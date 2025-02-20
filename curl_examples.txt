@@ -1,0 +1,3 @@
+curl -X POST http://localhost:8080/task -H "Content-Type: application/json" -d "{\"task_name\":\"someName\"}"
+curl -X GET http://localhost:8080/task/status/{id}
+curl -X GET http://localhost:8080/task/result/{id}
