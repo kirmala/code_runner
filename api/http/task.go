@@ -3,7 +3,6 @@ package http
 import (
 	"net/http"
 	"photo_editor/api/http/types"
-	"photo_editor/editing"
 	"photo_editor/models"
 	"photo_editor/usecases"
 
@@ -77,8 +76,6 @@ func (s *Task) postHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newTask := models.Task{Id: uuid.New().String(), Name: req.TaskName, Status: "in_progress", Result:""}
-
-	go editing.Edit(s.service, &newTask)
 
 	err = s.service.Post(newTask)
 	types.ProcessError(w, err, &types.PostTaskHandlerResponse{ID: &newTask.Id})
