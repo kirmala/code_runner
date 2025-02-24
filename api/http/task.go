@@ -34,8 +34,8 @@ func (s *Task) getStatusHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	task, err := s.service.Get(req.Id)
-	types.ProcessError(w, err, &types.GetTaskStatusHandlerResponse{Status: &task.Status})
+	taskStatus, err := s.service.GetStatus(req.Id)
+	types.ProcessError(w, err, &types.GetTaskStatusHandlerResponse{Status: taskStatus})
 }
 
 // @Summary Get a task result
@@ -54,8 +54,8 @@ func (s *Task) getResultHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	task, err := s.service.Get(req.Id)
-	types.ProcessError(w, err, &types.GetTaskResultHandlerResponse{Result: &task.Result})
+	taskResult, err := s.service.GetResult(req.Id)
+	types.ProcessError(w, err, &types.GetTaskResultHandlerResponse{Result: taskResult})
 }
 
 

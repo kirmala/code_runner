@@ -23,9 +23,22 @@ func NewTask(repo repository.Task) *Task {
 	}
 }
 
-func (rs *Task) Get(key string) (*models.Task, error) {
-	return rs.repo.Get(key)
+func (rs *Task) GetStatus(key string) (*string, error) {
+	task, err := rs.repo.Get(key)
+	if (err != nil) {
+		return nil, err
+	}
+	return &task.Status, err
 }
+
+func (rs *Task) GetResult(key string) (*string, error) {
+	task, err := rs.repo.Get(key)
+	if (err != nil) {
+		return nil, err
+	}
+	return &task.Result, err
+}
+
 
 func (rs *Task) Put(task models.Task) error {
 	return rs.repo.Put(task)
