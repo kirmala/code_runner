@@ -5,6 +5,20 @@ definitions:
       task_name:
         type: string
     type: object
+  types.PostUserLoginHandlerRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  types.PostUserRegisterHandlerRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -12,6 +26,60 @@ info:
   title: photo_editor
   version: "1.0"
 paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Logins new user and creates new session for him
+      parameters:
+      - description: user login and password
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/types.PostUserLoginHandlerRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: user
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Login a user
+      tags:
+      - user
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Registers new user and adds them to data base
+      parameters:
+      - description: user login and password
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/types.PostUserRegisterHandlerRequest'
+      responses:
+        "201":
+          description: Created
+        "208":
+          description: Key already exists
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+      summary: Register a user
+      tags:
+      - user
   /task:
     post:
       consumes:
@@ -24,11 +92,16 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/types.PostTaskHandlerRequest'
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
+        required: true
+        type: string
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
             type: task
         "400":
@@ -47,6 +120,11 @@ paths:
       - description: Id of the task
         in: path
         name: id
+        required: true
+        type: string
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
         required: true
         type: string
       produces:
@@ -76,6 +154,11 @@ paths:
       - description: Id of the task
         in: path
         name: id
+        required: true
+        type: string
+      - description: Bearer token for authentication
+        in: header
+        name: Authorization
         required: true
         type: string
       produces:
