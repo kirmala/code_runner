@@ -4,11 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 )
 
-func GetAuthToken (r *http.Request) (*string) {
+func GetAuthToken (r *http.Request) (*string, error) {
 	authHeader := r.Header.Get("Authorization")
-	return &authHeader
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return nil, fmt.Errorf("invalid Authorization token format need to include Bearer")
+	}
+	authHeader = strings.TrimPrefix(authHeader, "Bearer ")
+	return &authHeader, nil
 }
 
 type PostUserRegisterHandlerRequest struct {

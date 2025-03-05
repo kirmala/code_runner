@@ -20,4 +20,6 @@ RUN apk add --no-cache curl
 
 COPY --from=build /build/main ./main
 
-CMD ["/app/main" ]
+COPY --from=build /build/config/http.yaml ./http.yaml 
+
+CMD ["/app/main", "--config=/app/http.yaml"]

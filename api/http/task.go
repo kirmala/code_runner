@@ -30,8 +30,12 @@ func NewTaskHandler(service usecases.Task) *Task {
 // @Failure 404 {string} string "Task not found"
 // @Router /task/status/{id} [get]
 func (s *Task) getStatusHandler(w http.ResponseWriter, r *http.Request) {
-	authToken := types.GetAuthToken(r)
-	_, err := s.service.GetUserId(*authToken)
+	authToken, err := types.GetAuthToken(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	_, err = s.service.GetUserId(*authToken)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -57,8 +61,12 @@ func (s *Task) getStatusHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Task not found"
 // @Router /task/result/{id} [get]
 func (s *Task) getResultHandler(w http.ResponseWriter, r *http.Request) {
-	authToken := types.GetAuthToken(r)
-	_, err := s.service.GetUserId(*authToken)
+	authToken, err := types.GetAuthToken(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	_, err = s.service.GetUserId(*authToken)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -84,8 +92,12 @@ func (s *Task) getResultHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {string} string "Bad request"
 // @Router /task [post]
 func (s *Task) postHandler(w http.ResponseWriter, r *http.Request) {
-	authToken := types.GetAuthToken(r)
-	_, err := s.service.GetUserId(*authToken)
+	authToken, err := types.GetAuthToken(r)
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	_, err = s.service.GetUserId(*authToken)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
