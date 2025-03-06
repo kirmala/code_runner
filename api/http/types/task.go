@@ -27,30 +27,6 @@ func CreateGetTaskHandlerRequest(r *http.Request) (*GetTaskHandlerRequest, error
 	return &GetTaskHandlerRequest{Id: id}, nil
 }
 
-// type PutObjectHandlerRequest struct {
-// 	domain.Object
-// }
-
-// func CreatePutObjectHandlerRequest(r *http.Request) (*PutObjectHandlerRequest, error) {
-// 	var req PutObjectHandlerRequest
-// 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-// 		return nil, fmt.Errorf("error while decoding json: %v", err)
-// 	}
-// 	return &req, nil
-// }
-
-// type DeleteObjectHandlerRequest struct {
-// 	Key string `json:"key"`
-// }
-
-// func CreateDeleteObjectHandlerRequest(r *http.Request) (*DeleteObjectHandlerRequest, error) {
-// 	key := r.URL.Query().Get("key")
-// 	if key == "" {
-// 		return nil, fmt.Errorf("missing key")
-// 	}
-// 	return &DeleteObjectHandlerRequest{Key: key}, nil
-// }
-
 type PostTaskHandlerRequest struct {
 	TaskName string `json:"task_name"`
 }

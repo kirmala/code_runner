@@ -7,7 +7,8 @@ import (
 )
 
 type Task struct {
-	repo repository.Task
+	taskRepo repository.Task
+	sessionRepo repository.Session
 }
 
 func edit(service Task, newTask *models.Task) {
@@ -17,14 +18,26 @@ func edit(service Task, newTask *models.Task) {
 	service.Put(*newTask)
 }
 
-func NewTask(repo repository.Task) *Task {
+func NewTask(taskRepo repository.Task, sessionRepo repository.Session) *Task {
 	return &Task{
-		repo: repo,
+		taskRepo: taskRepo,
+		sessionRepo: sessionRepo,
 	}
 }
 
+func (rs *Task) GetUserId(key string) (*string, error) {
+	if key == "" {
+		return nil, repository.NotFound
+	}
+	session, err := rs.sessionRepo.Get(key)
+	if (err != nil) {
+		return nil, err
+	}
+	return &session.UserId, err
+}
+
 func (rs *Task) GetStatus(key string) (*string, error) {
-	task, err := rs.repo.Get(key)
+	task, err := rs.taskRepo.Get(key)
 	if (err != nil) {
 		return nil, err
 	}
@@ -32,7 +45,7 @@ func (rs *Task) GetStatus(key string) (*string, error) {
 }
 
 func (rs *Task) GetResult(key string) (*string, error) {
-	task, err := rs.repo.Get(key)
+	task, err := rs.taskRepo.Get(key)
 	if (err != nil) {
 		return nil, err
 	}
@@ -41,14 +54,14 @@ func (rs *Task) GetResult(key string) (*string, error) {
 
 
 func (rs *Task) Put(task models.Task) error {
-	return rs.repo.Put(task)
+	return rs.taskRepo.Put(task)
 }
 
 func (rs *Task) Post(task models.Task) error {
 	go edit(*rs, &task)
-	return rs.repo.Post(task)
+	return rs.taskRepo.Post(task)
 }
 
 func (rs *Task) Delete(key string) error {
-	return rs.repo.Delete(key)
+	return rs.taskRepo.Delete(key)
 }
