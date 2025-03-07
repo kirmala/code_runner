@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"io"
-	"photo_editor/models"
-	"photo_editor/repository"
+	"code_runner/models"
+	"code_runner/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )

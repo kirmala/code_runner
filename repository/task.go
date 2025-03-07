@@ -1,6 +1,6 @@
 package repository
 
-import "photo_editor/models"
+import "code_runner/models"
 
 type Task interface {
 	Get(key string) (*models.Task, error)

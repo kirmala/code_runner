@@ -2,9 +2,9 @@ package http
 
 import (
 	"net/http"
-	"photo_editor/api/http/types"
-	"photo_editor/models"
-	"photo_editor/usecases"
+	"code_runner/api/http/types"
+	"code_runner/models"
+	"code_runner/usecases"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"

@@ -288,7 +288,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "photo_editor",
+	Title:            "code_runner",
 	Description:      "This is a photo editor.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

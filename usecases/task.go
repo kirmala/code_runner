@@ -1,6 +1,6 @@
 package usecases
 
-import "photo_editor/models"
+import "code_runner/models"
 
 type Task interface {
 	GetStatus(key string) (*string, error)

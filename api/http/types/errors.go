@@ -2,7 +2,7 @@ package types
 
 import (
 	"net/http"
-	"photo_editor/repository"
+	"code_runner/repository"
 	"encoding/json"
 )
 

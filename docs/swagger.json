@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "This is a photo editor.",
-        "title": "photo_editor",
+        "title": "code_runner",
         "contact": {},
         "version": "1.0"
     },

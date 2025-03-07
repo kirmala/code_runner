@@ -1,8 +1,8 @@
 package service
 
 import (
-	"photo_editor/repository"
-	"photo_editor/models"
+	"code_runner/repository"
+	"code_runner/models"
 	"time"
 )
 

@@ -1,6 +1,6 @@
 package repository
 
-import "photo_editor/models"
+import "code_runner/models"
 
 type User interface {
 	Get(key string) (*models.User, error)

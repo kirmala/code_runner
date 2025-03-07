@@ -4,19 +4,19 @@ import (
 	//"fmt"
 	"fmt"
 	"log"
-	"photo_editor/config"
-	"photo_editor/repository/ram_storage"
-	"photo_editor/usecases/service"
+	"code_runner/config"
+	"code_runner/repository/ram_storage"
+	"code_runner/usecases/service"
 
 	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	"photo_editor/api/http"
-	_ "photo_editor/docs"
-	pkgHttp "photo_editor/pkg/http"
+	"code_runner/api/http"
+	_ "code_runner/docs"
+	pkgHttp "code_runner/pkg/http"
 )
 
-// @title photo_editor
+// @title code_runner
 // @version 1.0
 // @description This is a photo editor.
 

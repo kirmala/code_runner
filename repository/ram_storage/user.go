@@ -1,8 +1,8 @@
 package ram_storage
 
 import (
-	"photo_editor/models"
-	"photo_editor/repository"
+	"code_runner/models"
+	"code_runner/repository"
 )
 
 type User struct {

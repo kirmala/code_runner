@@ -1,4 +1,4 @@
-module photo_editor
+module code_runner
 
 go 1.23.2
 

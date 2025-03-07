@@ -23,7 +23,7 @@ host: localhost:8080
 info:
   contact: {}
   description: This is a photo editor.
-  title: photo_editor
+  title: code_runner
   version: "1.0"
 paths:
   /login:
