@@ -11,5 +11,5 @@ stop_services:
 
 build_services:
 	docker compose build
-	docker build -t code_runner consumer/usecases/services/docker_code_processor
+	docker build -t code_processor consumer/usecases/services/docker_code_processor
 	
