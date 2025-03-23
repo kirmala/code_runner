@@ -7,7 +7,7 @@ launch_with_tests: build_services
 	docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
 
 stop_services:
-	docker-compose down
+	docker compose down
 
 build_services:
 	docker compose build
