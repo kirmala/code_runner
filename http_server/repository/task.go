@@ -1,6 +1,6 @@
 package repository
 
-import "code_runner/models"
+import "code_processor/http_server/models"
 
 type Task interface {
 	Get(key string) (*models.Task, error)

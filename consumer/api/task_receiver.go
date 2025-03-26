@@ -1,4 +1,4 @@
-package repository
+package api
 
 type TaskReceiver interface {
 	Receive()

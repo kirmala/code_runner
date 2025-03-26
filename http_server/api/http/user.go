@@ -1,10 +1,10 @@
 package http
 
 import (
+	"code_processor/http_server/api/http/types"
+	"code_processor/http_server/models"
+	"code_processor/http_server/usecases"
 	"net/http"
-	"code_runner/api/http/types"
-	"code_runner/models"
-	"code_runner/usecases"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -59,7 +59,6 @@ func (s *User) postLoginHandler(w http.ResponseWriter, r *http.Request) {
 	SessionId, err := s.service.PostLogin(req.Username, req.Password)
 	types.ProcessError(w, err, &types.PostUserLoginHandlerResponse{Token: SessionId}, 200)
 }
-
 
 // WithUserHandlers registers user-related HTTP handlers.
 func (s *User) WithUserHandlers(r chi.Router) {

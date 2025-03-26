@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY . .
+COPY http_server .
 
 RUN apk add --no-cache make
 

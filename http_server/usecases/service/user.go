@@ -1,23 +1,23 @@
 package service
 
 import (
+	"code_processor/http_server/models"
+	"code_processor/http_server/repository"
 	"crypto/rand"
 	"encoding/base64"
 	"io"
-	"code_runner/models"
-	"code_runner/repository"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	userRepo repository.User
+	userRepo    repository.User
 	sessionRepo repository.Session
 }
 
 func NewUser(userRepo repository.User, sessionRepo repository.Session) *User {
 	return &User{
-		userRepo: userRepo,
+		userRepo:    userRepo,
 		sessionRepo: sessionRepo,
 	}
 }
@@ -30,10 +30,9 @@ func sessionId() string {
 	return base64.URLEncoding.EncodeToString(b)
 }
 
-
 func (rs *User) Get(key string) (*models.User, error) {
 	user, err := rs.userRepo.Get(key)
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	return user, err
@@ -46,17 +45,17 @@ func (rs *User) PostRegister(user models.User) error {
 
 func (rs *User) PostLogin(login string, password string) (*string, error) {
 	user, err := rs.userRepo.Get(login)
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	sessionId := sessionId()
 	err = rs.sessionRepo.Post(models.Session{UserId: user.Id, SessionId: sessionId})
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	return &sessionId, nil
@@ -65,5 +64,3 @@ func (rs *User) PostLogin(login string, password string) (*string, error) {
 func (rs *User) Delete(key string) error {
 	return rs.userRepo.Delete(key)
 }
-
-

@@ -1,6 +1,6 @@
 package usecases
 
-import "code_runner/models"
+import "code_processor/http_server/models"
 
 type Task interface {
 	GetStatus(key string) (*string, error)

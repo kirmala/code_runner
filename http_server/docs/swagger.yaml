@@ -25,7 +25,7 @@ host: localhost:8080
 info:
   contact: {}
   description: This is a code runner.
-  title: code_runner
+  title: http_server
   version: "1.0"
 paths:
   /login:

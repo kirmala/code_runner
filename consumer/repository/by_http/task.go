@@ -2,11 +2,11 @@ package byHttp
 
 import (
 	"bytes"
-	"consumer/models"
+	"code_processor/consumer/models"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"io"
+	"net/http"
 )
 
 type Task struct {

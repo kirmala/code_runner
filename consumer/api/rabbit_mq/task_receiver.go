@@ -1,9 +1,9 @@
 package rabbitMQ
 
 import (
-	"consumer/models"
-	"consumer/repository"
-	"consumer/usecases"
+	"code_processor/consumer/models"
+	"code_processor/consumer/repository"
+	"code_processor/consumer/usecases"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,13 +11,12 @@ import (
 	"github.com/streadway/amqp"
 )
 
-
 type RabbitMQReceiver struct {
-	connection *amqp.Connection
-	channel *amqp.Channel
-	queueName string
+	connection    *amqp.Connection
+	channel       *amqp.Channel
+	queueName     string
 	codeProcessor usecases.CodeProcessor
-	repo repository.Task
+	repo          repository.Task
 }
 
 func failOnError(err error, msg string) {
@@ -50,11 +49,11 @@ func NewRabbitMQReceiver(ampqURL, queueName string, codeProcessor usecases.CodeP
 	}
 
 	return &RabbitMQReceiver{
-		connection: conn,
-		channel: ch, 
-		queueName: queueName,
+		connection:    conn,
+		channel:       ch,
+		queueName:     queueName,
 		codeProcessor: codeProcessor,
-		repo: repo,
+		repo:          repo,
 	}, nil
 }
 
@@ -69,7 +68,7 @@ func (r *RabbitMQReceiver) Receive() {
 		nil,
 	)
 	failOnError(err, "Failed to declare a queue")
-	
+
 	forever := make(chan bool)
 
 	go func() {

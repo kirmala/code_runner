@@ -1,5 +1,6 @@
 package models
 
+
 type Task struct {
 	Id         string `json:"id"`
 	Code       string `json:"code"`

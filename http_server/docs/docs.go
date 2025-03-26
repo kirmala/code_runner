@@ -291,7 +291,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "code_runner",
+	Title:            "http_server",
 	Description:      "This is a code runner.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

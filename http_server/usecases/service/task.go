@@ -1,16 +1,16 @@
 package service
 
 import (
-	"code_runner/models"
-	"code_runner/repository"
+	"code_processor/http_server/models"
+	"code_processor/http_server/repository"
 	"fmt"
 	//"time"
 )
 
 type Task struct {
-	taskRepo repository.Task
+	taskRepo    repository.Task
 	sessionRepo repository.Session
-	taskSender repository.TaskSender
+	taskSender  repository.TaskSender
 }
 
 // func edit(service Task, newTask *models.Task) {
@@ -22,9 +22,9 @@ type Task struct {
 
 func NewTask(taskRepo repository.Task, sessionRepo repository.Session, taskSender repository.TaskSender) *Task {
 	return &Task{
-		taskRepo: taskRepo,
+		taskRepo:    taskRepo,
 		sessionRepo: sessionRepo,
-		taskSender: taskSender,
+		taskSender:  taskSender,
 	}
 }
 
@@ -33,7 +33,7 @@ func (rs *Task) GetUserId(key string) (*string, error) {
 		return nil, repository.NotFound
 	}
 	session, err := rs.sessionRepo.Get(key)
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	return &session.UserId, err
@@ -41,7 +41,7 @@ func (rs *Task) GetUserId(key string) (*string, error) {
 
 func (rs *Task) GetStatus(key string) (*string, error) {
 	task, err := rs.taskRepo.Get(key)
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	return &task.Status, err
@@ -49,12 +49,11 @@ func (rs *Task) GetStatus(key string) (*string, error) {
 
 func (rs *Task) GetResult(key string) (*string, error) {
 	task, err := rs.taskRepo.Get(key)
-	if (err != nil) {
+	if err != nil {
 		return nil, err
 	}
 	return &task.Result, err
 }
-
 
 func (rs *Task) Put(task models.Task) error {
 	return rs.taskRepo.Put(task)

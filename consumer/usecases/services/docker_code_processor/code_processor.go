@@ -1,7 +1,7 @@
 package dockerCodeProcessor
 
 import (
-	"consumer/models"
+	"code_processor/consumer/models"
 	"context"
 	"fmt"
 	"io"
@@ -11,10 +11,9 @@ import (
 )
 
 type CodeProcessor struct {
-	cli *client.Client
+	cli       *client.Client
 	imageName string
 }
-
 
 func NewCodeProcessor(imageName string) (*CodeProcessor, error) {
 	cli, err := client.NewClientWithOpts(client.WithVersion("1.41"))
@@ -107,4 +106,4 @@ func (r *CodeProcessor) Process(task models.Task) (*models.Task, error) {
 	task.Result = string(output)
 	task.Status = "ready"
 	return &task, nil
-}	
+}

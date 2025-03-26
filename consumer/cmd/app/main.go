@@ -1,16 +1,16 @@
 package main
 
 import (
-	"consumer/cmd/app/config"
-	"consumer/repository/by_http"
-	"consumer/repository/rabbit_mq"
-	"consumer/usecases/services/docker_code_processor"
+	"code_processor/consumer/cmd/app/config"
+	"code_processor/consumer/repository/by_http"
+	"code_processor/consumer/api/rabbit_mq"
+	"code_processor/consumer/usecases/services/docker_code_processor"
+
 	"fmt"
 	"log"
 )
 
 // http://localhost:15672/api/healthchecks/node
-
 
 func main() {
 	appFlags := config.ParseFlags()
@@ -22,7 +22,7 @@ func main() {
 
 	imageName := cfg.CodeProcessor.ImageName
 	taskCodeProcessor, err := dockerCodeProcessor.NewCodeProcessor(imageName)
-	if (err != nil) {
+	if err != nil {
 		log.Fatalf("creating docker client: %s", err)
 	}
 

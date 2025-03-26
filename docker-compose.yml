@@ -1,8 +1,8 @@
 services:
   http_server:
     build:
-      context: http_server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: http_server/Dockerfile
     ports:
       - "8080:8080"
     healthcheck:
@@ -28,8 +28,8 @@ services:
 
   consumer:
     build:
-      context: consumer
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: consumer/Dockerfile
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:

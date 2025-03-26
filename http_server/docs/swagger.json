@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "This is a code runner.",
-        "title": "code_runner",
+        "title": "http_server",
         "contact": {},
         "version": "1.0"
     },

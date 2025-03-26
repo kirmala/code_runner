@@ -1,9 +1,9 @@
 package types
 
 import (
-	"net/http"
-	"code_runner/repository"
+	"code_processor/http_server/repository"
 	"encoding/json"
+	"net/http"
 )
 
 func ProcessError(w http.ResponseWriter, err error, resp any, successResponse int) {
@@ -13,7 +13,7 @@ func ProcessError(w http.ResponseWriter, err error, resp any, successResponse in
 	} else if err == repository.AlreadyExists {
 		http.Error(w, "Key already exists", http.StatusAlreadyReported)
 		return
-	}  else if err != nil {
+	} else if err != nil {
 		http.Error(w, "Internal Error", http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))
 		return

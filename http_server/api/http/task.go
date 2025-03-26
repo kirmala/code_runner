@@ -1,12 +1,13 @@
 package http
 
 import (
-	"code_runner/api/http/types"
-	"code_runner/models"
-	"code_runner/usecases"
+	"code_processor/http_server/api/http/types"
+	"code_processor/http_server/models"
+	"code_processor/http_server/usecases"
 	"net/http"
 
 	"encoding/json"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
@@ -114,14 +115,14 @@ func (s *Task) postHandler(w http.ResponseWriter, r *http.Request) {
 	types.ProcessError(w, err, &types.PostTaskHandlerResponse{ID: &newTask.Id}, 201)
 }
 
-func(s *Task) commitHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Task) commitHandler(w http.ResponseWriter, r *http.Request) {
 	var task models.Task
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
 		http.Error(w, "error while decoding json", http.StatusInternalServerError)
 		return
 	}
 	err := s.service.Put(task)
-	if (err != nil) {
+	if err != nil {
 		http.Error(w, "error putting task", http.StatusInternalServerError)
 		return
 	}

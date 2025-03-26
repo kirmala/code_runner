@@ -2,22 +2,22 @@ package main
 
 import (
 	//"fmt"
-	"code_runner/cmd/app/config"
-	rabbitMQ "code_runner/repository/rabbit_mq"
-	"code_runner/repository/ram_storage"
-	"code_runner/usecases/service"
+	"code_processor/http_server/cmd/app/config"
+	rabbitMQ "code_processor/http_server/repository/rabbit_mq"
+	"code_processor/http_server/repository/ram_storage"
+	"code_processor/http_server/usecases/service"
 	"fmt"
 	"log"
 
 	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	"code_runner/api/http"
-	_ "code_runner/docs"
-	pkgHttp "code_runner/pkg/http"
+	"code_processor/http_server/api/http"
+	_ "code_processor/http_server/docs"
+	pkgHttp "code_processor/http_server/pkg/http"
 )
 
-// @title code_runner
+// @title code_processor/http_server
 // @version 1.0
 // @description This is a code runner.
 
@@ -29,7 +29,7 @@ func main() {
 	config.MustLoad(appFlags.ConfigPath, &cfg)
 	addr := fmt.Sprintf("%s:%s", cfg.HTTPConfig.Host, cfg.HTTPConfig.Port)
 	rabbitMQAddr := fmt.Sprintf("amqp://guest:guest@%s:%s", cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
-	
+
 	taskRepo := ram_storage.NewTask()
 	sessionRepo := ram_storage.NewSession()
 	userRepo := ram_storage.NewUser()
@@ -43,7 +43,6 @@ func main() {
 
 	taskHandlers := http.NewTaskHandler(taskService)
 	userHandlers := http.NewUserHandler(userService)
-
 
 	r := chi.NewRouter()
 	r.Get("/swagger/*", httpSwagger.WrapHandler)

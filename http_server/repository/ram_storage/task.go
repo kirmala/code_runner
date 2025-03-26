@@ -1,8 +1,8 @@
 package ram_storage
 
 import (
-	"code_runner/models"
-	"code_runner/repository"
+	"code_processor/http_server/models"
+	"code_processor/http_server/repository"
 )
 
 type Task struct {

@@ -6,7 +6,7 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
-COPY . .
+COPY consumer .
 
 RUN go build cmd/app/main.go
 

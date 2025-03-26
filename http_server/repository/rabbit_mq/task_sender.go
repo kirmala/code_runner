@@ -1,7 +1,7 @@
 package rabbitMQ
 
 import (
-	"code_runner/models"
+	"code_processor/http_server/models"
 	"encoding/json"
 	"fmt"
 
@@ -10,8 +10,8 @@ import (
 
 type RabbitMQSender struct {
 	connection *amqp.Connection
-	channel *amqp.Channel
-	queueName string
+	channel    *amqp.Channel
+	queueName  string
 }
 
 func NewRabbitMQSender(ampqURL, queueName string) (*RabbitMQSender, error) {
@@ -39,8 +39,8 @@ func NewRabbitMQSender(ampqURL, queueName string) (*RabbitMQSender, error) {
 
 	return &RabbitMQSender{
 		connection: conn,
-		channel: ch, 
-		queueName: queueName,
+		channel:    ch,
+		queueName:  queueName,
 	}, nil
 }
 
@@ -57,7 +57,7 @@ func (r *RabbitMQSender) Send(task models.Task) error {
 		false,
 		amqp.Publishing{
 			ContentType: "application/json",
-			Body: body,
+			Body:        body,
 		},
 	)
 	if err != nil {
