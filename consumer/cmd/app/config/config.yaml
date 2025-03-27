@@ -1,0 +1,10 @@
+rabbit_mq:
+  host: "broker"
+  port: "5672"
+  queue_name: "goida"
+repository:
+  host: "http_server"
+  port: "8080"
+  address: "task/commit"
+code_processor:
+  image_name: code_processor
