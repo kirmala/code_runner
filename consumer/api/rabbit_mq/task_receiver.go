@@ -1,7 +1,7 @@
 package rabbitMQ
 
 import (
-	"code_processor/consumer/models"
+	"code_processor/http_server/models"
 	"code_processor/consumer/repository"
 	"code_processor/consumer/usecases"
 	"encoding/json"
@@ -82,7 +82,7 @@ func (r *RabbitMQReceiver) Receive() {
 				errorTask.Status = err.Error()
 				err = r.repo.Put(errorTask)
 				if err != nil {
-					log.Printf("adding processed task to database %s", err)
+					log.Printf("adding processed task to database: %s", err)
 				}
 				continue
 			}
@@ -93,13 +93,13 @@ func (r *RabbitMQReceiver) Receive() {
 				errorTask.Status = err.Error()
 				err = r.repo.Put(errorTask)
 				if err != nil {
-					log.Printf("adding processed task to database %s", err)
+					log.Printf("adding processed task to database: %s", err)
 				}
 				continue
 			}
 			err = r.repo.Put(*processedTask)
 			if err != nil {
-				log.Printf("adding processed task to database %s", err)
+				log.Printf("adding processed task to database: %s", err)
 				continue
 			}
 			log.Printf("Success")

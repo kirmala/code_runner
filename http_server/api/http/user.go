@@ -26,7 +26,7 @@ func NewUserHandler(service usecases.User) *User {
 // @Success 201 "Created"
 // @Failure 400 {string} string "Bad request"
 // @Failure 208 {string} string "Key already exists"
-// @Router /register [post]
+// @Router /user/register [post]
 func (s *User) postRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	req, err := types.CreatePostUserRegisterHandlerRequest(r)
 	if err != nil {
@@ -48,7 +48,7 @@ func (s *User) postRegisterHandler(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {user} types.PostUserLoginHandlerResponse
 // @Failure 400 {string} string "Bad request"
 // @Failure 404 {string} string "Not found"
-// @Router /login [post]
+// @Router /user/login [post]
 func (s *User) postLoginHandler(w http.ResponseWriter, r *http.Request) {
 	req, err := types.CreatePostUserRegisterHandlerRequest(r)
 	if err != nil {

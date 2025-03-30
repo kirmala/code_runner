@@ -11,7 +11,19 @@ type HTTPConfig struct {
 	Port string `yaml:"port"`
 }
 
+type Postgres struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+}
+
+type Redis struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+}
+
 type AppConfig struct {
 	RabbitMQ `yaml:"rabbit_mq"`
 	HTTPConfig `yaml:"http"`
+	Postgres `yaml:"postgres"`
+	Redis `yaml:"redis"`
 }

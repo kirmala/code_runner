@@ -25,63 +25,9 @@ host: localhost:8080
 info:
   contact: {}
   description: This is a code runner.
-  title: http_server
+  title: code_processor/http_server
   version: "1.0"
 paths:
-  /login:
-    post:
-      consumes:
-      - application/json
-      description: Logins new user and creates new session for him
-      parameters:
-      - description: user login and password
-        in: body
-        name: name
-        required: true
-        schema:
-          $ref: '#/definitions/types.PostUserLoginHandlerRequest'
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: user
-        "400":
-          description: Bad request
-          schema:
-            type: string
-        "404":
-          description: Not found
-          schema:
-            type: string
-      summary: Login a user
-      tags:
-      - user
-  /register:
-    post:
-      consumes:
-      - application/json
-      description: Registers new user and adds them to data base
-      parameters:
-      - description: user login and password
-        in: body
-        name: name
-        required: true
-        schema:
-          $ref: '#/definitions/types.PostUserRegisterHandlerRequest'
-      responses:
-        "201":
-          description: Created
-        "208":
-          description: Key already exists
-          schema:
-            type: string
-        "400":
-          description: Bad request
-          schema:
-            type: string
-      summary: Register a user
-      tags:
-      - user
   /task:
     post:
       consumes:
@@ -181,4 +127,58 @@ paths:
       summary: Get a task status
       tags:
       - task
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Logins new user and creates new session for him
+      parameters:
+      - description: user login and password
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/types.PostUserLoginHandlerRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: user
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Login a user
+      tags:
+      - user
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers new user and adds them to data base
+      parameters:
+      - description: user login and password
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/types.PostUserRegisterHandlerRequest'
+      responses:
+        "201":
+          description: Created
+        "208":
+          description: Key already exists
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            type: string
+      summary: Register a user
+      tags:
+      - user
 swagger: "2.0"

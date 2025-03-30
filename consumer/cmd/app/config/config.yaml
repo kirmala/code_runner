@@ -8,3 +8,7 @@ repository:
   address: "task/commit"
 code_processor:
   image_name: code_processor
+postgres:
+  host: "postgres"
+  port: "5432"
+

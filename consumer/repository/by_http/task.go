@@ -2,7 +2,7 @@ package byHttp
 
 import (
 	"bytes"
-	"code_processor/consumer/models"
+	"code_processor/http_server/models"
 	"encoding/json"
 	"fmt"
 	"io"

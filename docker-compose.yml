@@ -5,6 +5,11 @@ services:
       dockerfile: http_server/Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      POSTGRES_DB: "code_runner"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "kek"
+      REDIS_PASSWORD: "lol"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://http_server:8080/swagger/index.html"]
       interval: 30s 
@@ -13,6 +18,10 @@ services:
       start_period: 10s
     depends_on:
       broker: 
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
   
   broker:
@@ -32,9 +41,53 @@ services:
       dockerfile: consumer/Dockerfile
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      POSTGRES_DB: "code_runner"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "kek"
     depends_on:
       broker: 
         condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+
+  postgres:
+    build:
+      context: http_server/repository/postgres
+      dockerfile: Dockerfile
+    container_name: my_postgres_db
+    environment:
+      POSTGRES_DB: "code_runner"
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "kek"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d code_runner"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    environment:
+      REDIS_PASSWORD: "lol"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   app_test:
     build:
@@ -47,5 +100,9 @@ services:
         condition: service_healthy
     profiles:
       ['test']
+  
+volumes:
+  postgres_data:
+  redis_data:
 
 

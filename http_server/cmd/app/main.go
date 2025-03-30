@@ -3,11 +3,13 @@ package main
 import (
 	//"fmt"
 	"code_processor/http_server/cmd/app/config"
+	"code_processor/http_server/repository/postgres"
 	rabbitMQ "code_processor/http_server/repository/rabbit_mq"
-	"code_processor/http_server/repository/ram_storage"
+	"code_processor/http_server/repository/redis"
 	"code_processor/http_server/usecases/service"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -30,9 +32,42 @@ func main() {
 	addr := fmt.Sprintf("%s:%s", cfg.HTTPConfig.Host, cfg.HTTPConfig.Port)
 	rabbitMQAddr := fmt.Sprintf("amqp://guest:guest@%s:%s", cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
 
-	taskRepo := ram_storage.NewTask()
-	sessionRepo := ram_storage.NewSession()
-	userRepo := ram_storage.NewUser()
+	pgPassword := os.Getenv("POSTGRES_PASSWORD")
+	if pgPassword == "" {
+		log.Fatal("POSTGRES_PASSWORD is not set")
+	}
+	pgUser := os.Getenv("POSTGRES_USER")
+	if pgUser == "" {
+		log.Fatal("POSTGRES_USER is not set")
+	}
+	pgDB := os.Getenv("POSTGRES_DB")
+	if pgDB == "" {
+		log.Fatal("POSTGRES_DB is not set")
+	}
+
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.Postgres.Host, cfg.Postgres.Port, pgUser, pgPassword, pgDB)
+
+	taskRepo, err := postgres.NewTaskStorage(connStr)
+	if err != nil {
+		log.Fatalf("creating task storage: %v", err)
+	}
+	userRepo, err := postgres.NewUserStorage(connStr)
+	if err != nil {
+		log.Fatalf("creating user storage: %v", err)
+	}
+
+	rdAddr := fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port)
+	rdPassword := os.Getenv("REDIS_PASSWORD")
+	if rdPassword == "" {
+		log.Fatal("REDIS_PASSWORD is not set")
+	}
+
+	sessionRepo, err := redis.NewSessionStorage(rdAddr, rdPassword)
+	if err != nil {
+		log.Fatalf("creating session storage: %v", err)
+	}
+	
+
 	taskSender, err := rabbitMQ.NewRabbitMQSender(rabbitMQAddr, cfg.RabbitMQ.QueueName)
 	if err != nil {
 		log.Fatalf("failed creating rabbitMQ: %v", err)

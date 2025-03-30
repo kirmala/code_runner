@@ -6,4 +6,5 @@ type Task struct {
 	Translator string `json:"translator"`
 	Status     string `json:"status"`
 	Result     string `json:"result"`
+	//UserId     string `json:"user_id"`
 }

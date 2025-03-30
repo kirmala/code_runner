@@ -54,7 +54,7 @@ func (rs *User) PostLogin(login string, password string) (*string, error) {
 		return nil, err
 	}
 	sessionId := sessionId()
-	err = rs.sessionRepo.Post(models.Session{UserId: user.Id, SessionId: sessionId})
+	err = rs.sessionRepo.Set(models.Session{UserId: user.Id, SessionId: sessionId})
 	if err != nil {
 		return nil, err
 	}
