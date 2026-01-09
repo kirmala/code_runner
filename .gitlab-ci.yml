@@ -1,0 +1,19 @@
+build-job:
+  stage: build
+  image: docker:latest
+  script:
+    - docker compose build 
+    - docker build -t code_processor consumer/usecases/services/docker_code_processor
+  
+test-job:
+  stage: test
+  image: docker:latest
+  script:
+	  - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
+
+deploy-prod:
+  stage: deploy
+  script:
+    - docker compose up -d
+  only:
+    - main
