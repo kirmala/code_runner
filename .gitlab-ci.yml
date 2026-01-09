@@ -9,7 +9,7 @@ test-job:
   stage: test
   image: docker:latest
   script:
-	  - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
+    - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
 
 deploy-prod:
   stage: deploy
