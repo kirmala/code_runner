@@ -1,19 +1,27 @@
-build-job:
-  stage: build
-  image: docker:latest
-  script:
-    - docker compose build 
-    - docker build -t code_processor consumer/usecases/services/docker_code_processor
-  
-test-job:
-  stage: test
-  image: docker:latest
-  script:
-    - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
+stages:
+  - build
+  - unit_test
+  - integration_test
 
-deploy-prod:
-  stage: deploy
+
+build:
+  stage: build
   script:
-    - docker compose up -d
-  only:
-    - main
+    - docker info
+    - docker compose build
+
+
+go_unit_tests:
+  image: golang:1.22
+  stage: unit_test
+  script:
+    - go mod download
+    - go test -race ./...
+
+
+integration_tests:
+  stage: integration_test
+  script:
+    	docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
+  after_script:
+    - docker compose down -v
