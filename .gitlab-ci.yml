@@ -20,7 +20,7 @@ go_unit_tests:
   stage: unit_test
   script:
     - go mod download
-    - go test ./... -coverprofile=coverage.txt -covermode count
+    - go test ./... -coverprofile=coverage.out -covermode count
     - go install github.com/boumenot/gocover-cobertura@latest
     - gocover-cobertura < coverage.out > coverage.xml
   cache:
