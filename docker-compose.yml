@@ -3,8 +3,6 @@ services:
     build:
       context: .
       dockerfile: http_server/Dockerfile
-    ports:
-      - "8080:8080"
     environment:
       POSTGRES_DB: "code_runner"
       POSTGRES_USER: "admin"
@@ -64,7 +62,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d code_runner"]
       interval: 1s
