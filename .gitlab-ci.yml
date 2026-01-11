@@ -8,7 +8,6 @@ build:
   image: docker:26
   stage: build
   script:
-    - docker info
     - docker compose build
 
 
@@ -21,6 +20,7 @@ go_unit_tests:
 
 
 integration_tests:
+  image: docker:26
   stage: integration_test
   script:
     - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
