@@ -22,6 +22,6 @@ go_unit_tests:
 integration_tests:
   stage: integration_test
   script:
-    	docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
+    - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
   after_script:
     - docker compose down -v
