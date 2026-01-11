@@ -23,6 +23,12 @@ go_unit_tests:
     - go test ./... -coverprofile=coverage.txt -covermode count
     - go install github.com/boumenot/gocover-cobertura@latest
     - gocover-cobertura < coverage.out > coverage.xml
+  cache:
+    key:
+      files:
+        - go.mod
+    paths:
+      - /go/pkg/mod
   artifacts:
     reports:
       coverage_report:
