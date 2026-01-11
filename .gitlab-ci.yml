@@ -15,6 +15,18 @@ build:
     - docker build -t code_processor consumer/usecases/services/docker_code_processor
 
 
+.go-cache:
+  variables:
+    GOPATH: $CI_PROJECT_DIR/.go
+  before_script:
+    - mkdir -p .go
+  cache:
+    key:
+      files:
+        - go.mod
+    paths:
+      - .go/pkg/mod/
+
 go_unit_tests:
   image: golang:1.25.1
   stage: unit_test
@@ -23,12 +35,7 @@ go_unit_tests:
     - go test ./... -coverprofile=coverage.out -covermode count
     - go install github.com/boumenot/gocover-cobertura@latest
     - gocover-cobertura < coverage.out > coverage.xml
-  cache:
-    key:
-      files:
-        - go.mod
-    paths:
-      - /go/pkg/mod
+  extends: .go-cache
   artifacts:
     reports:
       coverage_report:
