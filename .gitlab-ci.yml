@@ -3,12 +3,15 @@ stages:
   - unit_test
   - integration_test
 
+variables:
+  DOCKER_HOST: unix:///var/run/docker.sock
 
 build:
   image: docker:latest
   stage: build
   script:
-    - docker compose build 
+    - docker info
+    - docker compose build
     - docker build -t code_processor consumer/usecases/services/docker_code_processor
 
 
