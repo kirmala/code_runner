@@ -35,6 +35,10 @@ integration_tests:
   stage: integration_test
   script:
     - docker info
-    - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
+    - mkdir -p integration_logs
+    - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test | tee integration_logs/app_test.log
+  artifacts:
+    paths:
+      - integration_logs/
   after_script:
-    - docker compose down -v
+    - docker compose --profile test down
