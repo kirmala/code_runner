@@ -5,10 +5,11 @@ stages:
 
 
 build:
-  image: docker:26
+  image: docker:latest
   stage: build
   script:
-    - docker compose build
+    - docker compose build 
+    - docker build -t code_processor consumer/usecases/services/docker_code_processor
 
 
 go_unit_tests:
@@ -20,7 +21,7 @@ go_unit_tests:
 
 
 integration_tests:
-  image: docker:26
+  image: docker:latest
   stage: integration_test
   script:
     - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
