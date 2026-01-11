@@ -20,14 +20,14 @@ go_unit_tests:
   stage: unit_test
   script:
     - go mod download
-    - mkdir -p test_results
-    - go test -race -coverprofile=test_results/coverage.out ./...
+    - go test ./... -coverprofile=coverage.txt -covermode count
+    - go get github.com/boumenot/gocover-cobertura
+    - go run github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
   artifacts:
-    paths:
-      - test_results/
     reports:
-      cobertura: test_results/coverage.out
-    expire_in: 1 week
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
 
 
 integration_tests:
