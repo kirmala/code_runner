@@ -43,6 +43,8 @@ go_unit_tests:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
+  needs:
+    - job: build
 
 
 integration_tests:
@@ -57,6 +59,8 @@ integration_tests:
       - integration_logs/
   after_script:
     - docker compose --profile test down
+  needs:
+    - job: build
 
 deploy:
   image: docker:latest
