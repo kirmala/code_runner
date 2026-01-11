@@ -2,6 +2,7 @@ stages:
   - build
   - unit_test
   - integration_test
+  - deploy
 
 variables:
   DOCKER_HOST: unix:///var/run/docker.sock
@@ -55,3 +56,13 @@ integration_tests:
       - integration_logs/
   after_script:
     - docker compose --profile test down
+
+deploy:
+  image: docker:latest
+  stage: deploy
+  script:
+    - docker compose pull
+    - docker compose up -d
+  only:
+    - main
+  when: on_success
