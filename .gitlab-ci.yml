@@ -20,7 +20,14 @@ go_unit_tests:
   stage: unit_test
   script:
     - go mod download
-    - go test -race ./...
+    - mkdir -p test_results
+    - go test -race -coverprofile=test_results/coverage.out ./...
+  artifacts:
+    paths:
+      - test_results/
+    reports:
+      cobertura: test_results/coverage.out
+    expire_in: 1 week
 
 
 integration_tests:
