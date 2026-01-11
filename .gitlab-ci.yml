@@ -5,6 +5,7 @@ stages:
 
 
 build:
+  image: docker:26
   stage: build
   script:
     - docker info
@@ -12,7 +13,7 @@ build:
 
 
 go_unit_tests:
-  image: golang:1.22
+  image: golang:1.25.1
   stage: unit_test
   script:
     - go mod download
