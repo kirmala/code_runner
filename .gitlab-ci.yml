@@ -27,6 +27,7 @@ integration_tests:
   image: docker:latest
   stage: integration_test
   script:
+    - docker info
     - docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
   after_script:
     - docker compose down -v
