@@ -21,8 +21,8 @@ go_unit_tests:
   script:
     - go mod download
     - go test ./... -coverprofile=coverage.txt -covermode count
-    - go get github.com/boumenot/gocover-cobertura
-    - go run github.com/boumenot/gocover-cobertura < coverage.txt > coverage.xml
+    - go install github.com/boumenot/gocover-cobertura@latest
+    - gocover-cobertura < coverage.out > coverage.xml
   artifacts:
     reports:
       coverage_report:
