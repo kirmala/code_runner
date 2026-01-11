@@ -61,6 +61,8 @@ integration_tests:
 deploy:
   image: docker:latest
   stage: deploy
+  before_script:
+    - apk add --no-cache curl
   script:
     - docker compose pull
     - docker compose up -d
