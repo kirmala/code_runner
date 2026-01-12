@@ -9,8 +9,8 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"regexp"
-    "strings"
-    "unicode"
+	"strings"
+	"unicode"
 )
 
 type CodeProcessor struct {
@@ -19,27 +19,27 @@ type CodeProcessor struct {
 }
 
 func cleanContainerOutput(output string) string {
-    ansiEsc := regexp.MustCompile(`\x1B[@-_][0-?]*[ -/]*[@-~]`)
-    output = ansiEsc.ReplaceAllString(output, "")
+	ansiEsc := regexp.MustCompile(`\x1B[@-_][0-?]*[ -/]*[@-~]`)
+	output = ansiEsc.ReplaceAllString(output, "")
 
-    // 2. Remove non-printable characters (keep newlines and tabs)
-    var cleaned strings.Builder
-    for _, r := range output {
-        if unicode.IsPrint(r) || r == '\n' || r == '\t' || r == '\r' {
-            cleaned.WriteRune(r)
-        }
-    }
-    output = cleaned.String()
+	// 2. Remove non-printable characters (keep newlines and tabs)
+	var cleaned strings.Builder
+	for _, r := range output {
+		if unicode.IsPrint(r) || r == '\n' || r == '\t' || r == '\r' {
+			cleaned.WriteRune(r)
+		}
+	}
+	output = cleaned.String()
 
-    // 3. Ensure valid UTF-8
-    output = strings.ToValidUTF8(output, "")
+	// 3. Ensure valid UTF-8
+	output = strings.ToValidUTF8(output, "")
 
-    // 4. Trim and ensure non-empty
-    output = strings.TrimSpace(output)
-    if output == "" {
-        output = "[empty output after cleaning]"
-    }
-    return output
+	// 4. Trim and ensure non-empty
+	output = strings.TrimSpace(output)
+	if output == "" {
+		output = "[empty output after cleaning]"
+	}
+	return output
 }
 
 func NewCodeProcessor(imageName string) (*CodeProcessor, error) {

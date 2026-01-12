@@ -1,8 +1,8 @@
 package config
 
 type RabbitMQ struct {
-	Host string `yaml:"host"`
-	Port string `yaml:"port"`
+	Host      string `yaml:"host"`
+	Port      string `yaml:"port"`
 	QueueName string `yaml:"queue_name"`
 }
 
@@ -22,8 +22,8 @@ type Redis struct {
 }
 
 type AppConfig struct {
-	RabbitMQ `yaml:"rabbit_mq"`
+	RabbitMQ   `yaml:"rabbit_mq"`
 	HTTPConfig `yaml:"http"`
-	Postgres `yaml:"postgres"`
-	Redis `yaml:"redis"`
+	Postgres   `yaml:"postgres"`
+	Redis      `yaml:"redis"`
 }

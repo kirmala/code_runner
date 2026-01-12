@@ -15,7 +15,7 @@ func NewUserStorage(connStr string) (*UserStorage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connecting to db: %s", err)
 	}
-	
+
 	err = db.Ping()
 	if err != nil {
 		return nil, fmt.Errorf("pinging db: %s", err)
@@ -23,7 +23,6 @@ func NewUserStorage(connStr string) (*UserStorage, error) {
 
 	return &UserStorage{db: db}, nil
 }
-
 
 func (us *UserStorage) Get(login string) (*models.User, error) {
 	var user models.User

@@ -1,9 +1,9 @@
 package rabbitMQ
 
 import (
-	"code_processor/http_server/models"
 	"code_processor/consumer/repository"
 	"code_processor/consumer/usecases"
+	"code_processor/http_server/models"
 	"encoding/json"
 	"fmt"
 	"log"

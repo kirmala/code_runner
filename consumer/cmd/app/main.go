@@ -28,12 +28,12 @@ func main() {
 		log.Fatal("POSTGRES_USER is not set")
 	}
 	pgDB := os.Getenv("POSTGRES_DB")
-	if pgDB== "" {
+	if pgDB == "" {
 		log.Fatal("POSTGRES_DB is not set")
 	}
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.Postgres.Host, cfg.Postgres.Port, pgUser, pgPassword, pgDB)
 	taskRepo, err := postgres.NewTaskStorage(connStr)
-	
+
 	if err != nil {
 		log.Fatalf("connecting to postgres: %s", err)
 	}

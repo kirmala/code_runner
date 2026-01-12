@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func GetAuthToken (r *http.Request) (*string, error) {
+func GetAuthToken(r *http.Request) (*string, error) {
 	authHeader := r.Header.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
 		return nil, fmt.Errorf("invalid Authorization token format need to include Bearer")
@@ -45,4 +45,3 @@ func CreatePostUserLoginHandlerRequest(r *http.Request) (*PostUserLoginHandlerRe
 	}
 	return &req, nil
 }
-

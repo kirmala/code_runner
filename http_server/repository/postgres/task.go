@@ -1,20 +1,19 @@
 package postgres
 
 import (
-	"code_processor/http_server/repository"
 	"code_processor/http_server/models"
+	"code_processor/http_server/repository"
 	"database/sql"
 	"fmt"
 
 	_ "github.com/lib/pq"
 )
 
-
 type TaskStorage struct {
 	db *sql.DB
 }
 
-func NewTaskStorage(connStr string) (*TaskStorage, error){
+func NewTaskStorage(connStr string) (*TaskStorage, error) {
 	db, err := sql.Open("postgres", connStr)
 
 	if err != nil {
@@ -50,7 +49,6 @@ func (ps *TaskStorage) Get(key string) (*models.Task, error) {
 	}
 	return &task, nil
 }
-
 
 func (ps *TaskStorage) Put(task models.Task) error {
 	result, err := ps.db.Exec(`

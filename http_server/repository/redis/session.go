@@ -13,7 +13,7 @@ type SessionStorage struct {
 	db *redis.Client
 }
 
-func NewSessionStorage(addr string, password string) (*SessionStorage, error){
+func NewSessionStorage(addr string, password string) (*SessionStorage, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: password,
@@ -54,4 +54,3 @@ func (rs *SessionStorage) Delete(key string) error {
 	}
 	return nil
 }
-

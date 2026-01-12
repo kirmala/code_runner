@@ -7,12 +7,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-
 type TaskStorage struct {
 	db *sql.DB
 }
 
-func NewTaskStorage(connStr string) (*TaskStorage, error){
+func NewTaskStorage(connStr string) (*TaskStorage, error) {
 	db, err := sql.Open("postgres", connStr)
 
 	if err != nil {
