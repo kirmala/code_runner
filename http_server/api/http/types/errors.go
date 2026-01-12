@@ -7,15 +7,15 @@ import (
 )
 
 func ProcessError(w http.ResponseWriter, err error, resp any, successResponse int) {
-	if err == repository.NotFound {
+	if err == repository.ErrNotFound {
 		http.Error(w, "Key not found", http.StatusNotFound)
 		return
-	} else if err == repository.AlreadyExists {
+	} else if err == repository.ErrAlreadyExists {
 		http.Error(w, "Key already exists", http.StatusAlreadyReported)
 		return
 	} else if err != nil {
 		http.Error(w, "Internal Error", http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 

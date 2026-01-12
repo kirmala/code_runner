@@ -18,7 +18,7 @@ func NewTask() *Task {
 func (rs *Task) Get(key string) (*models.Task, error) {
 	value, exists := rs.data[key]
 	if !exists {
-		return nil, repository.NotFound
+		return nil, repository.ErrNotFound
 	}
 	return &value, nil
 }
@@ -30,7 +30,7 @@ func (rs *Task) Put(task models.Task) error {
 
 func (rs *Task) Post(task models.Task) error {
 	if _, exists := rs.data[task.Id]; exists {
-		return repository.AlreadyExists
+		return repository.ErrAlreadyExists
 	}
 	rs.data[task.Id] = task
 	return nil
@@ -38,7 +38,7 @@ func (rs *Task) Post(task models.Task) error {
 
 func (rs *Task) Delete(key string) error {
 	if _, exists := rs.data[key]; !exists {
-		return repository.NotFound
+		return repository.ErrNotFound
 	}
 	delete(rs.data, key)
 	return nil

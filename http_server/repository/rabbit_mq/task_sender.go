@@ -67,7 +67,12 @@ func (r *RabbitMQSender) Send(task models.Task) error {
 	return nil
 }
 
-func (r *RabbitMQSender) Close() {
-	r.channel.Close()
-	r.connection.Close()
+func (r *RabbitMQSender) Close() error {
+	if err := r.channel.Close(); err != nil {
+		return fmt.Errorf("closing ampq channel: %w", err)
+	}
+	if err := r.connection.Close(); err != nil {
+		return fmt.Errorf("closing ampq connection: %w", err)
+	}
+	return nil
 }

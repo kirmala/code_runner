@@ -30,7 +30,7 @@ func NewTask(taskRepo repository.Task, sessionRepo repository.Session, taskSende
 
 func (rs *Task) GetUserId(key string) (*string, error) {
 	if key == "" {
-		return nil, repository.NotFound
+		return nil, repository.ErrNotFound
 	}
 	session, err := rs.sessionRepo.Get(key)
 	if err != nil {

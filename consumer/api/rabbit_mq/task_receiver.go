@@ -108,7 +108,12 @@ func (r *RabbitMQReceiver) Receive() {
 	<-forever
 }
 
-func (r *RabbitMQReceiver) Close() {
-	r.channel.Close()
-	r.connection.Close()
+func (r *RabbitMQReceiver) Close() error {
+	if err := r.channel.Close(); err != nil {
+		return fmt.Errorf("closing ampq channel: %w", err)
+	}
+	if err := r.connection.Close(); err != nil {
+		return fmt.Errorf("closing ampq connection: %w", err)
+	}
+	return nil
 }

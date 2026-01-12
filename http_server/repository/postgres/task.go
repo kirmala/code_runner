@@ -43,7 +43,7 @@ func (ps *TaskStorage) Get(key string) (*models.Task, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, repository.NotFound
+			return nil, repository.ErrNotFound
 		}
 		return nil, fmt.Errorf("querying task: %w", err)
 	}

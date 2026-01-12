@@ -18,7 +18,7 @@ func NewUser() *User {
 func (rs *User) Get(key string) (*models.User, error) {
 	value, exists := rs.data[key]
 	if !exists {
-		return nil, repository.NotFound
+		return nil, repository.ErrNotFound
 	}
 	return &value, nil
 }
@@ -30,7 +30,7 @@ func (rs *User) Put(user models.User) error {
 
 func (rs *User) Post(user models.User) error {
 	if _, exists := rs.data[user.Login]; exists {
-		return repository.AlreadyExists
+		return repository.ErrAlreadyExists
 	}
 	rs.data[user.Login] = user
 	return nil
@@ -38,7 +38,7 @@ func (rs *User) Post(user models.User) error {
 
 func (rs *User) Delete(key string) error {
 	if _, exists := rs.data[key]; !exists {
-		return repository.NotFound
+		return repository.ErrNotFound
 	}
 	delete(rs.data, key)
 	return nil

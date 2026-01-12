@@ -18,12 +18,12 @@ func TestGetUserId(t *testing.T) {
 		{
 			name:        "session key is empty",
 			key:         "",
-			expectedErr: repository.NotFound,
+			expectedErr: repository.ErrNotFound,
 		},
 		{
 			name:        "session key not found",
 			key:         "nonexistent_key",
-			expectedErr: repository.NotFound,
+			expectedErr: repository.ErrNotFound,
 		},
 		{
 			name:        "session key found",

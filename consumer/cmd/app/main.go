@@ -38,7 +38,7 @@ func main() {
 		log.Fatalf("connecting to postgres: %s", err)
 	}
 
-	imageName := cfg.CodeProcessor.ImageName
+	imageName := cfg.ImageName
 	taskCodeProcessor, err := dockerCodeProcessor.NewCodeProcessor(imageName)
 	if err != nil {
 		log.Fatalf("creating docker client: %s", err)
@@ -46,7 +46,7 @@ func main() {
 
 	rabbitMQAddr := fmt.Sprintf("amqp://guest:guest@%s:%s", cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
 
-	TaskReceiver, err := rabbitMQ.NewRabbitMQReceiver(rabbitMQAddr, cfg.RabbitMQ.QueueName, taskCodeProcessor, taskRepo)
+	TaskReceiver, err := rabbitMQ.NewRabbitMQReceiver(rabbitMQAddr, cfg.QueueName, taskCodeProcessor, taskRepo)
 	if err != nil {
 		log.Fatalf("failed creating rabbitMQ: %v", err)
 	}

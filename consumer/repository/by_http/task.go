@@ -26,7 +26,7 @@ func (r *Task) Put(task models.Task) error {
 	if err != nil {
 		return fmt.Errorf("sending request: %s", err)
 	}
-	defer resp.Body.Close()
+	defer func() {_ = resp.Body.Close()}()
 	if resp.StatusCode != 200 {
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("unexpected status code: %d, response: %s", resp.StatusCode, string(body))

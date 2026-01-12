@@ -123,7 +123,7 @@ func (r *CodeProcessor) Process(task models.Task) (*models.Task, error) {
 	if err != nil {
 		return nil, fmt.Errorf("collecting container logs: %w", err)
 	}
-	defer out.Close()
+	defer func() {_= out.Close()}()
 
 	output, err := io.ReadAll(out)
 	if err != nil {

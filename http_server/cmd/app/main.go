@@ -67,7 +67,7 @@ func main() {
 		log.Fatalf("creating session storage: %v", err)
 	}
 
-	taskSender, err := rabbitMQ.NewRabbitMQSender(rabbitMQAddr, cfg.RabbitMQ.QueueName)
+	taskSender, err := rabbitMQ.NewRabbitMQSender(rabbitMQAddr, cfg.QueueName)
 	if err != nil {
 		log.Fatalf("failed creating rabbitMQ: %v", err)
 	}
