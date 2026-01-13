@@ -5,15 +5,23 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
-func GetAuthToken(r *http.Request) (*string, error) {
+func GetAuthToken(r *http.Request) (uuid.UUID, error) {
 	authHeader := r.Header.Get("Authorization")
 	if !strings.HasPrefix(authHeader, "Bearer ") {
-		return nil, fmt.Errorf("invalid Authorization token format need to include Bearer")
+		return uuid.Nil, fmt.Errorf("invalid Authorization token format need to include Bearer")
 	}
-	authHeader = strings.TrimPrefix(authHeader, "Bearer ")
-	return &authHeader, nil
+	tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+	token, err := uuid.Parse(tokenStr)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid Authorization token format: %v", err)
+	}
+
+	return token, nil
 }
 
 type PostUserRegisterHandlerRequest struct {
@@ -35,7 +43,7 @@ type PostUserLoginHandlerRequest struct {
 }
 
 type PostUserLoginHandlerResponse struct {
-	Token *string `json:"token"`
+	Token string `json:"token"`
 }
 
 func CreatePostUserLoginHandlerRequest(r *http.Request) (*PostUserLoginHandlerRequest, error) {

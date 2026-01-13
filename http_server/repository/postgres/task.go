@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -27,13 +28,13 @@ func NewTaskStorage(connStr string) (*TaskStorage, error) {
 	return &TaskStorage{db: db}, nil
 }
 
-func (ps *TaskStorage) Get(key string) (*models.Task, error) {
+func (ps *TaskStorage) Get(key uuid.UUID) (*models.Task, error) {
 	var task models.Task
 
 	err := ps.db.QueryRow(`
 		SELECT task_id, task_code, task_translator, task_status, task_result 
 		FROM tasks 
-		WHERE task_id = $1`, key).Scan(
+		WHERE task_id = $1`, key.String()).Scan(
 		&task.Id,
 		&task.Code,
 		&task.Translator,
@@ -95,7 +96,7 @@ func (ps *TaskStorage) Post(task models.Task) error {
 	return nil
 }
 
-func (ps *TaskStorage) Delete(key string) error {
+func (ps *TaskStorage) Delete(key uuid.UUID) error {
 	result, err := ps.db.Exec(`
 		DELETE FROM tasks 
 		WHERE task_id = $1`, key)

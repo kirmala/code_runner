@@ -3,6 +3,8 @@ package ram_storage
 import (
 	"code_processor/http_server/models"
 	"code_processor/http_server/repository"
+
+	"github.com/google/uuid"
 )
 
 type Session struct {
@@ -24,17 +26,17 @@ func (rs *Session) Get(key string) (*models.Session, error) {
 }
 
 func (rs *Session) Post(session models.Session) error {
-	if _, exists := rs.data[session.SessionId]; exists {
+	if _, exists := rs.data[session.SessionId.String()]; exists {
 		return repository.ErrAlreadyExists
 	}
-	rs.data[session.SessionId] = session
+	rs.data[session.SessionId.String()] = session
 	return nil
 }
 
-func (rs *Session) Delete(key string) error {
-	if _, exists := rs.data[key]; !exists {
+func (rs *Session) Delete(key uuid.UUID) error {
+	if _, exists := rs.data[key.String()]; !exists {
 		return repository.ErrNotFound
 	}
-	delete(rs.data, key)
+	delete(rs.data, key.String())
 	return nil
 }

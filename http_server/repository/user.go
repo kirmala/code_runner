@@ -1,10 +1,15 @@
 package repository
 
-import "code_processor/http_server/models"
+import (
+	"code_processor/http_server/models"
+
+	"github.com/google/uuid"
+)
 
 type User interface {
-	Get(key string) (*models.User, error)
+	GetByLogin(login string) (*models.User, error)
+	GetById(id uuid.UUID) (*models.User, error)
 	Put(models.User) error
 	Post(models.User) error
-	Delete(key string) error
+	Delete(key uuid.UUID) error
 }

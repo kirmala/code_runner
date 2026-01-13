@@ -1,7 +1,9 @@
 package models
 
+import "github.com/google/uuid"
+
 type Task struct {
-	Id         string `json:"id"`
+	Id         uuid.UUID `json:"id"`
 	Code       string `json:"code"`
 	Translator string `json:"translator"`
 	Status     string `json:"status"`

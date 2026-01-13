@@ -24,15 +24,15 @@ func (rs *Task) Get(key string) (*models.Task, error) {
 }
 
 func (rs *Task) Put(task models.Task) error {
-	rs.data[task.Id] = task
+	rs.data[task.Id.String()] = task
 	return nil
 }
 
 func (rs *Task) Post(task models.Task) error {
-	if _, exists := rs.data[task.Id]; exists {
+	if _, exists := rs.data[task.Id.String()]; exists {
 		return repository.ErrAlreadyExists
 	}
-	rs.data[task.Id] = task
+	rs.data[task.Id.String()] = task
 	return nil
 }
 

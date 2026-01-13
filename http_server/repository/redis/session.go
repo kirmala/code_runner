@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -30,25 +31,32 @@ func NewSessionStorage(addr string, password string) (*SessionStorage, error) {
 
 func (rs *SessionStorage) Set(session models.Session) error {
 	var ctx = context.Background()
-	err := rs.db.Set(ctx, session.SessionId, session.UserId, 10*time.Minute).Err()
+	err := rs.db.Set(ctx, session.SessionId.String(), session.UserId.String(), 10*time.Minute).Err()
 	if err != nil {
 		return fmt.Errorf("setting session: %s", err)
 	}
 	return nil
 }
 
-func (rs *SessionStorage) Get(key string) (*models.Session, error) {
+func (rs *SessionStorage) Get(key uuid.UUID) (*models.Session, error) {
 	var ctx = context.Background()
-	userId, err := rs.db.Get(ctx, key).Result()
+	userIdstr, err := rs.db.Get(ctx, key.String()).Result()
+
 	if err != nil {
 		return nil, fmt.Errorf("getting session: %s", err)
 	}
+
+	userId, err := uuid.Parse(userIdstr)
+	if err != nil {
+		return nil, fmt.Errorf("parsing user id: %s", err)
+	}
+
 	return &models.Session{SessionId: key, UserId: userId}, nil
 }
 
-func (rs *SessionStorage) Delete(key string) error {
+func (rs *SessionStorage) Delete(key uuid.UUID) error {
 	var ctx = context.Background()
-	err := rs.db.Del(ctx, key).Err()
+	err := rs.db.Del(ctx, key.String()).Err()
 	if err != nil {
 		return fmt.Errorf("deleting session: %s", err)
 	}

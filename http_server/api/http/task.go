@@ -37,17 +37,20 @@ func (s *Task) getStatusHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	_, err = s.service.GetUserId(*authToken)
+	_, err = s.service.GetUserId(authToken)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	req, err := types.CreateGetTaskHandlerRequest(r)
+	req := types.CreateGetTaskHandlerRequest(r)
+
+	id, err := uuid.Parse(req.Id)
 	if err != nil {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	taskStatus, err := s.service.GetStatus(req.Id)
+
+	taskStatus, err := s.service.GetStatus(id)
 	types.ProcessError(w, err, &types.GetTaskStatusHandlerResponse{Status: taskStatus}, 200)
 }
 
@@ -68,17 +71,21 @@ func (s *Task) getResultHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	_, err = s.service.GetUserId(*authToken)
+	_, err = s.service.GetUserId(authToken)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	req, err := types.CreateGetTaskHandlerRequest(r)
+	req := types.CreateGetTaskHandlerRequest(r)
+
+	reqId, err := uuid.Parse(req.Id)
+
 	if err != nil {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	taskResult, err := s.service.GetResult(req.Id)
+
+	taskResult, err := s.service.GetResult(reqId)
 	types.ProcessError(w, err, &types.GetTaskResultHandlerResponse{Result: taskResult}, 200)
 }
 
@@ -98,7 +105,7 @@ func (s *Task) postHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	_, err = s.service.GetUserId(*authToken)
+	_, err = s.service.GetUserId(authToken)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -109,10 +116,10 @@ func (s *Task) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newTask := models.Task{Id: uuid.New().String(), Code: req.TaskCode, Translator: req.TaskTranslator, Status: "in_progress", Result: "progres..."}
+	newTask := models.Task{Id: uuid.New(), Code: req.TaskCode, Translator: req.TaskTranslator, Status: "in_progress", Result: "progres..."}
 
 	err = s.service.Post(newTask)
-	types.ProcessError(w, err, &types.PostTaskHandlerResponse{ID: &newTask.Id}, 201)
+	types.ProcessError(w, err, &types.PostTaskHandlerResponse{ID: newTask.Id.String()}, 201)
 }
 
 func (s *Task) commitHandler(w http.ResponseWriter, r *http.Request) {

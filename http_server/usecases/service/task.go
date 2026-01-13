@@ -4,6 +4,8 @@ import (
 	"code_processor/http_server/models"
 	"code_processor/http_server/repository"
 	"fmt"
+
+	"github.com/google/uuid"
 	//"time"
 )
 
@@ -28,18 +30,15 @@ func NewTask(taskRepo repository.Task, sessionRepo repository.Session, taskSende
 	}
 }
 
-func (rs *Task) GetUserId(key string) (*string, error) {
-	if key == "" {
-		return nil, repository.ErrNotFound
-	}
+func (rs *Task) GetUserId(key uuid.UUID) (uuid.UUID, error) {
 	session, err := rs.sessionRepo.Get(key)
 	if err != nil {
-		return nil, err
+		return uuid.Nil, err
 	}
-	return &session.UserId, err
+	return session.UserId, err
 }
 
-func (rs *Task) GetStatus(key string) (*string, error) {
+func (rs *Task) GetStatus(key uuid.UUID) (*string, error) {
 	task, err := rs.taskRepo.Get(key)
 	if err != nil {
 		return nil, err
@@ -47,7 +46,7 @@ func (rs *Task) GetStatus(key string) (*string, error) {
 	return &task.Status, err
 }
 
-func (rs *Task) GetResult(key string) (*string, error) {
+func (rs *Task) GetResult(key uuid.UUID) (*string, error) {
 	task, err := rs.taskRepo.Get(key)
 	if err != nil {
 		return nil, err
@@ -67,6 +66,6 @@ func (rs *Task) Post(task models.Task) error {
 	return rs.taskRepo.Post(task)
 }
 
-func (rs *Task) Delete(key string) error {
+func (rs *Task) Delete(key uuid.UUID) error {
 	return rs.taskRepo.Delete(key)
 }

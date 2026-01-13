@@ -34,7 +34,7 @@ func (s *User) postRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newUser := models.User{Id: uuid.New().String(), Login: req.Username, Password: req.Password}
+	newUser := models.User{Id: uuid.New(), Login: req.Username, Password: req.Password}
 
 	err = s.service.PostRegister(newUser)
 	types.ProcessError(w, err, nil, 201)
@@ -57,7 +57,7 @@ func (s *User) postLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	SessionId, err := s.service.PostLogin(req.Username, req.Password)
-	types.ProcessError(w, err, &types.PostUserLoginHandlerResponse{Token: SessionId}, 200)
+	types.ProcessError(w, err, &types.PostUserLoginHandlerResponse{Token: SessionId.String()}, 200)
 }
 
 // WithUserHandlers registers user-related HTTP handlers.

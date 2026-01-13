@@ -20,12 +20,9 @@ type GetTaskResultHandlerResponse struct {
 	Result *string `json:"result"`
 }
 
-func CreateGetTaskHandlerRequest(r *http.Request) (*GetTaskHandlerRequest, error) {
+func CreateGetTaskHandlerRequest(r *http.Request) (*GetTaskHandlerRequest) {
 	id := chi.URLParam(r, "id")
-	if id == "" {
-		return nil, fmt.Errorf("missing id")
-	}
-	return &GetTaskHandlerRequest{Id: id}, nil
+	return &GetTaskHandlerRequest{Id: id}
 }
 
 type PostTaskHandlerRequest struct {
@@ -34,7 +31,7 @@ type PostTaskHandlerRequest struct {
 }
 
 type PostTaskHandlerResponse struct {
-	ID *string `json:"id"`
+	ID string `json:"id"`
 }
 
 func CreatePostTaskHandlerRequest(r *http.Request) (*PostTaskHandlerRequest, error) {

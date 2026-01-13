@@ -3,10 +3,8 @@ package service
 import (
 	"code_processor/http_server/models"
 	"code_processor/http_server/repository"
-	"crypto/rand"
-	"encoding/base64"
-	"io"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,16 +20,8 @@ func NewUser(userRepo repository.User, sessionRepo repository.Session) *User {
 	}
 }
 
-func sessionId() string {
-	b := make([]byte, 32)
-	if _, err := io.ReadFull(rand.Reader, b); err != nil {
-		return ""
-	}
-	return base64.URLEncoding.EncodeToString(b)
-}
-
-func (rs *User) Get(key string) (*models.User, error) {
-	user, err := rs.userRepo.Get(key)
+func (rs *User) Get(key uuid.UUID) (*models.User, error) {
+	user, err := rs.userRepo.GetById(key)
 	if err != nil {
 		return nil, err
 	}
@@ -43,24 +33,24 @@ func (rs *User) PostRegister(user models.User) error {
 	return rs.userRepo.Post(models.User{Id: user.Id, Login: user.Login, Password: string(hashedPassword)})
 }
 
-func (rs *User) PostLogin(login string, password string) (*string, error) {
-	user, err := rs.userRepo.Get(login)
+func (rs *User) PostLogin(login string, password string) (uuid.UUID, error) {
+	user, err := rs.userRepo.GetByLogin(login)
 	if err != nil {
-		return nil, err
+		return uuid.Nil, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return nil, err
+		return uuid.Nil, err
 	}
-	sessionId := sessionId()
+	sessionId := uuid.New()
 	err = rs.sessionRepo.Set(models.Session{UserId: user.Id, SessionId: sessionId})
 	if err != nil {
-		return nil, err
+		return uuid.Nil, err
 	}
-	return &sessionId, nil
+	return sessionId, nil
 }
 
-func (rs *User) Delete(key string) error {
+func (rs *User) Delete(key uuid.UUID) error {
 	return rs.userRepo.Delete(key)
 }
