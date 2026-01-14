@@ -116,7 +116,14 @@ func (s *Task) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newTask := models.Task{Id: uuid.New(), Code: req.TaskCode, Translator: req.TaskTranslator, Status: "in_progress", Result: "progres..."}
+	taskTranslator, err := models.ParseTranslator(req.TaskTranslator)
+
+	if err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	newTask := models.Task{Id: uuid.New(), Code: req.TaskCode, Translator: taskTranslator, Status: "in_progress", Result: "progres..."}
 
 	err = s.service.Post(newTask)
 	types.ProcessError(w, err, &types.PostTaskHandlerResponse{ID: newTask.Id.String()}, 201)

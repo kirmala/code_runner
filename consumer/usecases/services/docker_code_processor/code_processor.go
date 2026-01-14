@@ -13,6 +13,7 @@ import (
 	"unicode"
 )
 
+
 type CodeProcessor struct {
 	cli       *client.Client
 	imageName string
@@ -72,18 +73,17 @@ func NewCodeProcessor(imageName string) (*CodeProcessor, error) {
 }
 
 func (r *CodeProcessor) Process(task models.Task) (*models.Task, error) {
-
 	var config container.Config
 	config.Image = r.imageName
+
 	switch task.Translator {
-	case "python":
+	case models.PythonTranslator:
 		config.Cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.py && python3 /tmp/code.py", task.Code)}
-	case "g++":
+	case models.GppTranslator:
 		config.Cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && g++ /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
-	case "clang":
+	case models.ClangTranslator:
 		config.Cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && clang /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
 	default:
-
 		return nil, fmt.Errorf("unsupported translator: %s", task.Translator)
 	}
 
