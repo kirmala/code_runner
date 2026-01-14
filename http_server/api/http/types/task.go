@@ -13,7 +13,7 @@ type GetTaskHandlerRequest struct {
 }
 
 type GetTaskStatusHandlerResponse struct {
-	Status *string `json:"status"`
+	Status string `json:"status"`
 }
 
 type GetTaskResultHandlerResponse struct {

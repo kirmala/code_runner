@@ -123,7 +123,7 @@ func (s *Task) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newTask := models.Task{Id: uuid.New(), Code: req.TaskCode, Translator: taskTranslator, Status: "in_progress", Result: "progres..."}
+	newTask := models.Task{Id: uuid.New(), Code: req.TaskCode, Translator: taskTranslator, Status: models.StatusInProgress, Result: "progres..."}
 
 	err = s.service.Post(newTask)
 	types.ProcessError(w, err, &types.PostTaskHandlerResponse{ID: newTask.Id.String()}, 201)

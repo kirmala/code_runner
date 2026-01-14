@@ -78,8 +78,9 @@ func (r *RabbitMQReceiver) Receive() {
 			err := json.Unmarshal([]byte(d.Body), &task)
 			if err != nil {
 				log.Printf("Error decoding JSON: %s", err)
-				errorTask.Result = "ready"
-				errorTask.Status = err.Error()
+				errorTask.Result = err.Error()
+				errorTask.Status = models.StatusFailed
+
 				err = r.repo.Put(errorTask)
 				if err != nil {
 					log.Printf("adding processed task to database: %s", err)
@@ -89,8 +90,8 @@ func (r *RabbitMQReceiver) Receive() {
 			processedTask, err := r.codeProcessor.Process(task)
 			if err != nil {
 				log.Printf("processing task: %s", err)
-				errorTask.Result = "ready"
-				errorTask.Status = err.Error()
+				errorTask.Result = err.Error()
+				errorTask.Status = models.StatusFailed
 				err = r.repo.Put(errorTask)
 				if err != nil {
 					log.Printf("adding processed task to database: %s", err)

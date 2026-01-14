@@ -7,7 +7,7 @@ import (
 )
 
 type Task interface {
-	GetStatus(key uuid.UUID) (*string, error)
+	GetStatus(key uuid.UUID) (string, error)
 	GetResult(key uuid.UUID) (*string, error)
 	GetUserId(key uuid.UUID) (uuid.UUID, error)
 	Put(models.Task) error

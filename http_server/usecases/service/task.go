@@ -38,12 +38,12 @@ func (rs *Task) GetUserId(key uuid.UUID) (uuid.UUID, error) {
 	return session.UserId, err
 }
 
-func (rs *Task) GetStatus(key uuid.UUID) (*string, error) {
+func (rs *Task) GetStatus(key uuid.UUID) (string, error) {
 	task, err := rs.taskRepo.Get(key)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return &task.Status, err
+	return task.Status.String(), err
 }
 
 func (rs *Task) GetResult(key uuid.UUID) (*string, error) {

@@ -132,7 +132,7 @@ func (r *CodeProcessor) Process(task models.Task) (*models.Task, error) {
 	cleanOutput := cleanContainerOutput(string(output))
 
 	task.Result = cleanOutput
-	task.Status = "ready"
+	task.Status = models.StatusCompleted
 
 	return &task, nil
 }
