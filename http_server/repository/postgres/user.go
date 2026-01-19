@@ -2,10 +2,13 @@ package postgres
 
 import (
 	"code_processor/http_server/models"
+	"code_processor/http_server/repository"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type UserStorage struct {
@@ -40,7 +43,7 @@ func (us *UserStorage) GetByLogin(login string) (*models.User, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("user not found")
+			return nil, repository.ErrNotFound{Item: "user"}
 		}
 		return nil, fmt.Errorf("querying user by login: %w", err)
 	}
@@ -61,9 +64,9 @@ func (us *UserStorage) GetById(key uuid.UUID) (*models.User, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("user not found")
+			return nil, repository.ErrNotFound{Item: "user"}
 		}
-		return nil, fmt.Errorf("querying user by login: %w", err)
+		return nil, fmt.Errorf("querying user by id: %w", err)
 	}
 	return &user, nil
 }
@@ -85,7 +88,7 @@ func (us *UserStorage) Put(user models.User) error {
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no user found with id %s", user.Id)
+		return repository.ErrNotFound{Item: "user"}
 	}
 
 	return nil
@@ -101,6 +104,14 @@ func (us *UserStorage) Post(user models.User) error {
 	)
 
 	if err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			if pqErr.Code == "23505" {
+				return repository.ErrConflict{
+					Field: "id",
+				}
+			}
+		}
 		return fmt.Errorf("creating user: %w", err)
 	}
 
@@ -118,7 +129,7 @@ func (us *UserStorage) Delete(key uuid.UUID) error {
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no user found with id %s", key)
+		return repository.ErrNotFound{Item: "user"}
 	}
 
 	return nil

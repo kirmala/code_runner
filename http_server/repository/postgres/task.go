@@ -4,10 +4,11 @@ import (
 	"code_processor/http_server/models"
 	"code_processor/http_server/repository"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 type TaskStorage struct {
@@ -44,7 +45,7 @@ func (ps *TaskStorage) Get(key uuid.UUID) (*models.Task, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, repository.ErrNotFound
+			return nil, repository.ErrNotFound{Item: "task"}
 		}
 		return nil, fmt.Errorf("querying task: %w", err)
 	}
@@ -57,7 +58,7 @@ func (ps *TaskStorage) Put(task models.Task) error {
 		SET task_code = $1, 
 		    task_translator = $2,
 			task_result = $4,
-		    task_status = $3,
+		    task_status = $3
 		WHERE task_id = $5`,
 		task.Code,
 		task.Translator,
@@ -67,12 +68,12 @@ func (ps *TaskStorage) Put(task models.Task) error {
 	)
 
 	if err != nil {
-		return fmt.Errorf("pdating task: %w", err)
+		return fmt.Errorf("updating task: %w", err)
 	}
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no task found with id %s", task.Id)
+		return repository.ErrNotFound{Item: "task"}
 	}
 
 	return nil
@@ -90,6 +91,14 @@ func (ps *TaskStorage) Post(task models.Task) error {
 	)
 
 	if err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			if pqErr.Constraint == "pk_tasks" {
+				return repository.ErrConflict{
+					Field: "id",
+				}
+			}
+		}
 		return fmt.Errorf("creating task: %w", err)
 	}
 
@@ -107,7 +116,7 @@ func (ps *TaskStorage) Delete(key uuid.UUID) error {
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no task found with id %s", key)
+		return repository.ErrNotFound{Item: "task"}
 	}
 
 	return nil

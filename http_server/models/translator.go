@@ -15,9 +15,9 @@ var ErrUnknownTranslator = errors.New("unknown translator")
 
 var TranslatorName = map[translator]string{
 	UnknownTranslator: "unknown",
-	PythonTranslator: "python",
-	ClangTranslator:  "clang",
-	GppTranslator:    "g++",
+	PythonTranslator:  "python",
+	ClangTranslator:   "clang",
+	GppTranslator:     "g++",
 }
 
 func ParseTranslator(translator string) (translator, error) {
@@ -45,6 +45,3 @@ func (t translator) String() string {
 		return "unknown"
 	}
 }
-
-
-

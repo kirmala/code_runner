@@ -1,16 +1,47 @@
-package http
+package httpx
 
 import (
-	"code_processor/http_server/api/http/types"
+	"code_processor/http_server/api"
+	"code_processor/http_server/api/dto"
 	"code_processor/http_server/models"
 	"code_processor/http_server/usecases"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"encoding/json"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
+
+func CreateGetTaskHandlerRequest(r *http.Request) *dto.GetTaskHandlerRequest {
+	id := chi.URLParam(r, "id")
+	return &dto.GetTaskHandlerRequest{Id: id}
+}
+
+func CreatePostTaskHandlerRequest(r *http.Request) (*dto.PostTaskHandlerRequest, error) {
+	var req dto.PostTaskHandlerRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, api.ErrBadRequest{}
+	}
+	return &req, nil
+}
+
+func GetAuthToken(r *http.Request) (uuid.UUID, error) {
+	authHeader := r.Header.Get("Authorization")
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return uuid.Nil, fmt.Errorf("invalid Authorization token format need to include Bearer")
+	}
+	tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+	token, err := uuid.Parse(tokenStr)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid Authorization token format: %v", err)
+	}
+
+	return token, nil
+}
 
 type Task struct {
 	service usecases.Task
@@ -32,7 +63,7 @@ func NewTaskHandler(service usecases.Task) *Task {
 // @Failure 404 {string} string "Task not found"
 // @Router /task/status/{id} [get]
 func (s *Task) getStatusHandler(w http.ResponseWriter, r *http.Request) {
-	authToken, err := types.GetAuthToken(r)
+	authToken, err := GetAuthToken(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -42,16 +73,16 @@ func (s *Task) getStatusHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	req := types.CreateGetTaskHandlerRequest(r)
+	req := CreateGetTaskHandlerRequest(r)
 
 	id, err := uuid.Parse(req.Id)
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		WriteResponse(w, api.ErrBadRequest{Field: "id", Err: err.Error()}, nil)
 		return
 	}
 
 	taskStatus, err := s.service.GetStatus(id)
-	types.ProcessError(w, err, &types.GetTaskStatusHandlerResponse{Status: taskStatus}, 200)
+	WriteResponse(w, err, &dto.GetTaskStatusHandlerResponse{Status: taskStatus})
 }
 
 // @Summary Get a task result
@@ -66,7 +97,7 @@ func (s *Task) getStatusHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "Task not found"
 // @Router /task/result/{id} [get]
 func (s *Task) getResultHandler(w http.ResponseWriter, r *http.Request) {
-	authToken, err := types.GetAuthToken(r)
+	authToken, err := GetAuthToken(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -76,17 +107,17 @@ func (s *Task) getResultHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	req := types.CreateGetTaskHandlerRequest(r)
+	req := CreateGetTaskHandlerRequest(r)
 
-	reqId, err := uuid.Parse(req.Id)
+	id, err := uuid.Parse(req.Id)
 
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		WriteResponse(w, api.ErrBadRequest{Field: "id", Err: err.Error()}, nil)
 		return
 	}
 
-	taskResult, err := s.service.GetResult(reqId)
-	types.ProcessError(w, err, &types.GetTaskResultHandlerResponse{Result: taskResult}, 200)
+	taskResult, err := s.service.GetResult(id)
+	WriteResponse(w, err, dto.GetTaskResultHandlerResponse{Result: taskResult})
 }
 
 // @Summary Create an task
@@ -100,7 +131,7 @@ func (s *Task) getResultHandler(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {string} string "Bad request"
 // @Router /task [post]
 func (s *Task) postHandler(w http.ResponseWriter, r *http.Request) {
-	authToken, err := types.GetAuthToken(r)
+	authToken, err := GetAuthToken(r)
 	if err != nil {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -110,23 +141,23 @@ func (s *Task) postHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	req, err := types.CreatePostTaskHandlerRequest(r)
+	req, err := CreatePostTaskHandlerRequest(r)
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		WriteResponse(w, err, nil)
 		return
 	}
 
 	taskTranslator, err := models.ParseTranslator(req.TaskTranslator)
 
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		WriteResponse(w, api.ErrBadRequest{Field: "task_translator", Err: err.Error()}, nil)
 		return
 	}
 
 	newTask := models.Task{Id: uuid.New(), Code: req.TaskCode, Translator: taskTranslator, Status: models.StatusInProgress, Result: "progres..."}
 
 	err = s.service.Post(newTask)
-	types.ProcessError(w, err, &types.PostTaskHandlerResponse{ID: newTask.Id.String()}, 201)
+	WriteResponse(w, err, dto.PostTaskHandlerResponse{ID: newTask.Id.String()})
 }
 
 func (s *Task) commitHandler(w http.ResponseWriter, r *http.Request) {

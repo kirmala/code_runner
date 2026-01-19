@@ -16,10 +16,10 @@ const (
 var ErrUnknownStatus = errors.New("unknown status")
 
 var StatusName = map[status]string{
-	UnknownStatus: "unknown",
+	UnknownStatus:    "unknown",
 	StatusInProgress: "in_progress",
 	StatusCompleted:  "completed",
-	StatusFailed:    "failed",
+	StatusFailed:     "failed",
 }
 
 func ParseStatus(status string) (status, error) {
@@ -47,6 +47,3 @@ func (s status) String() string {
 		return "unknown"
 	}
 }
-
-
-

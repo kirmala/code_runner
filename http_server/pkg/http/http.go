@@ -1,8 +1,9 @@
-package http
+package httpx
 
 import (
-	"github.com/go-chi/chi/v5"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func CreateAndRunServer(r chi.Router, addr string) error {

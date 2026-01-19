@@ -20,7 +20,7 @@ func NewSessionRepo() *SessionRepo {
 func (sr *SessionRepo) Get(key uuid.UUID) (*models.Session, error) {
 	session, exists := sr.Sessions[key.String()]
 	if !exists {
-		return nil, repository.ErrNotFound
+		return nil, repository.ErrNotFound{}
 	}
 	return &session, nil
 }

@@ -14,7 +14,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	"code_processor/http_server/api/http"
+	"code_processor/http_server/api/httpx"
 	_ "code_processor/http_server/docs"
 	pkgHttp "code_processor/http_server/pkg/http"
 )
@@ -75,8 +75,8 @@ func main() {
 	taskService := service.NewTask(taskRepo, sessionRepo, taskSender)
 	userService := service.NewUser(userRepo, sessionRepo)
 
-	taskHandlers := http.NewTaskHandler(taskService)
-	userHandlers := http.NewUserHandler(userService)
+	taskHandlers := httpx.NewTaskHandler(taskService)
+	userHandlers := httpx.NewUserHandler(userService)
 
 	r := chi.NewRouter()
 	r.Get("/swagger/*", httpSwagger.WrapHandler)

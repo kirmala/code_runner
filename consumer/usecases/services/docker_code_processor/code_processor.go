@@ -13,7 +13,6 @@ import (
 	"unicode"
 )
 
-
 type CodeProcessor struct {
 	cli       *client.Client
 	imageName string
@@ -123,7 +122,7 @@ func (r *CodeProcessor) Process(task models.Task) (*models.Task, error) {
 	if err != nil {
 		return nil, fmt.Errorf("collecting container logs: %w", err)
 	}
-	defer func() {_= out.Close()}()
+	defer func() { _ = out.Close() }()
 
 	output, err := io.ReadAll(out)
 	if err != nil {
