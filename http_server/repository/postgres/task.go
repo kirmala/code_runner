@@ -4,11 +4,9 @@ import (
 	"code_processor/http_server/models"
 	"code_processor/http_server/repository"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/lib/pq"
 )
 
 type TaskStorage struct {
@@ -91,14 +89,6 @@ func (ps *TaskStorage) Post(task models.Task) error {
 	)
 
 	if err != nil {
-		var pqErr *pq.Error
-		if errors.As(err, &pqErr) {
-			if pqErr.Constraint == "pk_tasks" {
-				return repository.ErrConflict{
-					Field: "id",
-				}
-			}
-		}
 		return fmt.Errorf("creating task: %w", err)
 	}
 

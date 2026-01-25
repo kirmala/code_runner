@@ -106,12 +106,13 @@ func (us *UserStorage) Post(user models.User) error {
 	if err != nil {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) {
-			if pqErr.Code == "23505" {
+			if pqErr.Constraint == "uq_user_login" {
 				return repository.ErrConflict{
 					Field: "id",
 				}
 			}
 		}
+
 		return fmt.Errorf("creating user: %w", err)
 	}
 

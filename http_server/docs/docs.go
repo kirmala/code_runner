@@ -15,53 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/task": {
-            "post": {
-                "description": "Create a new task with the specified key and value",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "task"
-                ],
-                "summary": "Create an task",
-                "parameters": [
-                    {
-                        "description": "task code and translator",
-                        "name": "translation_data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/types.PostTaskHandlerRequest"
-                        }
-                    },
-                    {
-                        "type": "string",
-                        "description": "Bearer token for authentication",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "type": "task"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/task/result/{id}": {
             "get": {
                 "description": "Get a task result by its id",
@@ -101,13 +54,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpx.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httpx.HTTPError"
                         }
                     },
                     "404": {
                         "description": "Task not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpx.HTTPError"
                         }
                     }
                 }
@@ -146,19 +105,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "task"
+                            "$ref": "#/definitions/dto.GetTaskStatusHandlerResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpx.HTTPError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/httpx.HTTPError"
                         }
                     },
                     "404": {
                         "description": "Task not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpx.HTTPError"
                         }
                     }
                 }
@@ -177,11 +142,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "user login and password",
-                        "name": "name",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.PostUserLoginHandlerRequest"
+                            "$ref": "#/definitions/dto.PostUserLoginHandlerRequest"
                         }
                     }
                 ],
@@ -189,19 +154,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "user"
+                            "$ref": "#/definitions/dto.PostUserLoginHandlerResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpx.HTTPError"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpx.HTTPError"
                         }
                     }
                 }
@@ -220,11 +185,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "user login and password",
-                        "name": "name",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.PostUserRegisterHandlerRequest"
+                            "$ref": "#/definitions/dto.PostUserRegisterHandlerRequest"
                         }
                     }
                 ],
@@ -232,16 +197,16 @@ const docTemplate = `{
                     "201": {
                         "description": "Created"
                     },
-                    "208": {
-                        "description": "Key already exists",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/httpx.HTTPError"
+                        }
+                    },
+                    "409": {
+                        "description": "Key already exists",
+                        "schema": {
+                            "$ref": "#/definitions/httpx.HTTPError"
                         }
                     }
                 }
@@ -249,18 +214,15 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "types.PostTaskHandlerRequest": {
+        "dto.GetTaskStatusHandlerResponse": {
             "type": "object",
             "properties": {
-                "task_code": {
-                    "type": "string"
-                },
-                "task_translator": {
+                "status": {
                     "type": "string"
                 }
             }
         },
-        "types.PostUserLoginHandlerRequest": {
+        "dto.PostUserLoginHandlerRequest": {
             "type": "object",
             "properties": {
                 "password": {
@@ -271,13 +233,29 @@ const docTemplate = `{
                 }
             }
         },
-        "types.PostUserRegisterHandlerRequest": {
+        "dto.PostUserLoginHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PostUserRegisterHandlerRequest": {
             "type": "object",
             "properties": {
                 "password": {
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "httpx.HTTPError": {
+            "type": "object",
+            "properties": {
+                "error": {
                     "type": "string"
                 }
             }

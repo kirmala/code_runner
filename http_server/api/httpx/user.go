@@ -43,39 +43,47 @@ func NewUserHandler(service usecases.User) *User {
 // @Param user body dto.PostUserRegisterHandlerRequest true "user login and password"
 // @Success 201 "Created"
 // @Failure 400 {object} HTTPError "Bad request"
-// @Failure 208 {object} HTTPError "Key already exists"
+// @Failure 409 {object} HTTPError "Key already exists"
 // @Router /user/register [post]
 func (s *User) postRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	req, err := CreatePostUserRegisterHandlerRequest(r)
 	if err != nil {
-		WriteResponse(w, err, nil)
+		WriteError(w, err)
 		return
 	}
 
 	newUser := models.User{Id: uuid.New(), Login: req.Username, Password: req.Password}
 
 	err = s.service.PostRegister(newUser)
-	WriteResponse(w, err, nil)
+	if err != nil {
+		WriteError(w, err)
+	}
+
+	WriteSuccess(w, nil, http.StatusCreated)
 }
 
 // @Summary Login a user
 // @Description Logins new user and creates new session for him
 // @Tags user
 // @Accept  json
-// @Param name body types.PostUserLoginHandlerRequest true "user login and password"
-// @Success 200 {user} types.PostUserLoginHandlerResponse
-// @Failure 400 {string} string "Bad request"
-// @Failure 404 {string} string "Not found"
+// @Param user body dto.PostUserLoginHandlerRequest true "user login and password"
+// @Success 200 {object} dto.PostUserLoginHandlerResponse
+// @Failure 400 {object} HTTPError "Bad request"
+// @Failure 404 {object} HTTPError "Not found"
 // @Router /user/login [post]
 func (s *User) postLoginHandler(w http.ResponseWriter, r *http.Request) {
 	req, err := CreatePostUserRegisterHandlerRequest(r)
 	if err != nil {
-		WriteResponse(w, err, nil)
+		WriteError(w, err)
 		return
 	}
 
 	SessionId, err := s.service.PostLogin(req.Username, req.Password)
-	WriteResponse(w, err, dto.PostUserLoginHandlerResponse{Token: SessionId.String()})
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
+	WriteSuccess(w,  dto.PostUserLoginHandlerResponse{Token: SessionId.String()}, http.StatusOK)
 }
 
 // WithUserHandlers registers user-related HTTP handlers.

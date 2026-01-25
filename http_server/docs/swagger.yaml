@@ -1,24 +1,32 @@
 basePath: /
 definitions:
-  types.PostTaskHandlerRequest:
+  dto.GetTaskStatusHandlerResponse:
     properties:
-      task_code:
-        type: string
-      task_translator:
+      status:
         type: string
     type: object
-  types.PostUserLoginHandlerRequest:
+  dto.PostUserLoginHandlerRequest:
     properties:
       password:
         type: string
       username:
         type: string
     type: object
-  types.PostUserRegisterHandlerRequest:
+  dto.PostUserLoginHandlerResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  dto.PostUserRegisterHandlerRequest:
     properties:
       password:
         type: string
       username:
+        type: string
+    type: object
+  httpx.HTTPError:
+    properties:
+      error:
         type: string
     type: object
 host: localhost:8080
@@ -28,37 +36,6 @@ info:
   title: code_processor/http_server
   version: "1.0"
 paths:
-  /task:
-    post:
-      consumes:
-      - application/json
-      description: Create a new task with the specified key and value
-      parameters:
-      - description: task code and translator
-        in: body
-        name: translation_data
-        required: true
-        schema:
-          $ref: '#/definitions/types.PostTaskHandlerRequest'
-      - description: Bearer token for authentication
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            type: task
-        "400":
-          description: Bad request
-          schema:
-            type: string
-      summary: Create an task
-      tags:
-      - task
   /task/result/{id}:
     get:
       consumes:
@@ -85,11 +62,15 @@ paths:
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/httpx.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpx.HTTPError'
         "404":
           description: Task not found
           schema:
-            type: string
+            $ref: '#/definitions/httpx.HTTPError'
       summary: Get a task result
       tags:
       - task
@@ -115,15 +96,19 @@ paths:
         "200":
           description: OK
           schema:
-            type: task
+            $ref: '#/definitions/dto.GetTaskStatusHandlerResponse'
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/httpx.HTTPError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/httpx.HTTPError'
         "404":
           description: Task not found
           schema:
-            type: string
+            $ref: '#/definitions/httpx.HTTPError'
       summary: Get a task status
       tags:
       - task
@@ -135,23 +120,23 @@ paths:
       parameters:
       - description: user login and password
         in: body
-        name: name
+        name: user
         required: true
         schema:
-          $ref: '#/definitions/types.PostUserLoginHandlerRequest'
+          $ref: '#/definitions/dto.PostUserLoginHandlerRequest'
       responses:
         "200":
           description: OK
           schema:
-            type: user
+            $ref: '#/definitions/dto.PostUserLoginHandlerResponse'
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/httpx.HTTPError'
         "404":
           description: Not found
           schema:
-            type: string
+            $ref: '#/definitions/httpx.HTTPError'
       summary: Login a user
       tags:
       - user
@@ -163,21 +148,21 @@ paths:
       parameters:
       - description: user login and password
         in: body
-        name: name
+        name: user
         required: true
         schema:
-          $ref: '#/definitions/types.PostUserRegisterHandlerRequest'
+          $ref: '#/definitions/dto.PostUserRegisterHandlerRequest'
       responses:
         "201":
           description: Created
-        "208":
-          description: Key already exists
-          schema:
-            type: string
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/httpx.HTTPError'
+        "409":
+          description: Key already exists
+          schema:
+            $ref: '#/definitions/httpx.HTTPError'
       summary: Register a user
       tags:
       - user
