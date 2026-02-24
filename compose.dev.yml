@@ -1,0 +1,36 @@
+services:
+  http_server:
+    image: code_runner-http_server-dev:latest
+    build:
+      dockerfile: Dockerfile.dev
+    environment:
+      BUILD_PATH: ${HTTPSERVER_BUILD_PATH}
+      ARGS: ${HTTPSERVER_ARGS}
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+      - "43777:43777"
+
+  consumer:
+    image: code_runner-consumer-dev:latest
+    build:
+      dockerfile: Dockerfile.dev
+    environment:
+      BUILD_PATH: ${CONSUMER_BUILD_PATH}
+      ARGS: ${CONSUMER_ARGS}
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "43778:43777"
+  redis:
+    ports:
+      - "6379:6379"
+  postgres:
+    ports:
+      - "5432:5432"
+  broker:
+    ports:
+      - "5672:5672"
+      - "15672:15672"

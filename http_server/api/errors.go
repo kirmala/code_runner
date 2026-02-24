@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -18,4 +17,3 @@ func (e ErrBadRequest) Error() string {
 	return msg
 }
 
-var ErrUnauthorized = errors.New("unauthorized")

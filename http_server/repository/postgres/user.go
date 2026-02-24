@@ -108,7 +108,7 @@ func (us *UserStorage) Post(user models.User) error {
 		if errors.As(err, &pqErr) {
 			if pqErr.Constraint == "uq_user_login" {
 				return repository.ErrConflict{
-					Field: "id",
+					Field: "login",
 				}
 			}
 		}

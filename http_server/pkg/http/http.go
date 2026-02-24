@@ -2,14 +2,12 @@ package httpx
 
 import (
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
 )
 
-func CreateAndRunServer(r chi.Router, addr string) error {
+func CreateAndRunServer(h http.Handler, addr string) error {
 	httpServer := &http.Server{
 		Addr:    addr,
-		Handler: r,
+		Handler: h,
 	}
 
 	return httpServer.ListenAndServe()

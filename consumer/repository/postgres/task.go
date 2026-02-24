@@ -1,9 +1,12 @@
 package postgres
 
 import (
+	"code_processor/consumer/repository"
 	"code_processor/http_server/models"
+	"context"
 	"database/sql"
 	"fmt"
+
 	_ "github.com/lib/pq"
 )
 
@@ -25,28 +28,28 @@ func NewTaskStorage(connStr string) (*TaskStorage, error) {
 	return &TaskStorage{db: db}, nil
 }
 
-func (ps *TaskStorage) Put(task models.Task) error {
-	result, err := ps.db.Exec(`
+func (ps *TaskStorage) Put(ctx context.Context, task models.Task) error {
+	result, err := ps.db.ExecContext(ctx, `
 		UPDATE tasks 
 		SET task_code = $1, 
-		    task_translator = $2, 
-		    task_status = $3, 
-		    task_result = $4 
+		    task_translator = $2,
+			task_result = $3,
+		    task_status = $4
 		WHERE task_id = $5`,
 		task.Code,
 		task.Translator,
-		task.Status,
 		task.Result,
+		task.Status,
 		task.Id,
 	)
 
 	if err != nil {
-		return fmt.Errorf("pdating task: %w", err)
+		return fmt.Errorf("updating task: %w", err)
 	}
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no task found with id %s", task.Id)
+		return repository.ErrNotFound{Item: "task"}
 	}
 
 	return nil

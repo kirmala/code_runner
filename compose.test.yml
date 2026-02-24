@@ -1,0 +1,11 @@
+services:
+  app_test:
+    build:
+      context: tests
+      dockerfile: Dockerfile
+    environment:
+      - BASE_URL
+    depends_on:
+      http_server:
+        condition: service_healthy
+      

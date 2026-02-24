@@ -4,12 +4,12 @@ import (
 	"code_processor/http_server/api"
 	"code_processor/http_server/api/dto"
 	"code_processor/http_server/models"
-	"code_processor/http_server/usecases"
+	"code_processor/http_server/service"
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v5"
 )
 
 func CreatePostUserRegisterHandlerRequest(r *http.Request) (*dto.PostUserRegisterHandlerRequest, error) {
@@ -29,10 +29,10 @@ func CreatePostUserLoginHandlerRequest(r *http.Request) (*dto.PostUserLoginHandl
 }
 
 type User struct {
-	service usecases.User
+	service service.User
 }
 
-func NewUserHandler(service usecases.User) *User {
+func NewUserHandler(service service.User) *User {
 	return &User{service: service}
 }
 
@@ -42,24 +42,24 @@ func NewUserHandler(service usecases.User) *User {
 // @Accept  json
 // @Param user body dto.PostUserRegisterHandlerRequest true "user login and password"
 // @Success 201 "Created"
-// @Failure 400 {object} HTTPError "Bad request"
-// @Failure 409 {object} HTTPError "Key already exists"
+// @Failure 400 {object} dto.Error "Bad request"
+// @Failure 409 {object} dto.Error "Key already exists"
 // @Router /user/register [post]
-func (s *User) postRegisterHandler(w http.ResponseWriter, r *http.Request) {
-	req, err := CreatePostUserRegisterHandlerRequest(r)
+func (s *User) postRegisterHandler(c *echo.Context) error {
+	req, err := CreatePostUserRegisterHandlerRequest(c.Request())
 	if err != nil {
-		WriteError(w, err)
-		return
+		return err
 	}
 
-	newUser := models.User{Id: uuid.New(), Login: req.Username, Password: req.Password}
+	newUser := models.User{Id: uuid.New(), Login: req.Login, Password: req.Password}
 
-	err = s.service.PostRegister(newUser)
+	err = s.service.Register(newUser)
 	if err != nil {
-		WriteError(w, err)
+		return err
 	}
 
-	WriteSuccess(w, nil, http.StatusCreated)
+	
+	return c.NoContent(http.StatusCreated)
 }
 
 // @Summary Login a user
@@ -68,28 +68,24 @@ func (s *User) postRegisterHandler(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Param user body dto.PostUserLoginHandlerRequest true "user login and password"
 // @Success 200 {object} dto.PostUserLoginHandlerResponse
-// @Failure 400 {object} HTTPError "Bad request"
-// @Failure 404 {object} HTTPError "Not found"
+// @Failure 400 {object} dto.Error "Bad request"
+// @Failure 401 {object} dto.Error "Unauthorized"
 // @Router /user/login [post]
-func (s *User) postLoginHandler(w http.ResponseWriter, r *http.Request) {
-	req, err := CreatePostUserRegisterHandlerRequest(r)
+func (s *User) postLoginHandler(c *echo.Context) error {
+	req, err := CreatePostUserLoginHandlerRequest(c.Request())
 	if err != nil {
-		WriteError(w, err)
-		return
+		return err
 	}
 
-	SessionId, err := s.service.PostLogin(req.Username, req.Password)
+	SessionId, err := s.service.Login(req.Login, req.Password)
 	if err != nil {
-		WriteError(w, err)
-		return
+		return err
 	}
-	WriteSuccess(w,  dto.PostUserLoginHandlerResponse{Token: SessionId.String()}, http.StatusOK)
+	return c.JSON(http.StatusOK, &dto.PostUserLoginHandlerResponse{Token: SessionId.String()})
 }
 
 // WithUserHandlers registers user-related HTTP handlers.
-func (s *User) WithUserHandlers(r chi.Router) {
-	r.Route("/user", func(r chi.Router) {
-		r.Post("/register", s.postRegisterHandler)
-		r.Post("/login", s.postLoginHandler)
-	})
+func (s *User) WithUserHandlers(g *echo.Group) {
+	g.POST("/user/register", echo.HandlerFunc(s.postRegisterHandler))
+	g.POST("/user/login", echo.HandlerFunc(s.postLoginHandler))
 }

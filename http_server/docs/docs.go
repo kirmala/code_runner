@@ -15,6 +15,59 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/task": {
+            "post": {
+                "description": "Create a new task with the specified key and value",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "task"
+                ],
+                "summary": "Create an task",
+                "parameters": [
+                    {
+                        "description": "task code and translator",
+                        "name": "translation_data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.PostTaskHandlerRequest"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Bearer token for authentication",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.PostTaskHandlerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/task/result/{id}": {
             "get": {
                 "description": "Get a task result by its id",
@@ -48,25 +101,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "task"
+                            "$ref": "#/definitions/dto.GetTaskResultHandlerResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     },
                     "404": {
                         "description": "Task not found",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     }
                 }
@@ -111,19 +164,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     },
                     "404": {
                         "description": "Task not found",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     }
                 }
@@ -160,13 +213,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     }
                 }
@@ -200,13 +253,13 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     },
                     "409": {
                         "description": "Key already exists",
                         "schema": {
-                            "$ref": "#/definitions/httpx.HTTPError"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     }
                 }
@@ -214,6 +267,22 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.Error": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.GetTaskResultHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.GetTaskStatusHandlerResponse": {
             "type": "object",
             "properties": {
@@ -222,13 +291,32 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.PostTaskHandlerRequest": {
+            "type": "object",
+            "properties": {
+                "task_code": {
+                    "type": "string"
+                },
+                "task_translator": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PostTaskHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.PostUserLoginHandlerRequest": {
             "type": "object",
             "properties": {
-                "password": {
+                "login": {
                     "type": "string"
                 },
-                "username": {
+                "password": {
                     "type": "string"
                 }
             }
@@ -244,18 +332,10 @@ const docTemplate = `{
         "dto.PostUserRegisterHandlerRequest": {
             "type": "object",
             "properties": {
-                "password": {
+                "login": {
                     "type": "string"
                 },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "httpx.HTTPError": {
-            "type": "object",
-            "properties": {
-                "error": {
+                "password": {
                     "type": "string"
                 }
             }

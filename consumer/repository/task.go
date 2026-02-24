@@ -1,7 +1,10 @@
 package repository
 
-import "code_processor/http_server/models"
+import (
+	"code_processor/http_server/models"
+	"context"
+)
 
 type Task interface {
-	Put(models.Task) error
+	Put(context.Context, models.Task) error
 }

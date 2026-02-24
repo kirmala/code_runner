@@ -1,15 +1,35 @@
-.PHONY: launch_services launch_with_tests stop_services build_services
+COMPOSE_BASE := compose.yml
+COMPOSE_DEV := compose.dev.yml
+COMPOSE_TEST := compose.test.yml
 
-launch_services: build_services
-	docker compose up
+PHONY: dev-up dev-logs dev-down test-up test-logs test-down
 
-launch_with_tests: build_services
-	docker compose --profile test up --abort-on-container-exit --exit-code-from app_test
+dev-build:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) build
 
-stop_services:
-	docker compose down
+dev-up:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) up -d
 
-build_services:
-	docker compose build
-	docker build -t code_processor consumer/usecases/services/docker_code_processor
-	
+dev-logs:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) logs -f
+
+dev-down:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) down
+
+dev-restart-go:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) restart http_server consumer
+
+test-up:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) up --abort-on-container-exit --exit-code-from app_test --build
+
+test-logs:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) logs -f
+
+test-down:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) down -v
+
+all-down: dev-down test-down
+
+base-build:
+	docker compose -f $(COMPOSE_BASE) build
+
