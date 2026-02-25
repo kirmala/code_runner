@@ -84,6 +84,7 @@ func main() {
 	e := echo.New()
 	apiGroup := e.Group("")
 	apiGroup.Use(middleware.ServeErrors)
+	apiGroup.Use(middleware.Recover)
 	taskHandlers.WithTaskHandlers(apiGroup)
 	userHandlers.WithUserHandlers(apiGroup)
 
