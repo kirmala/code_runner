@@ -48,9 +48,7 @@ services:
 
 
   postgres:
-    build:
-      context: http_server/repository/postgres
-      dockerfile: Dockerfile
+    image: postgres:latest
     container_name: my_postgres_db
     environment:
       - POSTGRES_DB

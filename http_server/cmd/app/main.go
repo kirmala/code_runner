@@ -50,6 +50,10 @@ func main() {
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.Postgres.Host, cfg.Postgres.Port, pgUser, pgPassword, pgDB)
 
+	if err := postgres.RunMigrations(connStr); err != nil {
+		log.Fatalf("running migrations: %v", err)
+	}
+
 	taskRepo, err := postgres.NewTaskStorage(connStr)
 	if err != nil {
 		log.Fatalf("creating task storage: %v", err)
