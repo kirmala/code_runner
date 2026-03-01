@@ -22,8 +22,10 @@ dev-restart-server:
 dev-restart-consumer:
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) restart consumer
 
+runner-build:
+	docker build -t runner ./consumer/service/docker
 
-test-up:
+test-up: runner-build
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) up --abort-on-container-exit --exit-code-from app_test --build
 
 test-logs:
