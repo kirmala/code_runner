@@ -6,9 +6,14 @@ repository:
   host: "http_server"
   port: "8080"
   address: "task/commit"
-code_processor:
-  image_name: code_processor
+runner:
+  image_name: "runner"
+  client_version: "1.45"
+  container_resource:
+    memory: 134217728
+    nano_cpus: 500000000
+    pids_limit: 64
+
 postgres:
   host: "postgres"
   port: "5432"
-

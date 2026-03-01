@@ -16,8 +16,12 @@ dev-logs:
 dev-down:
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) down
 
-dev-restart-go:
-	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) restart http_server consumer
+dev-restart-server:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) restart http_server
+
+dev-restart-consumer:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) restart consumer
+
 
 test-up:
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) up --abort-on-container-exit --exit-code-from app_test --build
@@ -33,3 +37,5 @@ all-down: dev-down test-down
 base-build:
 	docker compose -f $(COMPOSE_BASE) build
 
+build-runner:
+	docker build -t runner ./consumer/service/docker/runner

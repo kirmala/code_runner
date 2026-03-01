@@ -12,8 +12,16 @@ type Repository struct {
 	Address string `yaml:"address"`
 }
 
-type CodeProcessor struct {
-	ImageName string `yaml:"image_name"`
+type ContainerResource struct {
+	Memory    int64  `yaml:"memory"`
+	NanoCPUs  int64  `yaml:"nano_cpus"`
+	PidsLimit *int64 `yaml:"pids_limit"`
+}
+
+type Runner struct {
+	ImageName         string            `yaml:"image_name"`
+	ClientVersion     string            `yaml:"client_version"`
+	ContainerResource ContainerResource `yaml:"container_resource"`
 }
 
 type Postgres struct {
@@ -22,8 +30,8 @@ type Postgres struct {
 }
 
 type AppConfig struct {
-	RabbitMQ      `yaml:"rabbit_mq"`
-	Repository    `yaml:"repository"`
-	CodeProcessor `yaml:"code_processor"`
-	Postgres      `yaml:"postgres"`
+	RabbitMQ   `yaml:"rabbit_mq"`
+	Repository `yaml:"repository"`
+	Runner     `yaml:"runner"`
+	Postgres   `yaml:"postgres"`
 }

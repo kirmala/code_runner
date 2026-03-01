@@ -2,10 +2,10 @@ package models
 
 import "errors"
 
-type translator int
+type Translator int
 
 const (
-	UnknownTranslator translator = iota
+	UnknownTranslator Translator = iota
 	PythonTranslator
 	ClangTranslator
 	GppTranslator
@@ -13,14 +13,14 @@ const (
 
 var ErrUnknownTranslator = errors.New("unknown translator")
 
-var TranslatorName = map[translator]string{
+var TranslatorName = map[Translator]string{
 	UnknownTranslator: "unknown",
 	PythonTranslator:  "python",
 	ClangTranslator:   "clang",
 	GppTranslator:     "g++",
 }
 
-func ParseTranslator(translator string) (translator, error) {
+func ParseTranslator(translator string) (Translator, error) {
 	switch translator {
 	case "python":
 		return PythonTranslator, nil
@@ -33,7 +33,7 @@ func ParseTranslator(translator string) (translator, error) {
 	}
 }
 
-func (t translator) String() string {
+func (t Translator) String() string {
 	switch t {
 	case PythonTranslator:
 		return "python"

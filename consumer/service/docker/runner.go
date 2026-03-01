@@ -5,18 +5,24 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"time"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"code_processor/consumer/cmd/app/config"
+
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 )
 
 type Runner struct {
 	cli       *client.Client
 	imageName string
+	resource config.ContainerResource
 }
+
 
 func cleanContainerOutput(output string) string {
 	ansiEsc := regexp.MustCompile(`\x1B[@-_][0-?]*[ -/]*[@-~]`)
@@ -42,57 +48,51 @@ func cleanContainerOutput(output string) string {
 	return output
 }
 
-func NewRunner(imageName string) (*Runner, error) {
-	cli, err := client.NewClientWithOpts(client.WithVersion("1.41"))
+func NewRunner(imageName string, clientVersion string, resource config.ContainerResource) (*Runner, error) {
+	cli, err := client.NewClientWithOpts(client.WithVersion(clientVersion))
 	if err != nil {
 		return nil, fmt.Errorf("creating client: %w", err)
 	}
 
-	// buildContext := "."
+	_, err = cli.ImageInspect(context.Background(), imageName)
+	if err != nil {
+		return nil, fmt.Errorf("inspecting image: %w", err)
+	}
 
-	// buildContextTar, err := archive.TarWithOptions(buildContext, &archive.TarOptions{})
-	// if err != nil {
-	// 	return nil, fmt.Errorf("creating tar archive of build context: %w", err)
-	// }
-	// defer buildContextTar.Close()
-
-	// buildOptions := types.ImageBuildOptions{
-	// 	Dockerfile: "Dockerfile",
-	// 	Tags:       []string{imageName},
-	// 	Remove:     true,
-	// }
-
-	// buildResponse, err := cli.ImageBuild(ctx, buildContextTar, buildOptions)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("building image: %w", err)
-	// }
-	// defer buildResponse.Body.Close()
-
-	return &Runner{cli: cli, imageName: imageName}, nil
+	return &Runner{cli: cli, resource: resource, imageName: imageName}, nil
 }
 
 func (r *Runner) Run(ctx context.Context, task models.Task) (models.Task, error) {
-	var config container.Config
-	config.Image = r.imageName
-
+	var cmd []string
 	switch task.Translator {
 	case models.PythonTranslator:
-		config.Cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.py && python3 /tmp/code.py", task.Code)}
+		cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.py && python3 /tmp/code.py", task.Code)}
 	case models.GppTranslator:
-		config.Cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && g++ /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
+		cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && g++ /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
 	case models.ClangTranslator:
-		config.Cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && clang /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
+		cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && clang /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
 	default:
-		return models.Task{}, fmt.Errorf("unsupported translator: %s", task.Translator)
+		return models.Task{}, models.ErrUnknownTranslator
 	}
 
 	resp, err := r.cli.ContainerCreate(
 		ctx,
-		&config,
-		nil, // HostConfig
-		nil, // NetworkingConfig
-		nil, // Platform
-		"",  // Container name
+		&container.Config{
+			Image: r.imageName,
+			Cmd:   cmd,
+		},
+		&container.HostConfig{
+			Resources: container.Resources{
+				Memory:    r.resource.Memory,
+				NanoCPUs:  r.resource.NanoCPUs,
+				PidsLimit: r.resource.PidsLimit,
+			},
+			NetworkMode:    "none",
+			ReadonlyRootfs: false,
+		},
+		nil,
+		nil,
+		"",
 	)
 	if err != nil {
 		return models.Task{}, fmt.Errorf("creating container: %w", err)
@@ -101,6 +101,10 @@ func (r *Runner) Run(ctx context.Context, task models.Task) (models.Task, error)
 	defer func() {
 		_ = r.cli.ContainerRemove(ctx, resp.ID, container.RemoveOptions{})
 	}()
+
+	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(10*time.Second))
+
+	defer cancel()
 
 	if err := r.cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		return models.Task{}, fmt.Errorf("starting container: %w", err)

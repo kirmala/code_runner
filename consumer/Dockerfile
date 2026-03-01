@@ -18,7 +18,7 @@ COPY --from=build /build/main ./main
 
 COPY --from=build /build/consumer/cmd/app/config/config.yaml ./config.yaml
 
-COPY --from=build /build/consumer/service/docker/runner/Dockerfile ./Dockerfile
+COPY --from=build /build/consumer/service/docker/Dockerfile ./Dockerfile
 
 
 CMD ["/app/main", "--config=/app/config.yaml"]

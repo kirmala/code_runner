@@ -4,7 +4,7 @@ import (
 	"code_processor/consumer/api/rabbitmq"
 	"code_processor/consumer/cmd/app/config"
 	"code_processor/consumer/service/basic"
-	docker "code_processor/consumer/service/docker/runner"
+	"code_processor/consumer/service/docker"
 
 	//"code_processor/consumer/repository/by_http"
 	"code_processor/consumer/repository/postgres"
@@ -43,7 +43,8 @@ func main() {
 	taskService := basic.NewTask(taskRepo)
 
 	imageName := cfg.ImageName
-	runner, err := docker.NewRunner(imageName)
+	clientVersion := cfg.ClientVersion
+	runner, err := docker.NewRunner(imageName, clientVersion, cfg.ContainerResource)
 	if err != nil {
 		log.Fatalf("creating docker client: %s", err)
 	}

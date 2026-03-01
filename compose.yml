@@ -77,6 +77,7 @@ services:
       retries: 5
       start_period: 5s
 
+
   
 volumes:
   postgres_data:
