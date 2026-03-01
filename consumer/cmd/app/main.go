@@ -1,11 +1,13 @@
 package main
 
 import (
-	"code_processor/consumer/api/rabbit_mq"
+	"code_processor/consumer/api/rabbitmq"
 	"code_processor/consumer/cmd/app/config"
+	"code_processor/consumer/service/basic"
+	"code_processor/consumer/service/docker"
+
 	//"code_processor/consumer/repository/by_http"
 	"code_processor/consumer/repository/postgres"
-	"code_processor/consumer/usecases/services/docker_code_processor"
 	"os"
 
 	"fmt"
@@ -38,15 +40,18 @@ func main() {
 		log.Fatalf("connecting to postgres: %s", err)
 	}
 
+	taskService := basic.NewTask(taskRepo)
+
 	imageName := cfg.ImageName
-	taskCodeProcessor, err := dockerCodeProcessor.NewCodeProcessor(imageName)
+	clientVersion := cfg.ClientVersion
+	runner, err := docker.NewRunner(imageName, clientVersion, cfg.ContainerResource)
 	if err != nil {
 		log.Fatalf("creating docker client: %s", err)
 	}
 
 	rabbitMQAddr := fmt.Sprintf("amqp://guest:guest@%s:%s", cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
 
-	TaskReceiver, err := rabbitMQ.NewRabbitMQReceiver(rabbitMQAddr, cfg.QueueName, taskCodeProcessor, taskRepo)
+	TaskReceiver, err := rabbitmq.NewTaskReceiver(rabbitMQAddr, cfg.QueueName, runner, taskService)
 	if err != nil {
 		log.Fatalf("failed creating rabbitMQ: %v", err)
 	}

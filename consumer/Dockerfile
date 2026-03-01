@@ -1,4 +1,4 @@
-FROM golang:1.23.3-alpine AS build
+FROM golang:1.25.0-alpine AS build
 
 WORKDIR /build
 
@@ -18,7 +18,7 @@ COPY --from=build /build/main ./main
 
 COPY --from=build /build/consumer/cmd/app/config/config.yaml ./config.yaml
 
-COPY --from=build /build/consumer/usecases/services/docker_code_processor/Dockerfile ./Dockerfile
+COPY --from=build /build/consumer/service/docker/Dockerfile ./Dockerfile
 
 
 CMD ["/app/main", "--config=/app/config.yaml"]

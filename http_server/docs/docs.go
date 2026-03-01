@@ -35,7 +35,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.PostTaskHandlerRequest"
+                            "$ref": "#/definitions/dto.PostTaskHandlerRequest"
                         }
                     },
                     {
@@ -50,13 +50,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "type": "task"
+                            "$ref": "#/definitions/dto.PostTaskHandlerResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
                         }
                     }
                 }
@@ -95,19 +101,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "task"
+                            "$ref": "#/definitions/dto.GetTaskResultHandlerResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
                         }
                     },
                     "404": {
                         "description": "Task not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     }
                 }
@@ -146,19 +158,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "task"
+                            "$ref": "#/definitions/dto.GetTaskStatusHandlerResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
                         }
                     },
                     "404": {
                         "description": "Task not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     }
                 }
@@ -177,11 +195,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "user login and password",
-                        "name": "name",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.PostUserLoginHandlerRequest"
+                            "$ref": "#/definitions/dto.PostUserLoginHandlerRequest"
                         }
                     }
                 ],
@@ -189,19 +207,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "user"
+                            "$ref": "#/definitions/dto.PostUserLoginHandlerResponse"
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     },
                     "404": {
                         "description": "Not found",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Error"
                         }
                     }
                 }
@@ -220,11 +238,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "user login and password",
-                        "name": "name",
+                        "name": "user",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/types.PostUserRegisterHandlerRequest"
+                            "$ref": "#/definitions/dto.PostUserRegisterHandlerRequest"
                         }
                     }
                 ],
@@ -232,16 +250,16 @@ const docTemplate = `{
                     "201": {
                         "description": "Created"
                     },
-                    "208": {
-                        "description": "Key already exists",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/dto.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Key already exists",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Error"
                         }
                     }
                 }
@@ -249,7 +267,31 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "types.PostTaskHandlerRequest": {
+        "dto.Error": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.GetTaskResultHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "result": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.GetTaskStatusHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PostTaskHandlerRequest": {
             "type": "object",
             "properties": {
                 "task_code": {
@@ -260,24 +302,40 @@ const docTemplate = `{
                 }
             }
         },
-        "types.PostUserLoginHandlerRequest": {
+        "dto.PostTaskHandlerResponse": {
             "type": "object",
             "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "username": {
+                "id": {
                     "type": "string"
                 }
             }
         },
-        "types.PostUserRegisterHandlerRequest": {
+        "dto.PostUserLoginHandlerRequest": {
             "type": "object",
             "properties": {
-                "password": {
+                "login": {
                     "type": "string"
                 },
-                "username": {
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PostUserLoginHandlerResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.PostUserRegisterHandlerRequest": {
+            "type": "object",
+            "properties": {
+                "login": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 }
             }

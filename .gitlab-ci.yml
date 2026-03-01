@@ -30,7 +30,7 @@ build:
       - .go/pkg/mod/
 
 go_unit_tests:
-  image: golang:1.25.1
+  image: golang:1.25.0
   stage: unit_test
   script:
     - go mod download

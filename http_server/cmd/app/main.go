@@ -6,15 +6,18 @@ import (
 	"code_processor/http_server/repository/postgres"
 	rabbitMQ "code_processor/http_server/repository/rabbit_mq"
 	"code_processor/http_server/repository/redis"
-	"code_processor/http_server/usecases/service"
+	"code_processor/http_server/service/basic"
+	"code_processor/http_server/service/session"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
-	"github.com/go-chi/chi/v5"
-	httpSwagger "github.com/swaggo/http-swagger"
+	"github.com/labstack/echo/v5"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
-	"code_processor/http_server/api/http"
+	"code_processor/http_server/api/httpx"
+	"code_processor/http_server/api/httpx/middleware"
 	_ "code_processor/http_server/docs"
 	pkgHttp "code_processor/http_server/pkg/http"
 )
@@ -47,6 +50,10 @@ func main() {
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.Postgres.Host, cfg.Postgres.Port, pgUser, pgPassword, pgDB)
 
+	if err := postgres.RunMigrations(connStr); err != nil {
+		log.Fatalf("running migrations: %v", err)
+	}
+
 	taskRepo, err := postgres.NewTaskStorage(connStr)
 	if err != nil {
 		log.Fatalf("creating task storage: %v", err)
@@ -72,19 +79,27 @@ func main() {
 		log.Fatalf("failed creating rabbitMQ: %v", err)
 	}
 
-	taskService := service.NewTask(taskRepo, sessionRepo, taskSender)
-	userService := service.NewUser(userRepo, sessionRepo)
+	taskService := basic.NewTask(taskRepo, sessionRepo, taskSender)
+	userService := basic.NewUser(userRepo, sessionRepo)
 
-	taskHandlers := http.NewTaskHandler(taskService)
-	userHandlers := http.NewUserHandler(userService)
+	taskHandlers := httpx.NewTaskHandler(taskService, session.Authenticator{SessionRepo: sessionRepo})
+	userHandlers := httpx.NewUserHandler(userService)
 
-	r := chi.NewRouter()
-	r.Get("/swagger/*", httpSwagger.WrapHandler)
-	taskHandlers.WithTaskHandlers(r)
-	userHandlers.WithUserHandlers(r)
+	e := echo.New()
+	apiGroup := e.Group("")
+	apiGroup.Use(middleware.ServeErrors)
+	apiGroup.Use(middleware.Recover)
+	taskHandlers.WithTaskHandlers(apiGroup)
+	userHandlers.WithUserHandlers(apiGroup)
+
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
+	e.GET("/health", func(c *echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
 
 	log.Printf("Starting server on %s", addr)
-	if err := pkgHttp.CreateAndRunServer(r, addr); err != nil {
+	if err := pkgHttp.CreateAndRunServer(e, addr); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }

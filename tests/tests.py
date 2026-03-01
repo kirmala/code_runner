@@ -13,9 +13,9 @@ def base_url():
 
 @pytest.fixture(scope='module')
 def user_data():
-    username = f'user_{uuid.uuid4()}'
+    login = f'user_{uuid.uuid4()}'
     password = 'password228'
-    return {'username': username, 'password': password}
+    return {'login': login, 'password': password}
 
 @pytest.fixture(scope='module')
 def auth_token(user_data, base_url):
@@ -88,7 +88,7 @@ def test_task_status_and_result(auth_token, base_url):
         data = response.json()
         assert 'status' in data
         
-        if data['status'] == 'ready':
+        if data['status'] == 'completed':
             break
          
         assert data['status'] == 'in_progress', f'undefined status: {data["status"]}!'

@@ -2,8 +2,13 @@ package postgres
 
 import (
 	"code_processor/http_server/models"
+	"code_processor/http_server/repository"
 	"database/sql"
+	"errors"
 	"fmt"
+
+	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 type UserStorage struct {
@@ -24,7 +29,7 @@ func NewUserStorage(connStr string) (*UserStorage, error) {
 	return &UserStorage{db: db}, nil
 }
 
-func (us *UserStorage) Get(login string) (*models.User, error) {
+func (us *UserStorage) GetByLogin(login string) (*models.User, error) {
 	var user models.User
 
 	err := us.db.QueryRow(`
@@ -38,9 +43,30 @@ func (us *UserStorage) Get(login string) (*models.User, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, fmt.Errorf("user not found")
+			return nil, repository.ErrNotFound{Item: "user"}
 		}
 		return nil, fmt.Errorf("querying user by login: %w", err)
+	}
+	return &user, nil
+}
+
+func (us *UserStorage) GetById(key uuid.UUID) (*models.User, error) {
+	var user models.User
+
+	err := us.db.QueryRow(`
+		SELECT user_id, user_login, user_password
+		FROM users
+		WHERE user_id = $1`, key.String()).Scan(
+		&user.Id,
+		&user.Login,
+		&user.Password,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, repository.ErrNotFound{Item: "user"}
+		}
+		return nil, fmt.Errorf("querying user by id: %w", err)
 	}
 	return &user, nil
 }
@@ -62,7 +88,7 @@ func (us *UserStorage) Put(user models.User) error {
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no user found with id %s", user.Id)
+		return repository.ErrNotFound{Item: "user"}
 	}
 
 	return nil
@@ -78,16 +104,25 @@ func (us *UserStorage) Post(user models.User) error {
 	)
 
 	if err != nil {
+		var pqErr *pq.Error
+		if errors.As(err, &pqErr) {
+			if pqErr.Constraint == "uq_user_login" {
+				return repository.ErrConflict{
+					Field: "login",
+				}
+			}
+		}
+
 		return fmt.Errorf("creating user: %w", err)
 	}
 
 	return nil
 }
 
-func (us *UserStorage) Delete(key string) error {
+func (us *UserStorage) Delete(key uuid.UUID) error {
 	result, err := us.db.Exec(`
 		DELETE FROM users
-		WHERE user_id = $1`, key)
+		WHERE user_id = $1`, key.String())
 
 	if err != nil {
 		return fmt.Errorf("deleting user: %w", err)
@@ -95,7 +130,7 @@ func (us *UserStorage) Delete(key string) error {
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no user found with id %s", key)
+		return repository.ErrNotFound{Item: "user"}
 	}
 
 	return nil

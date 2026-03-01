@@ -1,24 +1,49 @@
 basePath: /
 definitions:
-  types.PostTaskHandlerRequest:
+  dto.Error:
+    properties:
+      error:
+        type: string
+    type: object
+  dto.GetTaskResultHandlerResponse:
+    properties:
+      result:
+        type: string
+    type: object
+  dto.GetTaskStatusHandlerResponse:
+    properties:
+      status:
+        type: string
+    type: object
+  dto.PostTaskHandlerRequest:
     properties:
       task_code:
         type: string
       task_translator:
         type: string
     type: object
-  types.PostUserLoginHandlerRequest:
+  dto.PostTaskHandlerResponse:
     properties:
-      password:
-        type: string
-      username:
+      id:
         type: string
     type: object
-  types.PostUserRegisterHandlerRequest:
+  dto.PostUserLoginHandlerRequest:
     properties:
+      login:
+        type: string
       password:
         type: string
-      username:
+    type: object
+  dto.PostUserLoginHandlerResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  dto.PostUserRegisterHandlerRequest:
+    properties:
+      login:
+        type: string
+      password:
         type: string
     type: object
 host: localhost:8080
@@ -39,7 +64,7 @@ paths:
         name: translation_data
         required: true
         schema:
-          $ref: '#/definitions/types.PostTaskHandlerRequest'
+          $ref: '#/definitions/dto.PostTaskHandlerRequest'
       - description: Bearer token for authentication
         in: header
         name: Authorization
@@ -51,11 +76,15 @@ paths:
         "201":
           description: Created
           schema:
-            type: task
+            $ref: '#/definitions/dto.PostTaskHandlerResponse'
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
       summary: Create an task
       tags:
       - task
@@ -81,15 +110,19 @@ paths:
         "200":
           description: OK
           schema:
-            type: task
+            $ref: '#/definitions/dto.GetTaskResultHandlerResponse'
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
         "404":
           description: Task not found
           schema:
-            type: string
+            $ref: '#/definitions/dto.Error'
       summary: Get a task result
       tags:
       - task
@@ -115,15 +148,19 @@ paths:
         "200":
           description: OK
           schema:
-            type: task
+            $ref: '#/definitions/dto.GetTaskStatusHandlerResponse'
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/dto.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.Error'
         "404":
           description: Task not found
           schema:
-            type: string
+            $ref: '#/definitions/dto.Error'
       summary: Get a task status
       tags:
       - task
@@ -135,23 +172,23 @@ paths:
       parameters:
       - description: user login and password
         in: body
-        name: name
+        name: user
         required: true
         schema:
-          $ref: '#/definitions/types.PostUserLoginHandlerRequest'
+          $ref: '#/definitions/dto.PostUserLoginHandlerRequest'
       responses:
         "200":
           description: OK
           schema:
-            type: user
+            $ref: '#/definitions/dto.PostUserLoginHandlerResponse'
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/dto.Error'
         "404":
           description: Not found
           schema:
-            type: string
+            $ref: '#/definitions/dto.Error'
       summary: Login a user
       tags:
       - user
@@ -163,21 +200,21 @@ paths:
       parameters:
       - description: user login and password
         in: body
-        name: name
+        name: user
         required: true
         schema:
-          $ref: '#/definitions/types.PostUserRegisterHandlerRequest'
+          $ref: '#/definitions/dto.PostUserRegisterHandlerRequest'
       responses:
         "201":
           description: Created
-        "208":
-          description: Key already exists
-          schema:
-            type: string
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/dto.Error'
+        "409":
+          description: Key already exists
+          schema:
+            $ref: '#/definitions/dto.Error'
       summary: Register a user
       tags:
       - user

@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq"
+	"github.com/google/uuid"
 )
 
 type TaskStorage struct {
@@ -27,13 +27,13 @@ func NewTaskStorage(connStr string) (*TaskStorage, error) {
 	return &TaskStorage{db: db}, nil
 }
 
-func (ps *TaskStorage) Get(key string) (*models.Task, error) {
+func (ps *TaskStorage) Get(key uuid.UUID) (*models.Task, error) {
 	var task models.Task
 
 	err := ps.db.QueryRow(`
 		SELECT task_id, task_code, task_translator, task_status, task_result 
 		FROM tasks 
-		WHERE task_id = $1`, key).Scan(
+		WHERE task_id = $1`, key.String()).Scan(
 		&task.Id,
 		&task.Code,
 		&task.Translator,
@@ -43,7 +43,7 @@ func (ps *TaskStorage) Get(key string) (*models.Task, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, repository.ErrNotFound
+			return nil, repository.ErrNotFound{Item: "task"}
 		}
 		return nil, fmt.Errorf("querying task: %w", err)
 	}
@@ -56,7 +56,7 @@ func (ps *TaskStorage) Put(task models.Task) error {
 		SET task_code = $1, 
 		    task_translator = $2,
 			task_result = $4,
-		    task_status = $3,
+		    task_status = $3
 		WHERE task_id = $5`,
 		task.Code,
 		task.Translator,
@@ -66,12 +66,12 @@ func (ps *TaskStorage) Put(task models.Task) error {
 	)
 
 	if err != nil {
-		return fmt.Errorf("pdating task: %w", err)
+		return fmt.Errorf("updating task: %w", err)
 	}
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no task found with id %s", task.Id)
+		return repository.ErrNotFound{Item: "task"}
 	}
 
 	return nil
@@ -95,7 +95,7 @@ func (ps *TaskStorage) Post(task models.Task) error {
 	return nil
 }
 
-func (ps *TaskStorage) Delete(key string) error {
+func (ps *TaskStorage) Delete(key uuid.UUID) error {
 	result, err := ps.db.Exec(`
 		DELETE FROM tasks 
 		WHERE task_id = $1`, key)
@@ -106,7 +106,7 @@ func (ps *TaskStorage) Delete(key string) error {
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no task found with id %s", key)
+		return repository.ErrNotFound{Item: "task"}
 	}
 
 	return nil
