@@ -27,6 +27,13 @@ jobs:
     - name: Install Make
       run: sudo apt-get install make
 
+    - name: Create .env file from template
+
+      run: envsubst < .env.example > .env
+      env:
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+
     - name: Build and Test
       run: make test-up
 
