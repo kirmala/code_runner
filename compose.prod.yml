@@ -1,5 +1,6 @@
 services:
   http_server:
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
     # Use !override to discard the postgres dependency from the base file
@@ -12,6 +13,7 @@ services:
       - POSTGRES_HOST=host.docker.internal
 
   consumer:
+    restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
     # Use !override here as well
@@ -20,6 +22,12 @@ services:
         condition: service_healthy
     environment:
       - POSTGRES_HOST=host.docker.internal
+
+  broker:
+    restart: unless-stopped
+  
+  redis:
+    restart: unless-stopped
 
   postgres:
     profiles:

@@ -1,6 +1,7 @@
 COMPOSE_BASE := compose.yml
 COMPOSE_DEV := compose.dev.yml
 COMPOSE_TEST := compose.test.yml
+COMPOSE_PROD := compose.prod.yml
 
 PHONY: dev-up dev-logs dev-down test-up test-logs test-down
 
@@ -41,3 +42,8 @@ base-build:
 
 build-runner:
 	docker build -t runner ./consumer/service/docker/runner
+
+prod-up:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_PROD) up --build
+prod-down:
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_PROD) down
