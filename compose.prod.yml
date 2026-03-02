@@ -9,8 +9,8 @@ services:
         condition: service_healthy
       redis: 
         condition: service_healthy
-    environment:
-      - POSTGRES_HOST=host.docker.internal
+ 
+
 
   consumer:
     restart: unless-stopped
@@ -20,8 +20,7 @@ services:
     depends_on: !override
       broker: 
         condition: service_healthy
-    environment:
-      - POSTGRES_HOST=host.docker.internal
+
 
   broker:
     restart: unless-stopped

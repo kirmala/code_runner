@@ -33,7 +33,17 @@ func main() {
 	if pgDB == "" {
 		log.Fatal("POSTGRES_DB is not set")
 	}
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.Postgres.Host, cfg.Postgres.Port, pgUser, pgPassword, pgDB)
+	pgHost := os.Getenv("POSTGRES_HOST")
+	if pgHost == "" {
+		log.Fatal("POSTGRES_HOST is not set")
+	}
+	pgPort := os.Getenv("POSTGRES_PORT")
+	if pgPort == "" {
+		log.Fatal("POSTGRES_PORT is not set")
+	}
+
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", pgHost, pgPort, pgUser, pgPassword, pgDB)
+	
 	taskRepo, err := postgres.NewTaskStorage(connStr)
 
 	if err != nil {
