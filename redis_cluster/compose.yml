@@ -145,6 +145,19 @@ services:
     networks:
       - code_runner_network
 
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    environment:
+      - REDIS_ADDR=redis://redis-node-1:6379
+      - REDIS_PASSWORD
+      - REDIS_EXPORTER_IS_CLUSTER=true
+    ports:
+      - "9121:9121"
+    networks:
+      - code_runner_network
+    restart: unless-stopped
+
 volumes:
   redis_data_1:
   redis_data_2:
