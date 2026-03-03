@@ -32,7 +32,7 @@ func (a Auth) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 			return err
 		}
 
-		id, err := a.Authenticator.Authenticate(tokenStr)
+		id, err := a.Authenticator.Authenticate(c.Request().Context(), tokenStr)
 		if err != nil {
 			return err
 		}

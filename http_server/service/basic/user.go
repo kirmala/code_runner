@@ -4,6 +4,7 @@ import (
 	"code_processor/http_server/models"
 	"code_processor/http_server/repository"
 	"code_processor/http_server/service"
+	"context"
 	"errors"
 
 	"github.com/google/uuid"
@@ -35,7 +36,7 @@ func (rs *User) Register(user models.User) error {
 	return rs.userRepo.Post(models.User{Id: user.Id, Login: user.Login, Password: string(hashedPassword)})
 }
 
-func (rs *User) Login(login string, password string) (uuid.UUID, error) {
+func (rs *User) Login(ctx context.Context, login string, password string) (uuid.UUID, error) {
 	user, err := rs.userRepo.GetByLogin(login)
 	if err != nil {
 		var target repository.ErrNotFound
@@ -50,7 +51,7 @@ func (rs *User) Login(login string, password string) (uuid.UUID, error) {
 		return uuid.Nil, service.ErrUnauthenticated{Msg: "password is incorrect"}
 	}
 	sessionId := uuid.New()
-	err = rs.sessionRepo.Set(models.Session{UserId: user.Id, SessionId: sessionId})
+	err = rs.sessionRepo.Set(ctx, models.Session{UserId: user.Id, SessionId: sessionId})
 	if err != nil {
 		return uuid.Nil, err
 	}

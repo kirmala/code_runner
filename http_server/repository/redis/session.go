@@ -12,36 +12,25 @@ import (
 )
 
 type SessionStorage struct {
-	db *redis.Client
+	cli *redis.ClusterClient
 }
 
-func NewSessionStorage(addr string, password string) (*SessionStorage, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: password,
-		DB:       0,
-	})
-
-	var ctx = context.Background()
-	_, err := rdb.Ping(ctx).Result()
-	if err != nil {
-		return nil, fmt.Errorf("pinging redis: %w", err)
-	}
-	return &SessionStorage{db: rdb}, nil
+func NewSessionStorage(cli *redis.ClusterClient) (*SessionStorage) {
+	return &SessionStorage{cli: cli}
 }
 
-func (rs *SessionStorage) Set(session models.Session) error {
-	var ctx = context.Background()
-	err := rs.db.Set(ctx, session.SessionId.String(), session.UserId.String(), 10*time.Minute).Err()
+func (rs *SessionStorage) Set(ctx context.Context, session models.Session) error {
+	key := fmt.Sprintf("session:%s", session.SessionId.String())
+	err := rs.cli.Set(ctx, key, session.UserId.String(), 10*time.Minute).Err()
 	if err != nil {
 		return fmt.Errorf("setting session: %w", err)
 	}
 	return nil
 }
 
-func (rs *SessionStorage) Get(key uuid.UUID) (*models.Session, error) {
-	var ctx = context.Background()
-	userIdstr, err := rs.db.Get(ctx, key.String()).Result()
+func (rs *SessionStorage) Get(ctx context.Context, key uuid.UUID) (*models.Session, error) {
+	fullkey := fmt.Sprintf("session:%s", key.String())
+	userIdstr, err := rs.cli.Get(ctx, fullkey).Result()
 
 	if err != nil {
 		if err == redis.Nil {
@@ -58,9 +47,9 @@ func (rs *SessionStorage) Get(key uuid.UUID) (*models.Session, error) {
 	return &models.Session{SessionId: key, UserId: userId}, nil
 }
 
-func (rs *SessionStorage) Delete(key uuid.UUID) error {
-	var ctx = context.Background()
-	err := rs.db.Del(ctx, key.String()).Err()
+func (rs *SessionStorage) Delete(ctx context.Context, key uuid.UUID) error {
+	fullkey := fmt.Sprintf("session:%s", key.String())
+	err := rs.cli.Del(ctx, fullkey).Err()
 	if err != nil {
 		return fmt.Errorf("deleting session: %w", err)
 	}

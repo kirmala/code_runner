@@ -1,3 +1,7 @@
+networks:
+  code_runner_network:
+    external: true
+
 services:
   http_server:
     build:
@@ -10,6 +14,7 @@ services:
       - POSTGRES_HOST
       - POSTGRES_PORT
       - REDIS_PASSWORD
+      - REDIS_ADDRESSES
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s 
@@ -21,8 +26,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
+    networks:
+      - code_runner_network
   
   broker:
     image: "rabbitmq:3-management"
@@ -31,6 +36,8 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
+    networks:
+      - code_runner_network
 
   consumer:
     build:
@@ -49,6 +56,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+    networks:
+      - code_runner_network
 
 
   postgres:
@@ -65,21 +74,11 @@ services:
       interval: 1s
       timeout: 5s
       retries: 10
+    networks:
+      - code_runner_network
   
 
-  redis:
-    image: redis:7.2-alpine
-    container_name: redis
-    volumes:
-      - redis_data:/data
-    environment:
-      - REDIS_PASSWORD
-    healthcheck:
-      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "$$REDIS_PASSWORD", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 5s
+
 
 
   

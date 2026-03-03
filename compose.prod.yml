@@ -7,8 +7,7 @@ services:
     depends_on: !override
       broker: 
         condition: service_healthy
-      redis: 
-        condition: service_healthy
+
  
 
 
@@ -25,8 +24,6 @@ services:
   broker:
     restart: unless-stopped
   
-  redis:
-    restart: unless-stopped
 
   postgres:
     profiles:

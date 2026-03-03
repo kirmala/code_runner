@@ -77,7 +77,7 @@ func (s *User) postLoginHandler(c *echo.Context) error {
 		return err
 	}
 
-	SessionId, err := s.service.Login(req.Login, req.Password)
+	SessionId, err := s.service.Login(c.Request().Context(), req.Login, req.Password)
 	if err != nil {
 		return err
 	}
