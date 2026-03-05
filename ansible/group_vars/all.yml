@@ -1,0 +1,16 @@
+common_packages:
+  - curl
+  - git
+  - gnupg
+  - lsb-release
+
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-buildx-plugin
+  - docker-compose-plugin
+
+
+docker_gpg_url: "https://download.docker.com/linux/ubuntu/gpg"
+docker_repo_url: "deb [arch=amd64] https://download.docker.com/linux/ubuntu noble stable"
