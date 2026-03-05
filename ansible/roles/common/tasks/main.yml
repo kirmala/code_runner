@@ -20,4 +20,11 @@
   apt:
     name: "{{ docker_packages }}"
     state: present
-    update_cache: yes
+    update_cache: true
+  notify: restart docker
+
+- name: Ensure Docker is started and enabled
+  service:
+    name: docker
+    state: started
+    enabled: true
