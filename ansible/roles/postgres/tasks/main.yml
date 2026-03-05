@@ -1,49 +1,11 @@
----
-- name: Install PostgreSQL and dependencies
-  apt:
-    name: "{{ postgresql_packages }}"
-    state: present
-    update_cache: true
-  notify: 
-    restart postgresql
+- name: Install PostgreSQL packages
+  ansible.builtin.include_tasks: install.yml
 
-- name: Ensure PostgreSQL is started and enabled
-  service:
-    name: postgresql
-    state: started
-    enabled: true
+- name: Configure PostgreSQL settings
+  ansible.builtin.include_tasks: config.yml
 
-- name: Configure Postgres to listen on all interfaces
-  community.postgresql.postgresql_set:
-    name: listen_addresses
-    value: "*"
-  become: true
-  become_user: postgres
-  notify: restart postgresql
+- name: Setup application users and databases
+  ansible.builtin.include_tasks: database.yml
 
-- name: Allow Docker network to connect to Postgres
-  community.postgresql.postgresql_pg_hba:
-    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
-    contype: host
-    databases: "{{ postgresql_database }}"
-    users: "{{ postgresql_user }}"
-    address: "{{ postgresql_allowed_docker_network }}"
-    method: "scram-sha-256"
-  become: true
-  become_user: postgres
-  notify: reload postgresql
-
-- name: Create App Database User
-  community.postgresql.postgresql_user:
-    name: "{{ postgresql_user }}"
-    password: "{{ vault_postgresql_password }}"
-    role_attr_flags: "{{ postgresql_user_flags }}"
-  become: true
-  become_user: postgres
-
-- name: Create App Database
-  community.postgresql.postgresql_db:
-    name: "{{ postgresql_database }}"
-    owner: "{{ postgresql_user }}"
-  become: true
-  become_user: postgres
+- name: Setup backup and cloud sync logic
+  ansible.builtin.include_tasks: backup.yml

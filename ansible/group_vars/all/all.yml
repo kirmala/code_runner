@@ -1,9 +1,7 @@
 common_packages:
-  - acl
   - curl
   - git
   - gnupg
-  - lsb-release
 
 docker_packages:
   - docker-ce

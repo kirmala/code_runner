@@ -1,0 +1,36 @@
+BACKUP_DIR="{{ postgresql_backup_dir }}"
+DB_NAME="{{ postgresql_database }}"
+DATE=$(date +%Y-%m-%d_%H-%M-%S)
+FILE="$BACKUP_DIR/$DB_NAME-$DATE.sql"
+RCLONE_CONF="{{ rclone_config_path }}"
+
+
+cd /tmp || exit
+
+mkdir -p $BACKUP_DIR
+
+
+
+pg_dump $DB_NAME > $FILE
+
+if [ -s "$FILE" ]; then
+    echo "[$DATE] SUCCESS: Local backup created at $FILE"
+
+    echo "[$DATE] INFO: Uploading to Yandex Disk..."
+    /usr/bin/rclone copy "$FILE" yandex:Backups/Postgres/ --config "$RCLONE_CONF"
+
+    if [ $? -eq 0 ]; then
+        echo "[$DATE] SUCCESS: Cloud sync complete."
+    else
+        echo "[$DATE] ERROR: Cloud sync FAILED!" >&2
+    fi
+
+    find "$BACKUP_DIR" -type f -mtime +7 -delete
+
+    /usr/bin/rclone delete yandex:Backups/Postgres/ --min-age 30d --config "$RCLONE_CONF"
+
+else
+    echo "[$DATE] FATAL ERROR: Backup file is empty or failed!" >&2
+    rm -f "$FILE"
+    exit 1
+fi

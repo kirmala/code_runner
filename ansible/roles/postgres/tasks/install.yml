@@ -1,0 +1,13 @@
+- name: Install PostgreSQL and dependencies
+  apt:
+    name: "{{ postgresql_packages }}"
+    state: present
+    update_cache: true
+  notify: 
+    restart postgresql
+
+- name: Ensure PostgreSQL is started and enabled
+  service:
+    name: postgresql
+    state: started
+    enabled: true
