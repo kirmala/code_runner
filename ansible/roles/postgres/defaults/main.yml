@@ -1,0 +1,13 @@
+postgresql_python_library: python3-psycopg2
+postgresql_version: 16
+
+postgresql_user: admin
+postgresql_database: code_runner
+
+postgresql_packages:
+  - postgresql-{{ postgresql_version }}
+  - "{{ postgresql_python_library }}"
+
+postgresql_user_flags: "NOSUPERUSER"
+
+postgresql_allowed_docker_network: "172.19.0.0/16"

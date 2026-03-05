@@ -1,4 +1,5 @@
 common_packages:
+  - acl
   - curl
   - git
   - gnupg

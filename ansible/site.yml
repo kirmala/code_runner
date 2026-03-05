@@ -3,3 +3,9 @@
   become: true
   roles:
     - common
+
+- name: Setup PostgreSQL Database
+  hosts: database
+  become: true
+  roles:
+    - postgres
