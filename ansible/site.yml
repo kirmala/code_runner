@@ -9,3 +9,10 @@
   become: true
   roles:
     - postgres
+
+- name: Install Container Engine
+  hosts: 
+    - cache
+    - app
+  roles:
+    - docker
