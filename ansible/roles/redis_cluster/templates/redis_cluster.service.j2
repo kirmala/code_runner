@@ -9,10 +9,10 @@ StartLimitIntervalSec={{ redis_cluster_start_limit_interval_sec }}
 Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory={{ redis_cluster_repo_path }}
-EnvironmentFile={{ redis_cluster_repo_env_file_path }}
+EnvironmentFile={{ redis_cluster_env_file_path }}
 
-ExecStart={{ make_path }} {{ redis_cluster_start_command }}
-ExecStop={{ make_path }} {{ redis_cluster_stop_command }}
+ExecStart={{ redis_cluster_start_command }}
+ExecStop={{ redis_cluster_stop_command }}
 
 Restart=on-failure
 RestartSec={{ redis_cluster_restart_sec }}

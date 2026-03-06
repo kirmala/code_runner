@@ -1,0 +1,168 @@
+networks:
+  code_runner_network:
+    external: true
+
+services:
+  redis-node-1:
+    image: redis:7.2-alpine
+    container_name: redis-node-1
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data_1:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - code_runner_network
+    restart: unless-stopped
+
+  redis-node-2:
+    image: redis:7.2-alpine
+    container_name: redis-node-2
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data_2:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - code_runner_network
+    restart: unless-stopped
+
+  redis-node-3:
+    image: redis:7.2-alpine
+    container_name: redis-node-3
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data_3:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - code_runner_network
+    restart: unless-stopped
+
+  redis-node-4:
+    image: redis:7.2-alpine
+    container_name: redis-node-4
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data_4:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - code_runner_network
+    restart: unless-stopped
+
+  redis-node-5:
+    image: redis:7.2-alpine
+    container_name: redis-node-5
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data_5:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - code_runner_network
+    restart: unless-stopped
+
+  redis-node-6:
+    image: redis:7.2-alpine
+    container_name: redis-node-6
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data_6:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - code_runner_network
+    restart: unless-stopped
+
+  redis-cluster-init:
+    image: redis:7.2-alpine
+    container_name: redis-cluster-init
+    depends_on:
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+      - redis-node-5
+      - redis-node-6
+    entrypoint: >
+      sh -c "
+      sleep 10 &&
+      redis-cli -a $$REDIS_PASSWORD --cluster create
+      redis-node-1:6379
+      redis-node-2:6379
+      redis-node-3:6379
+      redis-node-4:6379
+      redis-node-5:6379
+      redis-node-6:6379
+      --cluster-replicas 1
+      --cluster-yes
+      "
+    environment:
+      - REDIS_PASSWORD
+    networks:
+      - code_runner_network
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    environment:
+      - REDIS_ADDR=redis://redis-node-1:6379
+      - REDIS_PASSWORD
+      - REDIS_EXPORTER_IS_CLUSTER=true
+    ports:
+      - "9121:9121"
+    networks:
+      - code_runner_network
+    restart: unless-stopped
+
+volumes:
+  redis_data_1:
+  redis_data_2:
+  redis_data_3:
+  redis_data_4:
+  redis_data_5:
+  redis_data_6:
+

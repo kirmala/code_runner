@@ -22,3 +22,9 @@
     name: docker
     state: started
     enabled: true
+
+- name: Create the application network
+  community.docker.docker_network:
+    name: "{{ docker_network_name }}"
+    driver: bridge
+    state: present
