@@ -16,3 +16,12 @@
     - app
   roles:
     - docker
+  become: true
+
+
+- name: Setup Redis Cluster
+  hosts: cache
+  roles:
+    - redis_cluster
+  become: true
+

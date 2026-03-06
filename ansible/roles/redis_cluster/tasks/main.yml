@@ -1,0 +1,29 @@
+- name: Clone Redis Cluster repository
+  ansible.builtin.git:
+    repo: "{{ redis_cluster_repo_github }}"
+    dest: "{{ redis_cluster_repo_path }}"
+    version: validation
+
+- name: Copy .env file to the server
+  template:
+    src: "{{ redis_cluster_repo_env_file }}.j2"
+    dest: "{{ redis_cluster_repo_env_file_path }}"
+    mode: '0600'
+
+- name: Create systemd unit file
+  ansible.builtin.template:
+    src: "{{ redis_cluster_service_name }}.service.j2"
+    dest: "/etc/systemd/system/{{ redis_cluster_service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - reload systemd
+    - restart redis_cluster
+
+- name: Ensure the service is started and enabled on boot
+  ansible.builtin.systemd_service:
+    name: "{{ redis_cluster_service_name }}"
+    state: started
+    enabled: true
+    daemon_reload: true

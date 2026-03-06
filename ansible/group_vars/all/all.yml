@@ -2,14 +2,14 @@ common_packages:
   - curl
   - git
   - gnupg
-
-docker_packages:
-  - docker-ce
-  - docker-ce-cli
-  - containerd.io
-  - docker-buildx-plugin
-  - docker-compose-plugin
+  - make
 
 
-docker_gpg_url: "https://download.docker.com/linux/ubuntu/gpg"
-docker_repo_url: "deb [arch=amd64] https://download.docker.com/linux/ubuntu noble stable"
+postgresql_user: admin
+postgresql_database: code_runner
+postgresql_host: host.docker.internal
+postgresql_port: 5432
+
+redis_addresses: "redis-node-1:6379,redis-node-2:6379,redis-node-3:6379,redis-node-4:6379,redis-node-5:6379,redis-node-6:6379"
+
+make_path: "/usr/bin/make"
