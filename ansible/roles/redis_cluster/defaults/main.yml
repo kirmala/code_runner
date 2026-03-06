@@ -8,7 +8,8 @@ redis_cluster_stop_command: "cluster-down"
 redis_cluster_restart_sec: "10s"
 
 redis_cluster_repo_github: https://github.com/kirmala/code_runner
-redis_cluster_repo_path: /opt/code_runner
+redis_cluster_repo_path: /opt/redis_cluster
+redis_cluster_user: redis_cluster
 redis_cluster_repo_env_file: ".env"
 redis_cluster_repo_env_file_path: "{{ redis_cluster_repo_path }}/{{ redis_cluster_repo_env_file }}"
 
