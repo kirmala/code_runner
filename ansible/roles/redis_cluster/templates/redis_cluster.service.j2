@@ -1,21 +1,22 @@
 [Unit]
-Description={{ redis_cluster_description }}
+Description={{ redis_cluster.description }}
 Requires=docker.service
 After=docker.service
-StartLimitBurst={{ redis_cluster_start_limit_burst }}
-StartLimitIntervalSec={{ redis_cluster_start_limit_interval_sec }}
+StartLimitBurst={{ redis_cluster.limits.burst }}
+StartLimitIntervalSec={{ redis_cluster.limits.interval_sec }}
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory={{ redis_cluster_repo_path }}
-EnvironmentFile={{ redis_cluster_env_file_path }}
 
-ExecStart={{ redis_cluster_start_command }}
-ExecStop={{ redis_cluster_stop_command }}
+WorkingDirectory={{ redis_cluster.repo_path }}
+EnvironmentFile={{ redis_cluster.files.env }}
+
+ExecStart={{ redis_cluster.commands.start }}
+ExecStop={{ redis_cluster.commands.stop }}
 
 Restart=on-failure
-RestartSec={{ redis_cluster_restart_sec }}
+RestartSec={{ redis_cluster.limits.restart_sec }}
 
 [Install]
 WantedBy=multi-user.target

@@ -25,3 +25,8 @@
     - redis_cluster
   become: true
 
+- name: Setup Code Runner
+  hosts: app
+  roles:
+    - code_runner
+  become: true

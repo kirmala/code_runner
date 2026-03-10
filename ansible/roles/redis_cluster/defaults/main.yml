@@ -1,21 +1,32 @@
-redis_cluster_service_name: redis_cluster
+redis_cluster_path: "/opt/redis_cluster"
 
-redis_cluster_description: "Docker Compose redis cluster"
-redis_cluster_start_limit_burst: 5
-redis_cluster_start_limit_interval_sec: "100s"
-redis_cluster_start_command: "docker compose -f compose.yml up -d"
-redis_cluster_stop_command: "docker compose -f compose.yml down"
-redis_cluster_restart_sec: "10s"
+redis_cluster:
+  service_name: "redis_cluster"
+  description: "Docker Compose redis cluster"
+  user: "redis_cluster"
+  repo_path: "{{ redis_cluster_path }}"
+  network: "{{ docker_network_name | default('code_runner_network')}}"
+  
+  limits:
+    burst: 5
+    interval_sec: "100s"
+    restart_sec: "10s"
 
-redis_cluster_repo_path: /opt/redis_cluster
-redis_cluster_user: redis_cluster
+  commands:
+    start: "docker compose -f compose.yml up -d"
+    stop: "docker compose -f compose.yml down"
 
-redis_cluster_env_file: ".env"
-redis_cluster_env_file_path: "{{ redis_cluster_repo_path }}/{{ redis_cluster_env_file }}"
-
-redis_cluster_compose_file: "compose.yml"
-redis_cluster_compose_file_path: "{{ redis_cluster_repo_path }}/{{ redis_cluster_compose_file }}"
-
-redis_cluster_config_file: "redis.conf"
-redis_cluster_config_file_path: "{{ redis_cluster_repo_path }}/{{ redis_cluster_config_file }}"
-
+  files:
+    env: "{{ redis_cluster_path }}/.env"
+    compose: "{{ redis_cluster_path }}/compose.yml"
+    config: "{{ redis_cluster_path }}/redis.conf"
+  
+  image: "redis:7.2-alpine"
+  nodes:
+    - { name: "redis-node-1", vol: "redis_data_1" }
+    - { name: "redis-node-2", vol: "redis_data_2" }
+    - { name: "redis-node-3", vol: "redis_data_3" }
+    - { name: "redis-node-4", vol: "redis_data_4" }
+    - { name: "redis-node-5", vol: "redis_data_5" }
+    - { name: "redis-node-6", vol: "redis_data_6" }
+    

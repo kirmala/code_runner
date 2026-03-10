@@ -1,57 +1,66 @@
-- name: Ensure redis cluster user exists
+- name: Ensure redis cluster user exists and is in the docker group
   ansible.builtin.user:
-    name: "{{ redis_cluster_user }}"
+    name: "{{ redis_cluster.user }}"
     system: yes
     shell: /usr/sbin/nologin
   become: true
 
-- name: Ensure /opt directory with correct ownership
+- name: Ensure repo directory exists with correct ownership
   ansible.builtin.file:
-    path: "{{ redis_cluster_repo_path }}"
+    path: "{{ redis_cluster.repo_path }}"
     state: directory
-    owner: "{{ redis_cluster_user }}"
-    group: "{{ redis_cluster_user }}"
+    owner: "{{ redis_cluster.user }}"
+    group: "{{ redis_cluster.user }}"
     mode: '0755'
   become: true
 
 - name: Copy .env file to the server
-  template:
-    src: "{{ redis_cluster_env_file }}.j2"
-    dest: "{{ redis_cluster_env_file_path }}"
+  ansible.builtin.template:
+    src: ".env.j2"
+    dest: "{{ redis_cluster.files.env }}"
+    owner: "{{ redis_cluster.user }}"
+    group: "{{ redis_cluster.user }}"
     mode: '0600'
   become: true
-  become_user: "{{ redis_cluster_user }}"
+
 
 - name: Copy compose to the server
-  template:
-    src: "{{ redis_cluster_compose_file }}.j2"
-    dest: "{{ redis_cluster_compose_file_path }}"
+  ansible.builtin.template:
+    src: "compose.yml.j2"
+    dest: "{{ redis_cluster.files.compose }}"
+    owner: "{{ redis_cluster.user }}"
+    group: "{{ redis_cluster.user }}"
     mode: '0644'
   become: true
-  become_user: "{{ redis_cluster_user }}"
+
 
 - name: Copy config to the server
-  template:
-    src: "{{ redis_cluster_config_file }}.j2"
-    dest: "{{ redis_cluster_config_file_path }}"
+  ansible.builtin.template:
+    src: "redis.conf.j2"
+    dest: "{{ redis_cluster.files.config }}"
+    owner: "{{ redis_cluster.user }}"
+    group: "{{ redis_cluster.user }}"
     mode: '0644'
   become: true
-  become_user: "{{ redis_cluster_user }}"
 
 - name: Create systemd unit file
   ansible.builtin.template:
-    src: "{{ redis_cluster_service_name }}.service.j2"
-    dest: "/etc/systemd/system/{{ redis_cluster_service_name }}.service"
+    src: "{{ redis_cluster.service_name }}.service.j2"
+    dest: "/etc/systemd/system/{{ redis_cluster.service_name }}.service"
     owner: root
     group: root
     mode: '0644'
+  register: systemd_file
   notify:
-    - reload systemd
     - restart redis_cluster
+  
+- name: Force immediate daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: systemd_file.changed
 
 - name: Ensure the service is started and enabled on boot
   ansible.builtin.systemd_service:
-    name: "{{ redis_cluster_service_name }}"
+    name: "{{ redis_cluster.service_name }}"
     state: started
     enabled: true
-    daemon_reload: true

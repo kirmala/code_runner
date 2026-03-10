@@ -1,8 +1,6 @@
-- name: reload systemd
-  ansible.builtin.systemd_service:
-    daemon_reload: true
+
 
 - name: restart redis_cluster
   ansible.builtin.systemd_service:
-    name: "{{ redis_cluster_service_name }}"
+    name: "{{ redis_cluster.service_name }}"
     state: restarted

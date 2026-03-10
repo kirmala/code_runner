@@ -1,0 +1,43 @@
+code_runner_path: "/opt/code_runner"
+
+code_runner:
+  service_name: "code_runner"
+  description: "Docker Compose code runner app"
+  user: "code_runner"
+  repo_path: "{{ code_runner_path }}"
+  external_port: "8080"
+  
+  limits:
+    burst: 5
+    interval_sec: 100s
+    restart_sec: 10s
+
+  commands:
+    start: "docker compose -f compose.yml up"
+    stop: "docker compose -f compose.yml down"
+
+  images:
+    http_server: 
+      name: "kirill252/code_runner-http_server"
+      tag: "1.0.0"
+    consumer: 
+      name: "kirill252/code_runner-consumer"
+      tag: "1.0.0"
+    sandbox: 
+      name: "kirill252/code_runner-sandbox"
+      tag: "1.0.0" 
+
+  files:
+    env: "{{ code_runner_path }}/.env"
+    compose: "{{ code_runner_path }}/compose.yml"
+  
+  postgres:
+    user: "{{ postgresql_user | default('admin') }}"
+    database: "{{ postgresql_database | default('code_runner') }}"
+    host: "{{ postgresql_host | default('host.docker.internal') }}"
+    port: "{{ postgresql_port | default(5432) }}"
+
+  redis:
+    addresses: "{{ redis_cluster_1_name | default('redis-node-1')}}:6379,{{ redis_cluster_2_name | default('redis-node-2')}}:6379,{{ redis_cluster_3_name | default('redis-node-3')}}:6379,{{ redis_cluster_4_name | default('redis-node-4')}}:6379,{{ redis_cluster_5_name | default('redis-node-5')}}:6379,{{ redis_cluster_6_name | default('redis-node-6')}}:6379"
+
+  network: "{{ docker_network_name | default('code_runner_network')}}"

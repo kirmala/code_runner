@@ -10,6 +10,11 @@ postgresql_database: code_runner
 postgresql_host: host.docker.internal
 postgresql_port: 5432
 
-redis_addresses: "redis-node-1:6379,redis-node-2:6379,redis-node-3:6379,redis-node-4:6379,redis-node-5:6379,redis-node-6:6379"
+docker_network_name: code_runner_network
 
-make_path: "/usr/bin/make"
+redis_cluster_1_name: redis-node-1
+redis_cluster_2_name: redis-node-2
+redis_cluster_3_name: redis-node-3
+redis_cluster_4_name: redis-node-4
+redis_cluster_5_name: redis-node-5
+redis_cluster_6_name: redis-node-6
