@@ -10,7 +10,7 @@ postgresql_packages:
 postgresql_user: admin
 postgresql_database: code_runner
 postgresql_user_flags: "NOSUPERUSER"
-postgresql_allowed_docker_network: "172.19.0.0/16"
+postgresql_allowed_docker_network: "172.18.0.0/16"
 
 #backup
 postgresql_backup_dir: "/var/backups/postgres"

@@ -13,6 +13,9 @@ EnvironmentFile={{ code_runner.files.env }}
 ExecStart={{ code_runner.commands.start }}
 ExecStop={{ code_runner.commands.stop }}
 
+StandardOutput=append:/var/log/{{ code_runner.service_name }}/{{ code_runner.service_name }}.log
+StandardError=append:/var/log/{{ code_runner.service_name }}/{{ code_runner.service_name }}.log
+
 Restart=on-failure
 RestartSec={{ code_runner.limits.restart_sec }}
 

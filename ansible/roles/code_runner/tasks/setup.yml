@@ -30,3 +30,21 @@
   ansible.builtin.systemd:
     daemon_reload: yes
   when: systemd_file.changed
+
+- name: Ensure log directory exists
+  ansible.builtin.file:
+    path: "/var/log/{{ code_runner.service_name }}"
+    state: directory
+    owner: "{{ code_runner.user }}"
+    group: "{{ code_runner.user }}"
+    mode: '0755'
+  become: true
+
+- name: Configure logrotate for code_runner
+  ansible.builtin.template:
+    src: logrotate.j2
+    dest: "/etc/logrotate.d/{{ code_runner.service_name }}"
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
