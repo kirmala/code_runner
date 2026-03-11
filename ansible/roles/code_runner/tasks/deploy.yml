@@ -33,4 +33,11 @@
     become: true
     notify:
       - "restart code_runner"
+
+  - name: Pull a migrations image
+    community.docker.docker_image:
+      name: "{{ code_runner.images.migrations.name }}"
+      tag: "{{ code_runner.images.migrations.tag }}"
+      source: pull
+    become: true
   tags: [update, deploy]

@@ -1,0 +1,15 @@
+- name: Run migrations
+  community.docker.docker_container:
+    name: migration_runner 
+    image: "{{ code_runner.images.migrations.name }}:{{ code_runner.images.migrations.tag }}"
+    command: "up"
+    state: started
+    env:
+      GOOSE_DBSTRING: "host={{ code_runner.postgres.host }} port={{ code_runner.postgres.port }} user={{ code_runner.postgres.user }} password={{ vault_postgresql_password }} dbname={{ code_runner.postgres.database }} sslmode=disable"
+    network_mode: "{{ code_runner.network }}"
+    cleanup: yes
+    detach: no
+    etc_hosts:
+      host.docker.internal: host-gateway
+  run_once: true
+  tags: [migrate]

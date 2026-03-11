@@ -3,6 +3,8 @@ code_runner_path: "/opt/code_runner"
 code_runner_http_tag: "1.0.0"
 code_runner_consumer_tag: "1.0.0"
 code_runner_sandbox_tag: "1.0.0"
+code_runner_migrations_tag: "1.0.0"
+
 
 code_runner:
   service_name: "code_runner"
@@ -30,6 +32,9 @@ code_runner:
     sandbox: 
       name: "kirill252/code_runner-sandbox"
       tag: "{{ code_runner_sandbox_tag }}"
+    migrations: 
+      name: "kirill252/code_runner-migrations"
+      tag: "{{ code_runner_migrations_tag }}"
 
   files:
     env: "{{ code_runner_path }}/.env"
