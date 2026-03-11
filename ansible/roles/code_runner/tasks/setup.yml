@@ -1,0 +1,32 @@
+- name: Ensure code runner user exists
+  ansible.builtin.user:
+    name: "{{ code_runner.user }}"
+    system: yes
+    shell: /usr/sbin/nologin
+  become: true
+
+- name: Ensure repo directory exists with correct ownership
+  ansible.builtin.file:
+    path: "{{ code_runner.repo_path }}"
+    state: directory
+    owner: "{{ code_runner.user }}"
+    group: "{{ code_runner.user }}"
+    mode: '0755'
+  become: true
+
+- name: Create systemd unit file
+  ansible.builtin.template:
+    src: "{{ code_runner.service_name }}.service.j2"
+    dest: "/etc/systemd/system/{{ code_runner.service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  register: systemd_file
+  notify:
+    - "restart code_runner"
+  
+- name: Force immediate daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: systemd_file.changed

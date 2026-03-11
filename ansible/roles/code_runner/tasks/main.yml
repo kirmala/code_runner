@@ -1,72 +1,19 @@
-- name: Ensure code runner user exists
-  ansible.builtin.user:
-    name: "{{ code_runner.user }}"
-    system: yes
-    shell: /usr/sbin/nologin
-  become: true
+- name: Initial setup
+  ansible.builtin.include_tasks: setup.yml
 
-- name: Ensure repo directory exists with correct ownership
-  ansible.builtin.file:
-    path: "{{ code_runner.repo_path }}"
-    state: directory
-    owner: "{{ code_runner.user }}"
-    group: "{{ code_runner.user }}"
-    mode: '0755'
-  become: true
+- name: Deploy application
+  ansible.builtin.include_tasks: deploy.yml
+  tags: [deploy, update]
 
-- name: Copy .env file to the server
-  ansible.builtin.template:
-    src: ".env.j2"
-    dest: "{{ code_runner.files.env }}"
-    owner: "{{ code_runner.user }}"
-    group: "{{ code_runner.user }}"
-    mode: '0600'
-  become: true
+# - name: Database migrations
+#   ansible.builtin.include_tasks: migrate.yml
+#   tags: [migrate]
 
-- name: Copy compose to the server
-  ansible.builtin.template:
-    src: "compose.yml.j2"
-    dest: "{{ code_runner.files.compose }}"
-    owner: "{{ code_runner.user }}"
-    group: "{{ code_runner.user }}"
-    mode: '0644'
-  become: true
+- name: Manage service state
+  ansible.builtin.include_tasks: manage.yml
+  tags: [manage]
 
-- name: Pre-pull images for the Compose project
-  community.docker.docker_compose_v2_pull:
-    project_src: "{{ code_runner.repo_path }}"
-  become: true
-  notify:
-    - "restart code_runner"
 
-- name: Pull a sandbox image
-  community.docker.docker_image:
-    name: "{{ code_runner.images.sandbox.name }}"
-    tag: "{{ code_runner.images.sandbox.tag }}"
-    source: pull
-  become: true
-  notify:
-    - "restart code_runner"
 
-- name: Create systemd unit file
-  ansible.builtin.template:
-    src: "{{ code_runner.service_name }}.service.j2"
-    dest: "/etc/systemd/system/{{ code_runner.service_name }}.service"
-    owner: root
-    group: root
-    mode: '0644'
-  become: true
-  register: systemd_file
-  notify:
-    - "restart code_runner"
 
-- name: Force immediate daemon-reload
-  ansible.builtin.systemd:
-    daemon_reload: yes
-  when: systemd_file.changed
 
-- name: Ensure the service is started and enabled on boot
-  ansible.builtin.systemd_service:
-    name: "{{ code_runner.service_name }}"
-    state: started
-    enabled: true

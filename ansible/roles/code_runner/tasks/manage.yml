@@ -1,0 +1,6 @@
+- name: Ensure the service state
+  ansible.builtin.systemd_service:
+    name: "{{ code_runner.service_name }}"
+    state: "{{ app_state | default('started') }}"
+    enabled: true
+  tags: [manage]
