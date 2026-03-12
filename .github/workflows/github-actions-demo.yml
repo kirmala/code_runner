@@ -23,7 +23,7 @@ jobs:
         with:
           filters: |
             http_server: ['http_server/**']
-            consumer: ['consumer/**', '!consumer/service/docker/**']
+            consumer: ['consumer/**']
             sandbox: ['consumer/service/docker/**']
             migrations: ['http_server/repository/postgres/**']
 
@@ -151,4 +151,4 @@ jobs:
         echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > ~/secrets/ansible_vault_pass 
 
     - name: Run Ansible Playbook
-      run: ansible-playbook -i inventory.ini site.yml
+      run: ansible-playbook -i ansible/inventory.ini ansible/site.yml
