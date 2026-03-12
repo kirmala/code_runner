@@ -47,8 +47,8 @@ jobs:
       - name: Build and push migrations
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./http_server/repository/postgres/Dockerfile
+          context: ./http_server/repository/postgres
+          file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/code_runner-migrations:latest
 
