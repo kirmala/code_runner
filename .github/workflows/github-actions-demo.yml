@@ -84,16 +84,17 @@ jobs:
         if: always()
         run: make test-down
 
-  # deploy:g
-  #   runs-on: ubuntu-latest
-  #   needs: integration_tests
-  #   if: github.ref == 'refs/heads/main'
-  #   environment: production
-  #   steps:
-  #     - name: Checkout code
-  #       uses: [actions/checkout@v4](https://github.com)
-        
-  #     - name: Deploy
-  #       run: |
-  #         docker compose pull
-  #         docker compose up -d
+  deploy:
+    runs-on: ubuntu-latest
+    needs: integration_tests
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run Ansible Playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: ansible/site.yml
+          inventory: ansible/inventory.ini
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          vault_password: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
