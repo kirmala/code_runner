@@ -1,7 +1,7 @@
 [Unit]
 Description={{ code_runner.description }}
 Requires=docker.service, postgresql.service, redis_cluster.service
-After=docker.service
+After=docker.service, postgresql.service, redis_cluster.service
 StartLimitBurst={{ code_runner.limits.burst }}
 StartLimitIntervalSec={{ code_runner.limits.interval_sec }}
 

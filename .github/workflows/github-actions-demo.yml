@@ -118,7 +118,7 @@ jobs:
         run: make test-down
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: integration_tests
     if: github.ref == 'refs/heads/main' && needs.integration_tests.result == 'success'
     steps:
