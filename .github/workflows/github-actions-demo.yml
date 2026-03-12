@@ -132,13 +132,14 @@ jobs:
     
     - name: Install Ansible Docker dependencies
       run: |
-        pip install docker docker-compose
+        pip install docker
         ansible-galaxy collection install community.docker
 
     - name: Configure SSH
       run: |
         mkdir -p ~/.ssh
-        echo ${{ secrets.SSH_KNOWN_HOSTS }} > ~/.ssh/id_ed25519
+        chmod 700 ~/.ssh
+        echo ${{ secrets.SSH_PRIVATE_KEY }} > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         echo ${{ secrets.SSH_KNOWN_HOSTS }} > ~/.ssh/known_hosts
 
