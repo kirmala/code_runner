@@ -8,8 +8,52 @@ on:
 
 
 jobs:
-  build:
+  changes:
     runs-on: ubuntu-latest
+    outputs:
+      # Expose filter results as job outputs
+      http_server: ${{ steps.filter.outputs.http_server }}
+      consumer: ${{ steps.filter.outputs.consumer }}
+      sandbox: ${{ steps.filter.outputs.sandbox }}
+      migrations: ${{ steps.filter.outputs.migrations }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            http_server: ['http_server/**']
+            consumer: ['consumer/**', '!consumer/service/docker/**']
+            sandbox: ['consumer/service/docker/**']
+            migrations: ['http_server/repository/postgres/**']
+
+  build:
+    needs: changes
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - service: http_server
+            context: .
+            file: ./http_server/Dockerfile
+            tag: code_runner-http_server
+          - service: consumer
+            context: .
+            file: ./consumer/Dockerfile
+            tag: code_runner-consumer
+          - service: sandbox
+            context: .
+            file: ./consumer/service/docker/Dockerfile
+            tag: code_runner-sandbox
+          - service: migrations
+            context: ./http_server/repository/postgres
+            file: ./http_server/repository/postgres/Dockerfile
+            tag: code_runner-migrations
+    
+    # ONLY run this specific matrix job if changes were detected for this service
+    if: needs.changes.outputs[matrix.service] == 'true'
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,37 +64,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push http_server
+      - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./http_server/Dockerfile
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/code_runner-http_server:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.tag }}:latest
+          # Layer caching makes the "push" faster because unchanged layers aren't re-uploaded
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
 
-      - name: Build and push consumer
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./consumer/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/code_runner-consumer:latest
-
-      - name: Build and push sandbox
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./consumer/service/docker/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/code_runner-sandbox:latest
-
-      - name: Build and push migrations
-        uses: docker/build-push-action@v5
-        with:
-          context: ./http_server/repository/postgres
-          file: ./http_server/repository/postgres/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/code_runner-migrations:latest
 
   integration_tests:
     runs-on: ubuntu-latest
