@@ -154,5 +154,5 @@ jobs:
       env:
         ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       run: |
-        ansible-playbook -i inventory.ini site.yml \
+        ansible-playbook -i ansible/inventory.ini ansible/site.yml \
           --vault-password-file=<(printf "%s" "$ANSIBLE_VAULT_PASSWORD")
