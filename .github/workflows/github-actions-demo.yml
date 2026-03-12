@@ -149,9 +149,8 @@ jobs:
         echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > ~/secrets/ansible_vault_pass 
 
     - name: Run ansible playbook
-      env:
-        ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
       run: |
         source ~/runner-venv/bin/activate
-        ansible-playbook -i ansible/inventory.ini ansible/site.yml \
-          --vault-password-file=<(printf "%s" "$ANSIBLE_VAULT_PASSWORD") --become
+        cd ansible
+        ansible-playbook site.yml --become
+
