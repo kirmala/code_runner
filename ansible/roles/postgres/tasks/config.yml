@@ -1,0 +1,19 @@
+- name: Configure Postgres to listen on all interfaces
+  community.postgresql.postgresql_alter_system:
+    param: listen_addresses
+    value: "*"
+  become: true
+  become_user: postgres
+  notify: restart postgresql
+
+- name: Allow Docker network to connect to Postgres
+  community.postgresql.postgresql_pg_hba:
+    dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf"
+    contype: host
+    databases: "{{ postgresql_database }}"
+    users: "{{ postgresql_user }}"
+    address: "{{ postgresql_allowed_docker_network }}"
+    method: "scram-sha-256"
+  become: true
+  become_user: postgres
+  notify: reload postgresql

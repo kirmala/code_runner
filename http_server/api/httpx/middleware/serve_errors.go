@@ -7,6 +7,7 @@ import (
 	"code_processor/http_server/service"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
@@ -42,6 +43,7 @@ func mapError(c *echo.Context, err error) {
 	default:
 		msg := dto.Error{Error: "Internal Server Error"}
 		writeError(c, msg, http.StatusInternalServerError)
+		log.Printf("Internal server error: %v", err)
 	}
 }
 

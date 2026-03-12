@@ -1,9 +1,11 @@
 package service
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 )
 
 type Authenticator interface {
-	Authenticate(token string) (uuid.UUID, error)
+	Authenticate(ctx context.Context, token string) (uuid.UUID, error)
 }

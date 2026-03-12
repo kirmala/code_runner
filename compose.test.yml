@@ -1,3 +1,7 @@
+networks:
+  code_runner_network:
+    external: true
+
 services:
   app_test:
     build:
@@ -8,4 +12,7 @@ services:
     depends_on:
       http_server:
         condition: service_healthy
+    networks:
+      - code_runner_network
+
       

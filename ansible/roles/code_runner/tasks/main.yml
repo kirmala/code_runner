@@ -1,0 +1,19 @@
+- name: Initial setup
+  ansible.builtin.include_tasks: setup.yml
+
+- name: Deploy application
+  ansible.builtin.include_tasks: deploy.yml
+  tags: [deploy, update]
+
+- name: Database migrations
+  ansible.builtin.include_tasks: migrate.yml
+  tags: [migrate]
+
+- name: Manage service state
+  ansible.builtin.include_tasks: manage.yml
+  tags: [manage]
+
+
+
+
+

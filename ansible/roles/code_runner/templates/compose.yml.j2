@@ -1,0 +1,61 @@
+networks:
+  {{ code_runner.network }}:
+    external: true
+
+services:
+  http_server:
+    image: "{{ code_runner.images.http_server.name }}:{{ code_runner.images.http_server.tag }}"
+    ports:
+      - "{{ code_runner.external_port }}:8080"
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      broker: 
+        condition: service_healthy
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+      - REDIS_PASSWORD
+      - REDIS_ADDRESSES
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s 
+      timeout: 10s   
+      retries: 3     
+      start_period: 10s
+    networks:
+      - {{ code_runner.network }}
+  
+  broker:
+    image: "rabbitmq:3-management"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - {{ code_runner.network }}
+
+  consumer:
+    image: "{{ code_runner.images.consumer.name }}:{{ code_runner.images.consumer.tag }}"
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_HOST
+      - POSTGRES_PORT
+    depends_on:
+      broker: 
+        condition: service_healthy
+    networks:
+      - {{ code_runner.network }}

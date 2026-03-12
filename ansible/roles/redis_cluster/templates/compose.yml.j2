@@ -1,0 +1,65 @@
+networks:
+  {{ redis_cluster.network }}:
+    external: true
+
+services:
+  {% for node in redis_cluster.nodes -%}
+  {{ node.name }}:
+    image: {{ redis_cluster.image }}
+    container_name: {{ node.name }}
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - {{ node.vol }}:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - {{ redis_cluster.network }}
+    restart: unless-stopped
+  {% endfor %}
+
+  redis-cluster-init:
+    image: {{ redis_cluster.image }}
+    container_name: redis-cluster-init
+    depends_on:
+    {% for node in redis_cluster.nodes -%}
+    - {{ node.name }}
+    {% endfor -%}
+    entrypoint: >
+      sh -c "
+      sleep 10 &&
+      redis-cli -a $$REDIS_PASSWORD --cluster create \
+      {% for node in redis_cluster.nodes -%}
+      {{ node.name }}:6379 \
+      {% endfor -%}
+      --cluster-replicas 1 \
+      --cluster-yes
+      "
+    environment:
+      - REDIS_PASSWORD
+    networks:
+      - {{ redis_cluster.network }}
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    environment:
+      - REDIS_ADDR=redis://{{ redis_cluster.nodes.0.name }}:6379
+      - REDIS_PASSWORD
+      - REDIS_EXPORTER_IS_CLUSTER=true
+    ports:
+      - "9121:9121"
+    networks:
+      - {{ redis_cluster.network }}
+    restart: unless-stopped
+
+volumes:
+  {% for node in redis_cluster.nodes -%}
+  {{ node.vol }}:
+  {% endfor %}

@@ -1,0 +1,32 @@
+- name: Apply common configuration to all nodes
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Setup PostgreSQL Database
+  hosts: database
+  become: true
+  roles:
+    - postgres
+
+- name: Install Container Engine
+  hosts: 
+    - cache
+    - app
+  roles:
+    - docker
+  become: true
+
+
+- name: Setup Redis Cluster
+  hosts: cache
+  roles:
+    - redis_cluster
+  become: true
+
+- name: Setup Code Runner
+  hosts: app
+  roles:
+    - code_runner
+  become: true

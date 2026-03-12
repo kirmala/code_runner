@@ -1,0 +1,23 @@
+[Unit]
+Description={{ code_runner.description }}
+Requires=docker.service, postgresql.service, redis_cluster.service
+After=docker.service
+StartLimitBurst={{ code_runner.limits.burst }}
+StartLimitIntervalSec={{ code_runner.limits.interval_sec }}
+
+[Service]
+Type=simple
+WorkingDirectory={{ code_runner.repo_path }}
+EnvironmentFile={{ code_runner.files.env }}
+
+ExecStart={{ code_runner.commands.start }}
+ExecStop={{ code_runner.commands.stop }}
+
+StandardOutput=append:/var/log/{{ code_runner.service_name }}/{{ code_runner.service_name }}.log
+StandardError=append:/var/log/{{ code_runner.service_name }}/{{ code_runner.service_name }}.log
+
+Restart=on-failure
+RestartSec={{ code_runner.limits.restart_sec }}
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+
+
+- name: restart redis_cluster
+  ansible.builtin.systemd_service:
+    name: "{{ redis_cluster.service_name }}"
+    state: restarted

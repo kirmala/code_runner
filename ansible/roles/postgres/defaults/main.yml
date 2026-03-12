@@ -1,0 +1,23 @@
+#Installation
+postgresql_python_library: python3-psycopg2
+postgresql_version: 16
+postgresql_packages:
+  - postgresql-{{ postgresql_version }}
+  - "{{ postgresql_python_library }}"
+  - acl
+
+#database set up
+postgresql_user: admin
+postgresql_database: code_runner
+postgresql_user_flags: "NOSUPERUSER"
+postgresql_allowed_docker_network: "172.18.0.0/16"
+
+#backup
+postgresql_backup_dir: "/var/backups/postgres"
+rclone_config_dir: "/var/lib/postgresql/.config/rclone"
+rclone_config_file: "rclone.conf"
+rclone_config_path: "{{ rclone_config_dir }}/{{ rclone_config_file }}"
+postgresql_backup_script_dir: "/usr/local/bin"
+postgresql_backup_script_file: "pg_backup.sh"
+postgresql_backup_script_path: "{{ postgresql_backup_script_dir }}/{{ postgresql_backup_script_file }}"
+postgresql_backup_cron_file: "postgres_backup"

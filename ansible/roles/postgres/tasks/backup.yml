@@ -1,0 +1,45 @@
+- name: Install rclone for backups
+  apt:
+    name: rclone
+    state: present
+
+- name: Ensure rclone config directory exists
+  file:
+    path: "{{ rclone_config_dir }}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+
+- name: Deploy rclone configuration
+  template:
+    src: "{{ rclone_config_file }}.j2"
+    dest: "{{ rclone_config_path }}"
+    owner: postgres
+    group: postgres
+    mode: '0600'
+
+- name: Ensure backup directory exists
+  file:
+    path: "{{ postgresql_backup_dir }}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
+
+- name: Copy backup script to the server
+  template:
+    src: "{{ postgresql_backup_script_file }}.j2"
+    dest: "{{ postgresql_backup_script_path }}"
+    owner: postgres
+    group: postgres
+    mode: '0755'
+
+- name: Schedule the custom backup script in cron.d
+  ansible.builtin.cron:
+    name: "Run custom postgres backup script"
+    cron_file: "{{ postgresql_backup_cron_file}}"
+    user: postgres                
+    minute: "0"
+    hour: "3"
+    job: "{{ postgresql_backup_script_path }}"

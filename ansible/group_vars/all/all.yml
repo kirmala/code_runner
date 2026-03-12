@@ -1,0 +1,20 @@
+common_packages:
+  - curl
+  - git
+  - gnupg
+  - make
+
+
+postgresql_user: admin
+postgresql_database: code_runner
+postgresql_host: host.docker.internal
+postgresql_port: 5432
+
+docker_network_name: code_runner_network
+
+redis_cluster_1_name: redis-node-1
+redis_cluster_2_name: redis-node-2
+redis_cluster_3_name: redis-node-3
+redis_cluster_4_name: redis-node-4
+redis_cluster_5_name: redis-node-5
+redis_cluster_6_name: redis-node-6

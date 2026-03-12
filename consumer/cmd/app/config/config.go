@@ -24,14 +24,8 @@ type Runner struct {
 	ContainerResource ContainerResource `yaml:"container_resource"`
 }
 
-type Postgres struct {
-	Host string `yaml:"host"`
-	Port string `yaml:"port"`
-}
-
 type AppConfig struct {
 	RabbitMQ   `yaml:"rabbit_mq"`
 	Repository `yaml:"repository"`
 	Runner     `yaml:"runner"`
-	Postgres   `yaml:"postgres"`
 }

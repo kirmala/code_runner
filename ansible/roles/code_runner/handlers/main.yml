@@ -1,0 +1,5 @@
+
+- name: restart code_runner
+  ansible.builtin.systemd_service:
+    name: "{{ code_runner.service_name }}"
+    state: restarted

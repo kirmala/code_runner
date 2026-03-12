@@ -1,0 +1,43 @@
+- name: Application Deployment Tasks
+  block:
+  - name: Copy .env file to the server
+    ansible.builtin.template:
+      src: ".env.j2"
+      dest: "{{ code_runner.files.env }}"
+      owner: "{{ code_runner.user }}"
+      group: "{{ code_runner.user }}"
+      mode: '0600'
+    become: true
+
+  - name: Copy compose to the server
+    ansible.builtin.template:
+      src: "compose.yml.j2"
+      dest: "{{ code_runner.files.compose }}"
+      owner: "{{ code_runner.user }}"
+      group: "{{ code_runner.user }}"
+      mode: '0644'
+    become: true
+
+  - name: Pre-pull images for the Compose project
+    community.docker.docker_compose_v2_pull:
+      project_src: "{{ code_runner.repo_path }}"
+    become: true
+    notify:
+      - "restart code_runner"
+
+  - name: Pull a sandbox image
+    community.docker.docker_image:
+      name: "{{ code_runner.images.sandbox.name }}"
+      tag: "{{ code_runner.images.sandbox.tag }}"
+      source: pull
+    become: true
+    notify:
+      - "restart code_runner"
+
+  - name: Pull a migrations image
+    community.docker.docker_image:
+      name: "{{ code_runner.images.migrations.name }}"
+      tag: "{{ code_runner.images.migrations.tag }}"
+      source: pull
+    become: true
+  tags: [update, deploy]

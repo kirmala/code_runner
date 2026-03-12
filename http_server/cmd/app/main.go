@@ -3,6 +3,7 @@ package main
 import (
 	//"fmt"
 	"code_processor/http_server/cmd/app/config"
+	myenv "code_processor/http_server/cmd/app/env"
 	"code_processor/http_server/repository/postgres"
 	rabbitMQ "code_processor/http_server/repository/rabbit_mq"
 	"code_processor/http_server/repository/redis"
@@ -11,8 +12,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
+	"github.com/caarlos0/env"
 	"github.com/labstack/echo/v5"
 	echoSwagger "github.com/swaggo/echo-swagger"
 
@@ -35,21 +36,13 @@ func main() {
 	addr := fmt.Sprintf("%s:%s", cfg.HTTPConfig.Host, cfg.HTTPConfig.Port)
 	rabbitMQAddr := fmt.Sprintf("amqp://guest:guest@%s:%s", cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
 
-	pgPassword := os.Getenv("POSTGRES_PASSWORD")
-	if pgPassword == "" {
-		log.Fatal("POSTGRES_PASSWORD is not set")
-	}
-	pgUser := os.Getenv("POSTGRES_USER")
-	if pgUser == "" {
-		log.Fatal("POSTGRES_USER is not set")
-	}
-	pgDB := os.Getenv("POSTGRES_DB")
-	if pgDB == "" {
-		log.Fatal("POSTGRES_DB is not set")
+	var envCfg myenv.Config
+	err := env.Parse(&envCfg)
+	if err != nil {
+		log.Fatalf("parsing env: %v", err)
 	}
 
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.Postgres.Host, cfg.Postgres.Port, pgUser, pgPassword, pgDB)
-
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", envCfg.PostgresHost, envCfg.PostgresPort, envCfg.PostgresUser, envCfg.PostgresPassword, envCfg.PostgresDB)
 	if err := postgres.RunMigrations(connStr); err != nil {
 		log.Fatalf("running migrations: %v", err)
 	}
@@ -63,16 +56,12 @@ func main() {
 		log.Fatalf("creating user storage: %v", err)
 	}
 
-	rdAddr := fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port)
-	rdPassword := os.Getenv("REDIS_PASSWORD")
-	if rdPassword == "" {
-		log.Fatal("REDIS_PASSWORD is not set")
+	redisCli, err := redis.NewClusterClient(envCfg.RedisAddresses, envCfg.RedisPassword)
+	if err != nil {
+		log.Fatalf("creating redis client: %v", err)
 	}
 
-	sessionRepo, err := redis.NewSessionStorage(rdAddr, rdPassword)
-	if err != nil {
-		log.Fatalf("creating session storage: %v", err)
-	}
+	sessionRepo := redis.NewSessionStorage(redisCli)
 
 	taskSender, err := rabbitMQ.NewRabbitMQSender(rabbitMQAddr, cfg.QueueName)
 	if err != nil {

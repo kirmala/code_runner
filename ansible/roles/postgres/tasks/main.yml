@@ -1,0 +1,11 @@
+- name: Install PostgreSQL packages
+  ansible.builtin.include_tasks: install.yml
+
+- name: Configure PostgreSQL settings
+  ansible.builtin.include_tasks: config.yml
+
+- name: Setup application users and databases
+  ansible.builtin.include_tasks: database.yml
+
+- name: Setup backup and cloud sync logic
+  ansible.builtin.include_tasks: backup.yml

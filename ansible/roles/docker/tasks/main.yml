@@ -1,0 +1,30 @@
+---
+- name: Add Docker GPG key
+  apt_key:
+    url: "{{ docker_gpg_url }}"
+    state: present
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "{{ docker_repo_url }}"
+    state: present
+    filename: docker
+
+- name: Install Docker components
+  apt:
+    name: "{{ docker_packages }}"
+    state: present
+    update_cache: true
+  notify: restart docker
+
+- name: Ensure Docker is started and enabled
+  service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Create the application network
+  community.docker.docker_network:
+    name: "{{ docker_network_name }}"
+    driver: bridge
+    state: present

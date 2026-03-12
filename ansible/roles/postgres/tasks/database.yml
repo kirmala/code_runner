@@ -1,0 +1,14 @@
+- name: Create App Database User
+  community.postgresql.postgresql_user:
+    name: "{{ postgresql_user }}"
+    password: "{{ vault_postgresql_password }}"
+    role_attr_flags: "{{ postgresql_user_flags }}"
+  become: true
+  become_user: postgres
+
+- name: Create App Database
+  community.postgresql.postgresql_db:
+    name: "{{ postgresql_database }}"
+    owner: "{{ postgresql_user }}"
+  become: true
+  become_user: postgres
