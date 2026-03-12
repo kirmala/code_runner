@@ -127,12 +127,13 @@ jobs:
 
     - name: Setup Python and Install dependencies
       run: |
-        python3 -m pip install --upgrade pip
-        pip install ansible
+        python3 -m venv ~/runner-venv
+        source ~/runner-venv/bin/activate
+        pip install --upgrade pip
+        pip install ansible docker
     
     - name: Install Ansible Docker dependencies
       run: |
-        pip install docker
         ansible-galaxy collection install community.docker
 
     - name: Setup SSH
