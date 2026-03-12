@@ -154,4 +154,4 @@ jobs:
       run: |
         source ~/runner-venv/bin/activate
         ansible-playbook -i ansible/inventory.ini ansible/site.yml \
-          --vault-password-file=<(printf "%s" "$ANSIBLE_VAULT_PASSWORD")
+          --vault-password-file=<(printf "%s" "$ANSIBLE_VAULT_PASSWORD") --become
