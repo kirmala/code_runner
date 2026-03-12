@@ -51,29 +51,31 @@ jobs:
             file: ./http_server/repository/postgres/Dockerfile
             tag: code_runner-migrations
     
-    # ONLY run this specific matrix job if changes were detected for this service
-    if: needs.changes.outputs[matrix.service] == 'true'
-
     steps:
       - name: Checkout code
+        # We only need to checkout if this specific service changed
+        if: needs.changes.outputs[matrix.service] == 'true'
         uses: actions/checkout@v4
 
       - name: Login to Docker Hub
+        if: needs.changes.outputs[matrix.service] == 'true'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
+        # Move the IF check here!
+        if: needs.changes.outputs[matrix.service] == 'true'
         uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.file }}
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.tag }}:latest
-          # Layer caching makes the "push" faster because unchanged layers aren't re-uploaded
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
 
 
   integration_tests:
