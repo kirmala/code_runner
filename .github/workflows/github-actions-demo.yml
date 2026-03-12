@@ -113,12 +113,30 @@ jobs:
     needs: integration_tests
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Run Ansible Playbook
-        uses: dawidd6/action-ansible-playbook@v2
-        with:
-          playbook: ansible/site.yml
-          inventory: ansible/inventory.ini
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          vault_password: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python and Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install ansible
+    
+    - name: Install Ansible Docker dependencies
+      run: |
+        pip install docker docker-compose
+        ansible-galaxy collection install community.docker
+
+    - name: Configure SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo ${{ secrets.SSH_KNOWN_HOSTS }} > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        echo ${{ secrets.SSH_KNOWN_HOSTS }} > ~/.ssh/known_hosts
+
+    - name: Add vault
+      run: |
+        mkdir -p ~/secrets
+        echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > ~/secrets/ansible_vault_pass 
+
+    - name: Run Ansible Playbook
+      run: ansible-playbook -i inventory.ini site.yml
