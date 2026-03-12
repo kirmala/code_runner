@@ -14,10 +14,10 @@ cluster-build:
 	docker compose -f $(CLUSTER) build
 
 cluster-up: network-create
-	docker compose -f $(CLUSTER) up -d
+	docker compose -f $(CLUSTER) --env-file ./.env up -d
 
 cluster-down:
-	docker compose -f $(CLUSTER) down
+	docker compose -f $(CLUSTER) --env-file ./.env down -v
 
 
 dev-build:
@@ -47,7 +47,7 @@ test-up: runner-build network-create cluster-up
 test-logs:
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) logs -f
 
-test-down:
+test-down: cluster-down
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) down -v
 
 
