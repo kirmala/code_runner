@@ -46,7 +46,7 @@ services:
       context: .
       dockerfile: consumer/Dockerfile
     image:
-      kirill252/code_runner-http_server:latest
+      kirill252/code_runner-consumer:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:

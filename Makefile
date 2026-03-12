@@ -12,10 +12,10 @@ network-create:
 
 
 cluster-up: network-create
-	docker compose -f $(CLUSTER) up -d
+	docker compose -f $(CLUSTER) --env-file ./.env up -d
 
 cluster-down:
-	docker compose -f $(CLUSTER) down
+	docker compose -f $(CLUSTER) --env-file ./.env down -v
 
 
 dev-build:
@@ -40,7 +40,7 @@ runner-build:
 	docker build -t runner ./consumer/service/docker
 
 test-build:
-	docker build -t app_test ./tests/Dockerfile
+	docker build -t app_test ./tests
 
 test-up: network-create cluster-up test-build
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) up --abort-on-container-exit --exit-code-from app_test --no-build
