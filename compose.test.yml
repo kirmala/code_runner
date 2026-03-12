@@ -4,9 +4,7 @@ networks:
 
 services:
   app_test:
-    build:
-      context: tests
-      dockerfile: Dockerfile
+    image: app_test
     environment:
       - BASE_URL
     depends_on:
