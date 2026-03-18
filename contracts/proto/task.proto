@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "github.com/kirmala/code_runner/contracts/gen/pb";
+
+enum TaskTranslator { 
+    TASK_TRANSLATOR_UNKNOWN = 0; 
+    TASK_TRANSLATOR_PYTHON = 1; 
+    TASK_TRANSLATOR_CLANG = 2; 
+    TASK_TRANSLATOR_GPP = 3; 
+}
+
+enum TaskStatus { 
+    TASK_STATUS_UNKNOWN = 0; 
+    TASK_STATUS_IN_PROGRESS = 1; 
+    TASK_STATUS_COMPLETED = 2; 
+    TASK_STATUS_FAILED = 3; 
+}
+
+message TaskExecutionMessage { 
+    string task_id = 1; 
+    string code = 2; 
+    TaskTranslator translator = 3; 
+}
