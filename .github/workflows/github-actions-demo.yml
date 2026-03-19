@@ -47,8 +47,8 @@ jobs:
             file: ./consumer/internal/service/docker/Dockerfile
             tag: code_runner-sandbox
           - service: migrations
-            context: ./http_server/repository/postgres
-            file: ./http_server/repository/postgres/Dockerfile
+            context: ./http_server/internal/repository/postgres
+            file: ./http_server/internal/repository/postgres/Dockerfile
             tag: code_runner-migrations
     
     steps:
