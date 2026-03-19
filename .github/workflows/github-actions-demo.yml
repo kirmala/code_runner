@@ -35,16 +35,16 @@ jobs:
       matrix:
         include:
           - service: http_server
-            context: .
-            file: ./http_server/Dockerfile
+            context: http_server
+            file: http_server/Dockerfile
             tag: code_runner-http_server
           - service: consumer
-            context: .
-            file: ./consumer/Dockerfile
+            context: consumer
+            file: consumer/Dockerfile
             tag: code_runner-consumer
           - service: sandbox
             context: .
-            file: ./consumer/service/docker/Dockerfile
+            file: ./consumer/internal/service/docker/Dockerfile
             tag: code_runner-sandbox
           - service: migrations
             context: ./http_server/repository/postgres

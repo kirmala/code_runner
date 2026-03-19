@@ -1,15 +1,14 @@
 package repository
 
 import (
-	"code_processor/http_server/models"
-
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
 )
 
 type User interface {
-	GetByLogin(login string) (*models.User, error)
-	GetById(id uuid.UUID) (*models.User, error)
-	Put(models.User) error
-	Post(models.User) error
+	GetByLogin(login string) (*domain.User, error)
+	GetById(id uuid.UUID) (*domain.User, error)
+	Put(domain.User) error
+	Post(domain.User) error
 	Delete(key uuid.UUID) error
 }

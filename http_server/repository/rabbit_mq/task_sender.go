@@ -1,10 +1,10 @@
 package rabbitMQ
 
 import (
-	"code_processor/http_server/models"
 	"encoding/json"
 	"fmt"
 
+	"github.com/kirmala/code_runner/http_server/domain"
 	"github.com/streadway/amqp"
 )
 
@@ -44,7 +44,7 @@ func NewRabbitMQSender(ampqURL, queueName string) (*RabbitMQSender, error) {
 	}, nil
 }
 
-func (r *RabbitMQSender) Send(task models.Task) error {
+func (r *RabbitMQSender) Send(task domain.Task) error {
 	body, err := json.Marshal(task)
 	if err != nil {
 		return fmt.Errorf("task mashal: %w", err)

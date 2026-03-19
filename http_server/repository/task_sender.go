@@ -1,7 +1,7 @@
 package repository
 
-import "code_processor/http_server/models"
+import "github.com/kirmala/code_runner/http_server/domain"
 
 type TaskSender interface {
-	Send(models.Task) error
+	Send(domain.Task) error
 }

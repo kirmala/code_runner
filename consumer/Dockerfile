@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build consumer/cmd/app/main.go
+RUN go build cmd/app/main.go
 
 FROM alpine AS runner
 
@@ -16,9 +16,9 @@ WORKDIR app
 
 COPY --from=build /build/main ./main
 
-COPY --from=build /build/consumer/cmd/app/config/config.yaml ./config.yaml
+COPY --from=build /build/cmd/app/config/config.yaml ./config.yaml
 
-COPY --from=build /build/consumer/service/docker/Dockerfile ./Dockerfile
+COPY --from=build /build/internal/service/docker/Dockerfile ./Dockerfile
 
 
 CMD ["/app/main", "--config=/app/config.yaml"]

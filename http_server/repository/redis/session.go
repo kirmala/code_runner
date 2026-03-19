@@ -1,13 +1,13 @@
 package redis
 
 import (
-	"code_processor/http_server/models"
-	"code_processor/http_server/repository"
 	"context"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
+	"github.com/kirmala/code_runner/http_server/repository"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -19,7 +19,7 @@ func NewSessionStorage(cli *redis.ClusterClient) (*SessionStorage) {
 	return &SessionStorage{cli: cli}
 }
 
-func (rs *SessionStorage) Set(ctx context.Context, session models.Session) error {
+func (rs *SessionStorage) Set(ctx context.Context, session domain.Session) error {
 	key := fmt.Sprintf("session:%s", session.SessionId.String())
 	err := rs.cli.Set(ctx, key, session.UserId.String(), 10*time.Minute).Err()
 	if err != nil {
@@ -28,7 +28,7 @@ func (rs *SessionStorage) Set(ctx context.Context, session models.Session) error
 	return nil
 }
 
-func (rs *SessionStorage) Get(ctx context.Context, key uuid.UUID) (*models.Session, error) {
+func (rs *SessionStorage) Get(ctx context.Context, key uuid.UUID) (*domain.Session, error) {
 	fullkey := fmt.Sprintf("session:%s", key.String())
 	userIdstr, err := rs.cli.Get(ctx, fullkey).Result()
 
@@ -44,7 +44,7 @@ func (rs *SessionStorage) Get(ctx context.Context, key uuid.UUID) (*models.Sessi
 		return nil, fmt.Errorf("parsing user id: %w", err)
 	}
 
-	return &models.Session{SessionId: key, UserId: userId}, nil
+	return &domain.Session{SessionId: key, UserId: userId}, nil
 }
 
 func (rs *SessionStorage) Delete(ctx context.Context, key uuid.UUID) error {

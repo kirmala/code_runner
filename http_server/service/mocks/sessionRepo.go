@@ -1,23 +1,22 @@
 package mocks
 
 import (
-	"code_processor/http_server/models"
-	"code_processor/http_server/repository"
-
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
+	"github.com/kirmala/code_runner/http_server/repository"
 )
 
 type SessionRepo struct {
-	Sessions map[string]models.Session
+	Sessions map[string]domain.Session
 }
 
 func NewSessionRepo() *SessionRepo {
 	return &SessionRepo{
-		Sessions: make(map[string]models.Session),
+		Sessions: make(map[string]domain.Session),
 	}
 }
 
-func (sr *SessionRepo) Get(key uuid.UUID) (*models.Session, error) {
+func (sr *SessionRepo) Get(key uuid.UUID) (*domain.Session, error) {
 	session, exists := sr.Sessions[key.String()]
 	if !exists {
 		return nil, repository.ErrNotFound{}
@@ -25,7 +24,7 @@ func (sr *SessionRepo) Get(key uuid.UUID) (*models.Session, error) {
 	return &session, nil
 }
 
-func (sr *SessionRepo) Set(session models.Session) error {
+func (sr *SessionRepo) Set(session domain.Session) error {
 	sr.Sessions[session.SessionId.String()] = session
 	return nil
 }

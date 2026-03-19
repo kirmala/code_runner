@@ -5,8 +5,8 @@ networks:
 services:
   http_server:
     build:
-      context: .
-      dockerfile: http_server/Dockerfile
+      context: http_server
+      dockerfile: Dockerfile
     image: kirill252/code_runner-http_server:latest
 
     environment:
@@ -43,8 +43,8 @@ services:
 
   consumer:
     build:
-      context: .
-      dockerfile: consumer/Dockerfile
+      context: consumer
+      dockerfile: Dockerfile
     image:
       kirill252/code_runner-consumer:latest
     volumes:

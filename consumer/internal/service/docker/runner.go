@@ -1,7 +1,6 @@
 package docker
 
 import (
-	"code_processor/http_server/models"
 	"context"
 	"fmt"
 	"io"
@@ -11,18 +10,17 @@ import (
 	"strings"
 	"unicode"
 
-	"code_processor/consumer/cmd/app/config"
-
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
+	"github.com/kirmala/code_runner/consumer/cmd/app/config"
+	"github.com/kirmala/code_runner/consumer/internal/domain"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/client"
 )
 
 type Runner struct {
 	cli       *client.Client
 	imageName string
-	resource config.ContainerResource
+	resource  config.ContainerResource
 }
-
 
 func cleanContainerOutput(output string) string {
 	ansiEsc := regexp.MustCompile(`\x1B[@-_][0-?]*[ -/]*[@-~]`)
@@ -49,7 +47,7 @@ func cleanContainerOutput(output string) string {
 }
 
 func NewRunner(imageName string, clientVersion string, resource config.ContainerResource) (*Runner, error) {
-	cli, err := client.NewClientWithOpts(client.WithVersion(clientVersion))
+	cli, err := client.New(client.WithAPIVersion(clientVersion))
 	if err != nil {
 		return nil, fmt.Errorf("creating client: %w", err)
 	}
@@ -62,77 +60,77 @@ func NewRunner(imageName string, clientVersion string, resource config.Container
 	return &Runner{cli: cli, resource: resource, imageName: imageName}, nil
 }
 
-func (r *Runner) Run(ctx context.Context, task models.Task) (models.Task, error) {
+func (r *Runner) Run(ctx context.Context, task domain.Task) (domain.Task, error) {
 	var cmd []string
 	switch task.Translator {
-	case models.PythonTranslator:
+	case domain.PythonTranslator:
 		cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.py && python3 /tmp/code.py", task.Code)}
-	case models.GppTranslator:
+	case domain.GppTranslator:
 		cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && g++ /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
-	case models.ClangTranslator:
+	case domain.ClangTranslator:
 		cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && clang /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
 	default:
-		return models.Task{}, models.ErrUnknownTranslator
+		return domain.Task{}, domain.ErrUnknownTranslator
 	}
 
 	resp, err := r.cli.ContainerCreate(
 		ctx,
-		&container.Config{
-			Image: r.imageName,
-			Cmd:   cmd,
-		},
-		&container.HostConfig{
-			Resources: container.Resources{
-				Memory:    r.resource.Memory,
-				NanoCPUs:  r.resource.NanoCPUs,
-				PidsLimit: r.resource.PidsLimit,
+		client.ContainerCreateOptions{
+			Config: &container.Config{
+				Image: r.imageName,
+				Cmd:   cmd,
 			},
-			NetworkMode:    "none",
-			ReadonlyRootfs: false,
+			HostConfig: &container.HostConfig{
+				Resources: container.Resources{
+					Memory:    r.resource.Memory,
+					NanoCPUs:  r.resource.NanoCPUs,
+					PidsLimit: r.resource.PidsLimit,
+				},
+				NetworkMode:    "none",
+				ReadonlyRootfs: false,
+			},
 		},
-		nil,
-		nil,
-		"",
 	)
+
 	if err != nil {
-		return models.Task{}, fmt.Errorf("creating container: %w", err)
+		return domain.Task{}, fmt.Errorf("creating container: %w", err)
 	}
 
 	defer func() {
-		_ = r.cli.ContainerRemove(ctx, resp.ID, container.RemoveOptions{})
+		_, _ = r.cli.ContainerRemove(ctx, resp.ID, client.ContainerRemoveOptions{})
 	}()
 
 	ctx, cancel := context.WithDeadline(ctx, time.Now().Add(10*time.Second))
 
 	defer cancel()
 
-	if err := r.cli.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
-		return models.Task{}, fmt.Errorf("starting container: %w", err)
+	if _, err := r.cli.ContainerStart(ctx, resp.ID, client.ContainerStartOptions{}); err != nil {
+		return domain.Task{}, fmt.Errorf("starting container: %w", err)
 	}
 
-	statusCh, errCh := r.cli.ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
+	res := r.cli.ContainerWait(ctx, resp.ID, client.ContainerWaitOptions{Condition: container.WaitConditionNotRunning})
 	select {
-	case err := <-errCh:
+	case err := <-res.Error:
 		if err != nil {
-			return models.Task{}, fmt.Errorf("running container: %w", err)
+			return domain.Task{}, fmt.Errorf("running container: %w", err)
 		}
-	case <-statusCh:
+	case <-res.Result:
 	}
 
-	out, err := r.cli.ContainerLogs(ctx, resp.ID, container.LogsOptions{ShowStdout: true, ShowStderr: true})
+	out, err := r.cli.ContainerLogs(ctx, resp.ID, client.ContainerLogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
-		return models.Task{}, fmt.Errorf("collecting container logs: %w", err)
+		return domain.Task{}, fmt.Errorf("collecting container logs: %w", err)
 	}
 	defer func() { _ = out.Close() }()
 
 	output, err := io.ReadAll(out)
 	if err != nil {
-		return models.Task{}, fmt.Errorf("reading container logs: %w", err)
+		return domain.Task{}, fmt.Errorf("reading container logs: %w", err)
 	}
 	cleanOutput := cleanContainerOutput(string(output))
 
 	task.Result = cleanOutput
-	task.Status = models.StatusCompleted
+	task.Status = domain.StatusCompleted
 
 	return task, nil
 }

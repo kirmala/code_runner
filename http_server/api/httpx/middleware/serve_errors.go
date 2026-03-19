@@ -1,15 +1,15 @@
 package middleware
 
 import (
-	"code_processor/http_server/api"
-	"code_processor/http_server/api/dto"
-	"code_processor/http_server/repository"
-	"code_processor/http_server/service"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/kirmala/code_runner/http_server/api"
+	"github.com/kirmala/code_runner/http_server/api/dto"
+	"github.com/kirmala/code_runner/http_server/repository"
+	"github.com/kirmala/code_runner/http_server/service"
 	"github.com/labstack/echo/v5"
 )
 

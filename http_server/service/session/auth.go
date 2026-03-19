@@ -1,11 +1,11 @@
 package session
 
 import (
-	"code_processor/http_server/repository"
-	"code_processor/http_server/service"
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/repository"
+	"github.com/kirmala/code_runner/http_server/service"
 )
 
 type Authenticator struct {

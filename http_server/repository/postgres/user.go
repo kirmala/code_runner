@@ -1,13 +1,13 @@
 package postgres
 
 import (
-	"code_processor/http_server/models"
-	"code_processor/http_server/repository"
 	"database/sql"
 	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
+	"github.com/kirmala/code_runner/http_server/repository"
 	"github.com/lib/pq"
 )
 
@@ -29,8 +29,8 @@ func NewUserStorage(connStr string) (*UserStorage, error) {
 	return &UserStorage{db: db}, nil
 }
 
-func (us *UserStorage) GetByLogin(login string) (*models.User, error) {
-	var user models.User
+func (us *UserStorage) GetByLogin(login string) (*domain.User, error) {
+	var user domain.User
 
 	err := us.db.QueryRow(`
 		SELECT user_id, user_login, user_password
@@ -50,8 +50,8 @@ func (us *UserStorage) GetByLogin(login string) (*models.User, error) {
 	return &user, nil
 }
 
-func (us *UserStorage) GetById(key uuid.UUID) (*models.User, error) {
-	var user models.User
+func (us *UserStorage) GetById(key uuid.UUID) (*domain.User, error) {
+	var user domain.User
 
 	err := us.db.QueryRow(`
 		SELECT user_id, user_login, user_password
@@ -71,7 +71,7 @@ func (us *UserStorage) GetById(key uuid.UUID) (*models.User, error) {
 	return &user, nil
 }
 
-func (us *UserStorage) Put(user models.User) error {
+func (us *UserStorage) Put(user domain.User) error {
 	result, err := us.db.Exec(`
 		UPDATE users
 		SET user_login = $1,
@@ -94,7 +94,7 @@ func (us *UserStorage) Put(user models.User) error {
 	return nil
 }
 
-func (us *UserStorage) Post(user models.User) error {
+func (us *UserStorage) Post(user domain.User) error {
 	_, err := us.db.Exec(`
 		INSERT INTO users (user_id, user_login, user_password)
 		VALUES ($1, $2, $3)`,

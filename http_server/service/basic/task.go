@@ -1,11 +1,11 @@
 package basic
 
 import (
-	"code_processor/http_server/models"
-	"code_processor/http_server/repository"
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
+	"github.com/kirmala/code_runner/http_server/repository"
 	//"time"
 )
 
@@ -14,7 +14,7 @@ type Task struct {
 	taskSender  repository.TaskSender
 }
 
-// func edit(service Task, newTask *models.Task) {
+// func edit(service Task, newTask *domain.Task) {
 // 	time.Sleep(8 * time.Second)
 // 	newTask.Status = "ready"
 // 	newTask.Result = "something happend"
@@ -44,11 +44,11 @@ func (rs *Task) GetResult(key uuid.UUID) (*string, error) {
 	return &task.Result, err
 }
 
-func (rs *Task) Put(task models.Task) error {
+func (rs *Task) Put(task domain.Task) error {
 	return rs.taskRepo.Put(task)
 }
 
-func (rs *Task) Post(task models.Task) error {
+func (rs *Task) Post(task domain.Task) error {
 	err := rs.taskSender.Send(task)
 	if err != nil {
 		return fmt.Errorf("sending task: %w", err)

@@ -1,14 +1,14 @@
 package httpx
 
 import (
-	"code_processor/http_server/api"
-	"code_processor/http_server/api/dto"
-	"code_processor/http_server/models"
-	"code_processor/http_server/service"
 	"encoding/json"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/api"
+	"github.com/kirmala/code_runner/http_server/api/dto"
+	"github.com/kirmala/code_runner/http_server/domain"
+	"github.com/kirmala/code_runner/http_server/service"
 	"github.com/labstack/echo/v5"
 )
 
@@ -51,7 +51,7 @@ func (s *User) postRegisterHandler(c *echo.Context) error {
 		return err
 	}
 
-	newUser := models.User{Id: uuid.New(), Login: req.Login, Password: req.Password}
+	newUser := domain.User{Id: uuid.New(), Login: req.Login, Password: req.Password}
 
 	err = s.service.Register(newUser)
 	if err != nil {
