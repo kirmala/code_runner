@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"code_processor/http_server/service"
 	"net/http"
 	"strings"
 
+	"github.com/kirmala/code_runner/http_server/service"
 	"github.com/labstack/echo/v5"
 )
 

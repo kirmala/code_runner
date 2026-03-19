@@ -1,23 +1,22 @@
 package ram_storage
 
 import (
-	"code_processor/http_server/models"
-	"code_processor/http_server/repository"
-
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
+	"github.com/kirmala/code_runner/http_server/repository"
 )
 
 type Session struct {
-	data map[uuid.UUID]models.Session
+	data map[uuid.UUID]domain.Session
 }
 
 func NewSession() *Session {
 	return &Session{
-		data: make(map[uuid.UUID]models.Session),
+		data: make(map[uuid.UUID]domain.Session),
 	}
 }
 
-func (rs Session) Get(key uuid.UUID) (*models.Session, error) {
+func (rs Session) Get(key uuid.UUID) (*domain.Session, error) {
 	value, exists := rs.data[key]
 	if !exists {
 		return nil, repository.ErrNotFound{Item: "session"}
@@ -25,7 +24,7 @@ func (rs Session) Get(key uuid.UUID) (*models.Session, error) {
 	return &value, nil
 }
 
-func (rs *Session) Set(session models.Session) error {
+func (rs *Session) Set(session domain.Session) error {
 	rs.data[session.SessionId] = session
 	return nil
 }

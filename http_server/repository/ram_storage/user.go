@@ -1,23 +1,23 @@
 package ram_storage
 
 // import (
-// 	"code_processor/http_server/models"
-// 	"code_processor/http_server/repository"
+// 	"http_server/domain"
+// 	"http_server/repository"
 
 // 	"github.com/google/uuid"
 // )
 
 // type User struct {
-// 	data map[uuid.UUID]models.User
+// 	data map[uuid.UUID]domain.User
 // }
 
 // func NewUser() *User {
 // 	return &User{
-// 		data: make(map[uuid.UUID]models.User),
+// 		data: make(map[uuid.UUID]domain.User),
 // 	}
 // }
 
-// func (u *User) GetByLogin(login string) (*models.User, error) {
+// func (u *User) GetByLogin(login string) (*domain.User, error) {
 // 	value, exists := rs.data[login]
 // 	if !exists {
 // 		return nil, repository.ErrNotFound{Item: "user"}
@@ -32,9 +32,8 @@ package ram_storage
 // 	}
 // 	return &value.Result, nil
 // }
-	
 
-// func (rs *User) Get(key uuid.UUID) (*models.User, error) {
+// func (rs *User) Get(key uuid.UUID) (*domain.User, error) {
 // 	value, exists := rs.data[key]
 // 	if !exists {
 // 		return nil, repository.ErrNotFound{Item: "user"}
@@ -42,12 +41,12 @@ package ram_storage
 // 	return &value, nil
 // }
 
-// func (rs *User) Put(user models.User) error {
+// func (rs *User) Put(user domain.User) error {
 // 	rs.data[user.Id] = user
 // 	return nil
 // }
 
-// func (rs *User) Post(user models.User) error {
+// func (rs *User) Post(user domain.User) error {
 // 	if _, exists := rs.data[user.Login]; exists {
 // 		return repository.ErrAlreadyExists
 // 	}

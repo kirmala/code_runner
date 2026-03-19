@@ -45,6 +45,9 @@ test-build:
 test-up: network-create cluster-up test-build
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) up --abort-on-container-exit --exit-code-from app_test --no-build
 
+local-test-up: network-create cluster-up test-build base-build
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) up --abort-on-container-exit --exit-code-from app_test --no-build
+
 test-logs:
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_TEST) logs -f
 

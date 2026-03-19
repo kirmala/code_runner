@@ -1,13 +1,13 @@
 package basic
 
 import (
-	"code_processor/http_server/models"
-	"code_processor/http_server/repository"
-	"code_processor/http_server/service"
 	"context"
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
+	"github.com/kirmala/code_runner/http_server/repository"
+	"github.com/kirmala/code_runner/http_server/service"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,7 +23,7 @@ func NewUser(userRepo repository.User, sessionRepo repository.Session) *User {
 	}
 }
 
-func (rs *User) Get(key uuid.UUID) (*models.User, error) {
+func (rs *User) Get(key uuid.UUID) (*domain.User, error) {
 	user, err := rs.userRepo.GetById(key)
 	if err != nil {
 		return nil, err
@@ -31,9 +31,9 @@ func (rs *User) Get(key uuid.UUID) (*models.User, error) {
 	return user, err
 }
 
-func (rs *User) Register(user models.User) error {
+func (rs *User) Register(user domain.User) error {
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	return rs.userRepo.Post(models.User{Id: user.Id, Login: user.Login, Password: string(hashedPassword)})
+	return rs.userRepo.Post(domain.User{Id: user.Id, Login: user.Login, Password: string(hashedPassword)})
 }
 
 func (rs *User) Login(ctx context.Context, login string, password string) (uuid.UUID, error) {
@@ -51,7 +51,7 @@ func (rs *User) Login(ctx context.Context, login string, password string) (uuid.
 		return uuid.Nil, service.ErrUnauthenticated{Msg: "password is incorrect"}
 	}
 	sessionId := uuid.New()
-	err = rs.sessionRepo.Set(ctx, models.Session{UserId: user.Id, SessionId: sessionId})
+	err = rs.sessionRepo.Set(ctx, domain.Session{UserId: user.Id, SessionId: sessionId})
 	if err != nil {
 		return uuid.Nil, err
 	}

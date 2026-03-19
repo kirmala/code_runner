@@ -1,14 +1,14 @@
 package repository
 
 import (
-	"code_processor/http_server/models"
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
 )
 
 type Session interface {
-	Get(ctx context.Context, key uuid.UUID) (*models.Session, error)
-	Set(ctx context.Context, session models.Session) error
+	Get(ctx context.Context, key uuid.UUID) (*domain.Session, error)
+	Set(ctx context.Context, session domain.Session) error
 	Delete(ctx context.Context, key uuid.UUID) error
 }

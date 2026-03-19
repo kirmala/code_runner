@@ -1,15 +1,14 @@
 package service
 
 import (
-	"code_processor/http_server/models"
-
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
 )
 
 type Task interface {
 	GetStatus(key uuid.UUID) (string, error)
 	GetResult(key uuid.UUID) (*string, error)
-	Put(models.Task) error
-	Post(models.Task) error
+	Put(domain.Task) error
+	Post(domain.Task) error
 	Delete(key uuid.UUID) error
 }

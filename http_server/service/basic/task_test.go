@@ -1,9 +1,9 @@
 package basic
 
 // import (
-// 	"code_processor/http_server/models"
-// 	"code_processor/http_server/repository"
-// 	"code_processor/http_server/service/mocks"
+// 	"http_server/domain"
+// 	"http_server/repository"
+// 	"http_server/service/mocks"
 // 	"errors"
 // 	"testing"
 // )
@@ -39,7 +39,7 @@ package basic
 // 			task := NewTask(
 // 				nil,
 // 				&mocks.SessionRepo{
-// 					Sessions: map[string]models.Session{
+// 					Sessions: map[string]domain.Session{
 // 						"valid_key": {
 // 							UserId:    "user123",
 // 							SessionId: "valid_key",

@@ -1,16 +1,16 @@
 package httpx
 
 import (
-	"code_processor/http_server/api"
-	"code_processor/http_server/api/dto"
-	"code_processor/http_server/api/httpx/middleware"
-	"code_processor/http_server/models"
-	"code_processor/http_server/service"
 	"net/http"
 
 	"encoding/json"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/api"
+	"github.com/kirmala/code_runner/http_server/api/dto"
+	"github.com/kirmala/code_runner/http_server/api/httpx/middleware"
+	"github.com/kirmala/code_runner/http_server/domain"
+	"github.com/kirmala/code_runner/http_server/service"
 	"github.com/labstack/echo/v5"
 )
 
@@ -121,13 +121,13 @@ func (s *Task) postHandler(c *echo.Context) error {
 		return err
 	}
 
-	taskTranslator, err := models.ParseTranslator(req.TaskTranslator)
+	taskTranslator, err := domain.ParseTranslator(req.TaskTranslator)
 
 	if err != nil {
 		return api.ErrBadRequest{Field: "task_translator", Err: err.Error()}
 	}
 
-	newTask := models.Task{Id: uuid.New(), Code: req.TaskCode, Translator: taskTranslator, Status: models.StatusInProgress, Result: "progres..."}
+	newTask := domain.Task{Id: uuid.New(), Code: req.TaskCode, Translator: taskTranslator, Status: domain.StatusInProgress, Result: "progres..."}
 
 	err = s.service.Post(newTask)
 	if err != nil {

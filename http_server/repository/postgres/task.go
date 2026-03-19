@@ -1,12 +1,12 @@
 package postgres
 
 import (
-	"code_processor/http_server/models"
-	"code_processor/http_server/repository"
 	"database/sql"
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/domain"
+	"github.com/kirmala/code_runner/http_server/repository"
 )
 
 type TaskStorage struct {
@@ -27,8 +27,8 @@ func NewTaskStorage(connStr string) (*TaskStorage, error) {
 	return &TaskStorage{db: db}, nil
 }
 
-func (ps *TaskStorage) Get(key uuid.UUID) (*models.Task, error) {
-	var task models.Task
+func (ps *TaskStorage) Get(key uuid.UUID) (*domain.Task, error) {
+	var task domain.Task
 
 	err := ps.db.QueryRow(`
 		SELECT task_id, task_code, task_translator, task_status, task_result 
@@ -50,7 +50,7 @@ func (ps *TaskStorage) Get(key uuid.UUID) (*models.Task, error) {
 	return &task, nil
 }
 
-func (ps *TaskStorage) Put(task models.Task) error {
+func (ps *TaskStorage) Put(task domain.Task) error {
 	result, err := ps.db.Exec(`
 		UPDATE tasks 
 		SET task_code = $1, 
@@ -77,7 +77,7 @@ func (ps *TaskStorage) Put(task models.Task) error {
 	return nil
 }
 
-func (ps *TaskStorage) Post(task models.Task) error {
+func (ps *TaskStorage) Post(task domain.Task) error {
 	_, err := ps.db.Exec(`
 		INSERT INTO tasks (task_id, task_code, task_translator, task_result, task_status)
 		VALUES ($1, $2, $3, $4, $5)`,

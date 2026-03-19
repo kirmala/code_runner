@@ -1,13 +1,13 @@
 package rabbitmq
 
 import (
-	"code_processor/consumer/service"
-	"code_processor/http_server/models"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 
+	"github.com/kirmala/code_runner/consumer/internal/domain"
+	"github.com/kirmala/code_runner/consumer/internal/service"
 	"github.com/streadway/amqp"
 )
 
@@ -73,13 +73,13 @@ func (r *TaskReceiver) Receive() {
 
 	go func() {
 		for d := range msgs {
-			var task models.Task
+			var task domain.Task
 			errorTask := task
 			err := json.Unmarshal([]byte(d.Body), &task)
 			if err != nil {
 				log.Printf("Error decoding JSON: %s", err)
 				errorTask.Result = err.Error()
-				errorTask.Status = models.StatusFailed
+				errorTask.Status = domain.StatusFailed
 
 				err = r.taskService.Put(context.Background(), errorTask)
 				if err != nil {
@@ -91,7 +91,7 @@ func (r *TaskReceiver) Receive() {
 			if err != nil {
 				log.Printf("processing task: %s", err)
 				errorTask.Result = err.Error()
-				errorTask.Status = models.StatusFailed
+				errorTask.Status = domain.StatusFailed
 				err = r.taskService.Put(context.Background(), errorTask)
 				if err != nil {
 					log.Printf("adding processed task to database: %s", err)

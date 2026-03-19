@@ -1,17 +1,16 @@
 package main
 
 import (
-	"code_processor/consumer/api/rabbitmq"
-	"code_processor/consumer/cmd/app/config"
-	"code_processor/consumer/service/basic"
-	"code_processor/consumer/service/docker"
-
-	//"code_processor/consumer/repository/by_http"
-	"code_processor/consumer/repository/postgres"
 	"os"
 
 	"fmt"
 	"log"
+
+	"github.com/kirmala/code_runner/consumer/cmd/app/config"
+	"github.com/kirmala/code_runner/consumer/internal/api/rabbitmq"
+	"github.com/kirmala/code_runner/consumer/internal/repository/postgres"
+	"github.com/kirmala/code_runner/consumer/internal/service/basic"
+	"github.com/kirmala/code_runner/consumer/internal/service/docker"
 )
 
 // http://localhost:15672/api/healthchecks/node

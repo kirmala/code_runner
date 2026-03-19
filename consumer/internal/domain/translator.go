@@ -1,4 +1,4 @@
-package models
+package domain
 
 import "errors"
 
@@ -34,14 +34,5 @@ func ParseTranslator(translator string) (Translator, error) {
 }
 
 func (t Translator) String() string {
-	switch t {
-	case PythonTranslator:
-		return "python"
-	case ClangTranslator:
-		return "clang"
-	case GppTranslator:
-		return "g++"
-	default:
-		return "unknown"
-	}
+	return TranslatorName[t]
 }

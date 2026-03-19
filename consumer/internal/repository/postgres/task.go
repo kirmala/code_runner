@@ -1,12 +1,12 @@
 package postgres
 
 import (
-	"code_processor/consumer/repository"
-	"code_processor/http_server/models"
 	"context"
 	"database/sql"
 	"fmt"
 
+	"github.com/kirmala/code_runner/consumer/internal/domain"
+	"github.com/kirmala/code_runner/consumer/internal/repository"
 	_ "github.com/lib/pq"
 )
 
@@ -28,7 +28,7 @@ func NewTaskStorage(connStr string) (*TaskStorage, error) {
 	return &TaskStorage{db: db}, nil
 }
 
-func (ps *TaskStorage) Put(ctx context.Context, task models.Task) error {
+func (ps *TaskStorage) Put(ctx context.Context, task domain.Task) error {
 	result, err := ps.db.ExecContext(ctx, `
 		UPDATE tasks 
 		SET task_code = $1, 

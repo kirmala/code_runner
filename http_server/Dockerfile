@@ -10,7 +10,7 @@ COPY . .
 
 RUN apk add --no-cache make
 
-RUN go build http_server/cmd/app/main.go
+RUN go build cmd/app/main.go
 
 FROM alpine AS runner
 
@@ -20,6 +20,6 @@ RUN apk add --no-cache curl
 
 COPY --from=build /build/main ./main
 
-COPY --from=build /build/http_server/cmd/app/config/config.yaml ./config.yaml 
+COPY --from=build /build/cmd/app/config/config.yaml ./config.yaml 
 
 CMD ["/app/main", "--config=/app/config.yaml"]
