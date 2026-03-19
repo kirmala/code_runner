@@ -36,11 +36,11 @@ jobs:
         include:
           - service: http_server
             context: http_server
-            file: Dockerfile
+            file: http_server/Dockerfile
             tag: code_runner-http_server
           - service: consumer
-            context: http_server
-            file: Dockerfile
+            context: consumer
+            file: consumer/Dockerfile
             tag: code_runner-consumer
           - service: sandbox
             context: .
