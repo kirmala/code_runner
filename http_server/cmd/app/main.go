@@ -1,24 +1,24 @@
 package main
 
 import (
-	//"fmt"
-	"github.com/kirmala/code_runner/http_server/cmd/app/config"
-	myenv "github.com/kirmala/code_runner/http_server/cmd/app/env"
-	"github.com/kirmala/code_runner/http_server/repository/postgres"
-	rabbitMQ "github.com/kirmala/code_runner/http_server/repository/rabbit_mq"
-	"github.com/kirmala/code_runner/http_server/repository/redis"
-	"github.com/kirmala/code_runner/http_server/service/basic"
-	"github.com/kirmala/code_runner/http_server/service/session"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/kirmala/code_runner/http_server/cmd/app/config"
+	myenv "github.com/kirmala/code_runner/http_server/cmd/app/env"
+	"github.com/kirmala/code_runner/http_server/internal/repository/postgres"
+	rabbitMQ "github.com/kirmala/code_runner/http_server/internal/repository/rabbit_mq"
+	"github.com/kirmala/code_runner/http_server/internal/repository/redis"
+	"github.com/kirmala/code_runner/http_server/internal/service/basic"
+	"github.com/kirmala/code_runner/http_server/internal/service/session"
 
 	"github.com/caarlos0/env"
 	"github.com/labstack/echo/v5"
 	echoSwagger "github.com/swaggo/echo-swagger/v2"
 
-	"github.com/kirmala/code_runner/http_server/api/httpx"
-	"github.com/kirmala/code_runner/http_server/api/httpx/middleware"
+	"github.com/kirmala/code_runner/http_server/internal/api/httpx"
+	"github.com/kirmala/code_runner/http_server/internal/api/httpx/middleware"
 	_ "github.com/kirmala/code_runner/http_server/docs"
 	pkgHttp "github.com/kirmala/code_runner/http_server/pkg/http"
 )
