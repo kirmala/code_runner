@@ -6,6 +6,7 @@ require (
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
+	github.com/labstack/echo-prometheus v0.0.1
 	github.com/labstack/echo/v5 v5.0.4
 	github.com/lib/pq v1.12.0
 	github.com/pressly/goose/v3 v3.27.0
@@ -34,7 +35,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
-	github.com/prometheus/common v0.66.1 // indirect
+	github.com/prometheus/common v0.67.5 // indirect
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/sv-tools/openapi v0.2.1 // indirect
@@ -42,10 +43,11 @@ require (
 	github.com/swaggo/swag/v2 v2.0.0-rc4 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.yaml.in/yaml/v2 v2.4.2 // indirect
+	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	golang.org/x/mod v0.33.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

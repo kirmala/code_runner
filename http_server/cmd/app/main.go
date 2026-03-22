@@ -7,7 +7,6 @@ import (
 
 	"github.com/kirmala/code_runner/http_server/cmd/app/config"
 	myenv "github.com/kirmala/code_runner/http_server/cmd/app/env"
-	"github.com/kirmala/code_runner/http_server/internal/metrics"
 	"github.com/kirmala/code_runner/http_server/internal/repository/postgres"
 	rabbitMQ "github.com/kirmala/code_runner/http_server/internal/repository/rabbit_mq"
 	"github.com/kirmala/code_runner/http_server/internal/repository/redis"
@@ -22,8 +21,7 @@ import (
 	"github.com/kirmala/code_runner/http_server/internal/api/httpx"
 	"github.com/kirmala/code_runner/http_server/internal/api/httpx/middleware"
 	pkgHttp "github.com/kirmala/code_runner/http_server/pkg/http"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	echoprometheus "github.com/labstack/echo-prometheus"
 )
 
 // @title github.com/kirmala/code_runner/http_server
@@ -79,9 +77,11 @@ func main() {
 
 	e := echo.New()
 	apiGroup := e.Group("")
+
 	apiGroup.Use(middleware.ServeErrors)
 	apiGroup.Use(middleware.Recover)
-	apiGroup.Use(middleware.Metrics)
+	apiGroup.Use(echoprometheus.NewMiddleware("code_runner"))
+	// apiGroup.Use(middleware.Metrics)
 	taskHandlers.WithTaskHandlers(apiGroup)
 	userHandlers.WithUserHandlers(apiGroup)
 
@@ -91,16 +91,16 @@ func main() {
 		return c.NoContent(http.StatusOK)
 	})
 
-	log.Printf("Starting server on %s", addr)
 	go func() {
-		if err := pkgHttp.CreateAndRunServer(e, addr); err != nil {
-			log.Fatalf("Failed to start server: %v", err)
+		metrics := echo.New()
+		metrics.GET("/metrics", echoprometheus.NewHandler())
+		if err := metrics.Start(":2112"); err != nil {
+			e.Logger.Error("failed to start metrics server", "error", err)
 		}
 	}()
 
-	reg := prometheus.NewRegistry()
-	metrics.Register(reg)
-
-	http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
-	http.ListenAndServe(":2112", nil)
+	log.Printf("Starting server on %s", addr)
+	if err := pkgHttp.CreateAndRunServer(e, addr); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
