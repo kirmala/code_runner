@@ -18,3 +18,8 @@ redis_cluster_3_name: redis-node-3
 redis_cluster_4_name: redis-node-4
 redis_cluster_5_name: redis-node-5
 redis_cluster_6_name: redis-node-6
+
+code_runner_http_server_metrics_port: 2112
+
+
+

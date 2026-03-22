@@ -1,0 +1,61 @@
+- name: Create node_exporter user
+  user:
+    name: "{{ node_exporter.user }}"
+    shell: /usr/sbin/nologin
+    system: yes
+
+- name: Create textfile collector folder with group write access
+  file:
+    path: "{{ node_exporter.textfile_collector_path }}"
+    state: directory
+    owner: "{{ node_exporter.user }}"
+    group: "{{ node_exporter.user }}"
+    mode: '775'
+
+- name: Ensure postgres can write to the folder
+  user:
+    name: postgres
+    groups: "{{ node_exporter.user }}"
+    append: yes
+
+
+- name: Download node_exporter
+  get_url:
+    url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter.version }}/node_exporter-{{ node_exporter.version }}.linux-amd64.tar.gz
+    dest: /tmp/node_exporter.tar.gz
+
+- name: Extract
+  unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Install binary
+  copy:
+    src: /tmp/node_exporter-{{ node_exporter.version }}.linux-amd64/node_exporter
+    dest: /usr/local/bin/node_exporter
+    mode: "0755"
+    remote_src: yes
+
+- name: Create systemd unit file
+  ansible.builtin.template:
+    src: "{{ node_exporter.service_name }}.service.j2"
+    dest: "/etc/systemd/system/{{ node_exporter.service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  register: systemd_file
+  notify:
+    - restart node_exporter
+  
+- name: Force immediate daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: systemd_file.changed
+
+- name: Ensure the service is started and enabled on boot
+  ansible.builtin.systemd_service:
+    name: "{{ node_exporter.service_name }}"
+    state: started
+    enabled: true
+      

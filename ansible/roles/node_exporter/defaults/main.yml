@@ -1,0 +1,5 @@
+node_exporter:
+  version: "1.10.2"
+  service_name: "node_exporter"
+  user: "node_exporter"
+  textfile_collector_path: "/var/lib/node_exporter/textfile_collector"

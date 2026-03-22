@@ -12,6 +12,7 @@ code_runner:
   user: "code_runner"
   repo_path: "{{ code_runner_path }}"
   external_port: "8080"
+  http_server_metrics_port: "{{ code_runner_http_server_metrics_port | default(2112) }}"
   
   limits:
     burst: 5

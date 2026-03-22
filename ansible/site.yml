@@ -30,3 +30,16 @@
   roles:
     - code_runner
   become: true
+
+- name: Setup node exporter
+  hosts: node_exporters
+  roles:
+    - node_exporter
+  become: true
+  
+
+- name: Setup Prometheus
+  hosts: prometheus
+  roles:
+    - prometheus
+  become: true
