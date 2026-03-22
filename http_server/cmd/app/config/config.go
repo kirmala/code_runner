@@ -11,8 +11,13 @@ type HTTPConfig struct {
 	Port string `yaml:"port"`
 }
 
+type PrometheusConfig struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+}
 
 type AppConfig struct {
-	RabbitMQ   `yaml:"rabbit_mq"`
-	HTTPConfig `yaml:"http"`
+	RabbitMQ         `yaml:"rabbit_mq"`
+	HTTPConfig       `yaml:"http"`
+	PrometheusConfig `yaml:"prometheus"`
 }

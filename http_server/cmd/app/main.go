@@ -7,6 +7,7 @@ import (
 
 	"github.com/kirmala/code_runner/http_server/cmd/app/config"
 	myenv "github.com/kirmala/code_runner/http_server/cmd/app/env"
+	"github.com/kirmala/code_runner/http_server/internal/metrics"
 	"github.com/kirmala/code_runner/http_server/internal/repository/postgres"
 	rabbitMQ "github.com/kirmala/code_runner/http_server/internal/repository/rabbit_mq"
 	"github.com/kirmala/code_runner/http_server/internal/repository/redis"
@@ -17,10 +18,12 @@ import (
 	"github.com/labstack/echo/v5"
 	echoSwagger "github.com/swaggo/echo-swagger/v2"
 
+	_ "github.com/kirmala/code_runner/http_server/docs"
 	"github.com/kirmala/code_runner/http_server/internal/api/httpx"
 	"github.com/kirmala/code_runner/http_server/internal/api/httpx/middleware"
-	_ "github.com/kirmala/code_runner/http_server/docs"
 	pkgHttp "github.com/kirmala/code_runner/http_server/pkg/http"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // @title github.com/kirmala/code_runner/http_server
@@ -78,6 +81,7 @@ func main() {
 	apiGroup := e.Group("")
 	apiGroup.Use(middleware.ServeErrors)
 	apiGroup.Use(middleware.Recover)
+	apiGroup.Use(middleware.Metrics)
 	taskHandlers.WithTaskHandlers(apiGroup)
 	userHandlers.WithUserHandlers(apiGroup)
 
@@ -88,7 +92,15 @@ func main() {
 	})
 
 	log.Printf("Starting server on %s", addr)
-	if err := pkgHttp.CreateAndRunServer(e, addr); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
+	go func() {
+		if err := pkgHttp.CreateAndRunServer(e, addr); err != nil {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+
+	reg := prometheus.NewRegistry()
+	metrics.Register(reg)
+
+	http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
+	http.ListenAndServe(":2112", nil)
 }
