@@ -6,7 +6,6 @@ require (
 	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
-	github.com/labstack/echo-prometheus v0.0.1
 	github.com/labstack/echo/v5 v5.0.4
 	github.com/lib/pq v1.12.0
 	github.com/pressly/goose/v3 v3.27.0
@@ -47,7 +46,6 @@ require (
 	golang.org/x/mod v0.33.0 // indirect
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/tools v0.42.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

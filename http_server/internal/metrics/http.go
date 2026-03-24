@@ -2,21 +2,28 @@ package metrics
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/collectors"
 )
 
 var (
-	HTTPRequestsTotal = prometheus.NewCounter(
+	HttpRequests = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
-			Namespace: "code_runner",
-			Subsystem: "http_server",
-			Name:      "requests_total",
-			Help:      "Total number of HTTP requests received.",
+			Name: "http_requests_total",
+			Help: "Total number of HTTP requests",
 		},
+		[]string{"service", "method", "path", "status_group"},
+	)
+
+	HttpDuration = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "http_request_duration_seconds",
+			Help:    "HTTP request duration",
+			Buckets: prometheus.DefBuckets,
+		},
+		[]string{"service", "method", "path"},
 	)
 )
 
 func Register(reg prometheus.Registerer) {
-	reg.MustRegister(HTTPRequestsTotal)
-	reg.MustRegister(collectors.NewGoCollector())
+	reg.MustRegister(HttpRequests)
+	reg.MustRegister(HttpDuration)
 }
