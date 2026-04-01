@@ -7,5 +7,6 @@ prometheus:
     self: '{{ prometheus_metrics_address | default(["localhost:9090"]) }}'
     code_runner: '{{ code_runner_metrics_address | default(["localhost:2112"]) }}'
     node_exporter: '{{ node_exporter_metrics_address | default(["localhost:9100"]) }}'
-    pushgateway: "localhost:9091"
+    redis_exporter: '{{ redis_exporter_metrics_address | default(["localhost:9121"]) }}'
+    postgres_exporter: '{{ postgres_exporter_metrics_address | default(["localhost:9187"]) }}'
   service_name: "prometheus"

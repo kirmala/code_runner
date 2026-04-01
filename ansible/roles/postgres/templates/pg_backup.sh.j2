@@ -2,54 +2,80 @@
 
 BACKUP_DIR="{{ postgresql_backup_dir }}"
 DB_NAME="{{ postgresql_database }}"
-DATE=$(date +%Y-%m-%d_%H-%M-%S)
-FILE="$BACKUP_DIR/$DB_NAME-$DATE.sql"
 RCLONE_CONF="{{ rclone_config_path }}"
 METRIC_FILE="{{ postgresql_node_exporter_textfile_collector_path }}/backup.prom"
+COUNTER_FILE="{{ postgresql_node_exporter_textfile_collector_path }}/backup_counters.db"
+
+DATE=$(date +%Y-%m-%d_%H-%M-%S)
+FILE="$BACKUP_DIR/$DB_NAME-$DATE.sql"
+
+mkdir -p "$BACKUP_DIR"
+mkdir -p "$(dirname "$METRIC_FILE")"
 
 cd /tmp || exit 1
-mkdir -p "$BACKUP_DIR"
 
 START_TIME=$(date +%s)
-
-# 🔹 Create backup
-pg_dump "$DB_NAME" > "$FILE"
-
-END_TIME=$(date +%s)
-DURATION=$((END_TIME - START_TIME))
 
 SUCCESS=0
 SIZE=0
 
-# 🔹 Validate backup
-if [ -s "$FILE" ]; then
-    SIZE=$(stat -c%s "$FILE")
-    echo "[$DATE] SUCCESS: Local backup created"
 
-    # 🔹 Upload to cloud
-    /usr/bin/rclone copy "$FILE" yandex:Backups/Postgres/ --config "$RCLONE_CONF"
-
-    if [ $? -eq 0 ]; then
-        echo "[$DATE] SUCCESS: Uploaded to cloud"
-        SUCCESS=1
-    else
-        echo "[$DATE] ERROR: Upload failed" >&2
-        SUCCESS=0
-    fi
-
-    # 🔹 Cleanup old backups
-    find "$BACKUP_DIR" -type f -mtime +7 -delete
-    /usr/bin/rclone delete yandex:Backups/Postgres/ --min-age 30d --config "$RCLONE_CONF"
-
-else
-    echo "[$DATE] ERROR: Backup failed or empty" >&2
-    rm -f "$FILE"
+if [ ! -f "$COUNTER_FILE" ]; then
+    echo "success=0" > "$COUNTER_FILE"
+    echo "failure=0" >> "$COUNTER_FILE"
 fi
 
-# 🔥 STEP 3 — WRITE METRICS (IMPORTANT)
+source "$COUNTER_FILE"
+
+# =========================
+# CREATE BACKUP
+# =========================
+if pg_dump "$DB_NAME" > "$FILE"; then
+    if [ -s "$FILE" ]; then
+        SIZE=$(stat -c%s "$FILE")
+        echo "[$DATE] SUCCESS: Local backup created ($SIZE bytes)"
+
+        # =========================
+        # UPLOAD TO CLOUD
+        # =========================
+        if /usr/bin/rclone copy "$FILE" yandex:Backups/Postgres/ --config "$RCLONE_CONF"; then
+            echo "[$DATE] SUCCESS: Uploaded to cloud"
+            SUCCESS=1
+        else
+            echo "[$DATE] ERROR: Upload failed" >&2
+            SUCCESS=0
+        fi
+
+    else
+        echo "[$DATE] ERROR: Backup file is empty" >&2
+        rm -f "$FILE"
+        SUCCESS=0
+    fi
+else
+    echo "[$DATE] ERROR: pg_dump failed" >&2
+    SUCCESS=0
+fi
+
+
+find "$BACKUP_DIR" -type f -mtime +7 -delete || true
+/usr/bin/rclone delete yandex:Backups/Postgres/ --min-age 30d --config "$RCLONE_CONF" || true
+
+
+if [ "$SUCCESS" -eq 1 ]; then
+    success=$((success + 1))
+else
+    failure=$((failure + 1))
+fi
+
+echo "success=$success" > "$COUNTER_FILE"
+echo "failure=$failure" >> "$COUNTER_FILE"
+
+
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+TIMESTAMP=$(date +%s)
 
 TMP_FILE=$(mktemp)
-
 
 cat <<EOF > "$TMP_FILE"
 # HELP backup_success Backup status (1=success, 0=failure)
@@ -63,13 +89,26 @@ backup_duration_seconds $DURATION
 # HELP backup_size_bytes Backup file size in bytes
 # TYPE backup_size_bytes gauge
 backup_size_bytes $SIZE
+
+# HELP backup_success_total Total successful backups
+# TYPE backup_success_total counter
+backup_success_total $success
+
+# HELP backup_failure_total Total failed backups
+# TYPE backup_failure_total counter
+backup_failure_total $failure
+
+# HELP backup_last_run_timestamp Last backup run timestamp
+# TYPE backup_last_run_timestamp gauge
+backup_last_run_timestamp $TIMESTAMP
 EOF
 
-# 🔥 Atomic write (VERY IMPORTANT)
 chmod 644 "$TMP_FILE"
 mv "$TMP_FILE" "$METRIC_FILE"
 
-# Exit code (important for cron)
+# =========================
+# EXIT
+# =========================
 if [ "$SUCCESS" -eq 1 ]; then
     exit 0
 else

@@ -1,0 +1,56 @@
+- name: Create grafana user
+  user:
+    name: "{{ grafana.user }}"
+    shell: /usr/sbin/nologin
+    system: yes
+
+
+- name: Create base directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    mode: "0755"
+  loop:
+    - "{{ grafana.dir }}"
+    - "{{ grafana.homepath }}"  
+
+
+- name: Download Grafana
+  get_url:
+    url: "https://dl.grafana.com/oss/release/grafana-{{ grafana.version }}.linux-amd64.tar.gz"
+    dest: "/tmp/grafana.tar.gz"
+
+- name: Extract Grafana
+  unarchive:
+    src: "/tmp/grafana.tar.gz"
+    dest: "/tmp"
+    remote_src: yes
+
+- name: Move binaries to /usr/local/grafana
+  ansible.builtin.copy:
+    src: "/tmp/grafana-{{ grafana.version }}/"
+    dest: "{{ grafana.homepath }}/"
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    mode: "0755"
+    remote_src: yes
+
+- name: Ensure recursive ownership on installation directory
+  ansible.builtin.file:
+    path: "{{ grafana.homepath }}"
+    state: directory
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    recurse: yes
+
+
+- name: Move config
+  copy:
+    src: "/usr/local/grafana-{{ grafana.version }}/conf"
+    dest: "{{ grafana.dir }}"
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    mode: "0755"
+    remote_src: yes

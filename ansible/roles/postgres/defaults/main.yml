@@ -23,3 +23,8 @@ postgresql_backup_script_path: "{{ postgresql_backup_script_dir }}/{{ postgresql
 postgresql_backup_cron_file: "postgres_backup"
 postgresql_service_name: "postgresql"
 postgresql_node_exporter_textfile_collector_path: "/var/lib/node_exporter/textfile_collector"
+
+
+#exporter
+postgresql_exporter_user: "postgresql_exporter"
+postgresql_exporter_password: "strong_password"

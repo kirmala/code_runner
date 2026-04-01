@@ -15,3 +15,6 @@
     name: "{{ postgresql_service_name }}"
     state: started
     enabled: true
+
+- name: Setup postgres exporter
+  ansible.builtin.include_tasks: exporter.yml

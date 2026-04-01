@@ -43,3 +43,10 @@
   roles:
     - prometheus
   become: true
+
+- name: Setup Grafana
+  hosts: grafana
+  roles:
+    - grafana
+  become: true
+  tags: grafana_only

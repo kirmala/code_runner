@@ -1,0 +1,41 @@
+grafana_dir: "/etc/grafana"
+
+
+grafana:
+  version: "12.4.1"
+  user: "grafana"
+  dir: "{{ grafana_dir }}"
+  service_name: "grafana"
+  config_path: "{{ grafana_dir }}/conf/custom.ini"
+  homepath: "/usr/local/grafana"
+  org_id: 1
+  dashboard_dir: "/var/lib/grafana/dashboards"
+  provisioning_dir: "/etc/grafana/provisioning"
+
+  template_dashboards:
+  - template: "rps_dashboard.json.j2"
+    filename: "rps_dashboard.json"
+  - template: "latency_dashboard.json.j2"
+    filename: "latency_dashboard.json"
+  - template: "error_persentage_dashboard.json.j2"
+    filename: "error_persentage_dashboard.json"
+
+  prometheus_datasource_uid: "my_prom_datasource"
+  prometheus_datasource_name: "Prometheus"
+  
+
+  community_dashboards:
+  - id: 12485
+    name: "Postgres Dashboard"
+    datasource: "Prometheus"
+  - id: 14091
+    name: "Redis Dashboard"
+    datasource: "Prometheus"
+  - id: 1860
+    name: "Node Dashboard"
+    datasource: "Prometheus"
+  
+  smtp_password: "{{ vault_google_password }}"
+
+
+
