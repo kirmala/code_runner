@@ -21,7 +21,7 @@ cluster-down:
 dev-build:
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) build
 
-dev-up: network-create cluster-up
+dev-up: network-create cluster-up base-build
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) up -d
 
 dev-logs:
