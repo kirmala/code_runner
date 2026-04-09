@@ -1,14 +1,16 @@
 package middleware
 
 import (
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/kirmala/code_runner/http_server/internal/service"
 	"github.com/labstack/echo/v5"
+	slogctx "github.com/veqryn/slog-context"
 )
 
-const UserIdKey = "userId"
+const UserIdKey = "user_id"
 
 
 func getAuthToken(r *http.Request) (string, error) {
@@ -37,6 +39,12 @@ func (a Auth) Auth(next echo.HandlerFunc) echo.HandlerFunc {
 			return err
 		}
 
+		ctx := c.Request().Context()
+		ctx = slogctx.Prepend(ctx,
+			slog.Any(UserIdKey, id),
+		)
+		
+		c.SetRequest(c.Request().WithContext(ctx))
 		c.Set(UserIdKey, id)
 
 		return next(c)

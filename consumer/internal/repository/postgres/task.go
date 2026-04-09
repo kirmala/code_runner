@@ -14,18 +14,8 @@ type TaskStorage struct {
 	db *sql.DB
 }
 
-func NewTaskStorage(connStr string) (*TaskStorage, error) {
-	db, err := sql.Open("postgres", connStr)
-
-	if err != nil {
-		return nil, fmt.Errorf("connecting to db: %s", err)
-	}
-	err = db.Ping()
-	if err != nil {
-		return nil, fmt.Errorf("pinging db: %s", err)
-	}
-
-	return &TaskStorage{db: db}, nil
+func NewTaskStorage(db *sql.DB) (*TaskStorage) {
+	return &TaskStorage{db: db}
 }
 
 func (ps *TaskStorage) Put(ctx context.Context, task domain.Task) error {

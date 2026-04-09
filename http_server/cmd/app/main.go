@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -34,44 +33,39 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-	appFlags := config.ParseFlags()
-	var cfg config.AppConfig
-	config.MustLoad(appFlags.ConfigPath, &cfg)
-
 	h := slogctx.NewHandler(slog.NewJSONHandler(os.Stdout, nil), nil)
 	slog.SetDefault(slog.New(h))
 
-	defer func() {
-		slog.Info("shutdown complete")
-	}()
+	appFlags := config.ParseFlags()
+	var cfg config.AppConfig
+	config.Load(appFlags.ConfigPath, &cfg)
 	
 	addr := fmt.Sprintf("%s:%s", cfg.HTTPConfig.Host, cfg.HTTPConfig.Port)
 	rabbitMQAddr := fmt.Sprintf("amqp://guest:guest@%s:%s", cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.PostgresDB.Host, cfg.PostgresDB.Port, cfg.PostgresDB.User, cfg.PostgresDB.Password, cfg.PostgresDB.DB)
-	if err := postgres.RunMigrations(connStr); err != nil {
-		log.Fatalf("running migrations: %v", err)
-	}
 
-	taskRepo, err := postgres.NewTaskStorage(connStr)
-	if err != nil {
-		log.Fatalf("creating task storage: %v", err)
+	db, err := postgres.Connect(connStr)
+
+	if err := postgres.RunMigrations(db); err != nil {
+		slog.Error("failed to run migrations", slog.Any("error", err))
+		return
 	}
-	userRepo, err := postgres.NewUserStorage(connStr)
-	if err != nil {
-		log.Fatalf("creating user storage: %v", err)
-	}
+	taskRepo := postgres.NewTaskStorage(db)
+	userRepo := postgres.NewUserStorage(db)
 
 	redisCli, err := redis.NewClusterClient(cfg.RedisDB.Addresses, cfg.RedisDB.Password)
 	if err != nil {
-		log.Fatalf("creating redis client: %v", err)
+		slog.Error("failed to create redis client", slog.Any("error", err))
+		return
 	}
 
 	sessionRepo := redis.NewSessionStorage(redisCli)
 
 	taskSender, err := rabbitMQ.NewRabbitMQSender(rabbitMQAddr, cfg.QueueName)
 	if err != nil {
-		log.Fatalf("failed creating rabbitMQ: %v", err)
+		slog.Error("failed to create rabbitmq", slog.Any("error", err))
+		return
 	}
 
 	taskService := basic.NewTask(taskRepo, sessionRepo, taskSender)
@@ -83,8 +77,10 @@ func main() {
 	e := echo.New()
 	apiGroup := e.Group("")
 
+	apiGroup.Use(middleware.CorrelationID)
 	apiGroup.Use(middleware.Metrics)
 	apiGroup.Use(middleware.ServeErrors)
+	apiGroup.Use(middleware.Logger)
 	apiGroup.Use(middleware.Recover)
 	
 	taskHandlers.WithTaskHandlers(apiGroup)
@@ -104,8 +100,8 @@ func main() {
 		http.ListenAndServe(":2112", nil)
 	}()
 
-	log.Printf("Starting server on %s", addr)
+	slog.Info("starting server", slog.String("address", addr))
 	if err := pkgHttp.CreateAndRunServer(e, addr); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		slog.Error("failed to start server", slog.Any("error", err))
 	}
 }
