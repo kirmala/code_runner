@@ -17,6 +17,8 @@ require (
 	golang.org/x/crypto v0.49.0
 )
 
+require github.com/go-logr/logr v1.4.3 // indirect
+
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
@@ -40,6 +42,7 @@ require (
 	github.com/sv-tools/openapi v0.2.1 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect
 	github.com/swaggo/swag/v2 v2.0.0-rc4 // indirect
+	github.com/veqryn/slog-context v0.9.0
 	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-
 	"fmt"
 	"log"
 
@@ -20,28 +18,7 @@ func main() {
 	var cfg config.AppConfig
 	config.MustLoad(appFlags.ConfigPath, &cfg)
 
-	pgPassword := os.Getenv("POSTGRES_PASSWORD")
-	if pgPassword == "" {
-		log.Fatal("POSTGRES_PASSWORD is not set")
-	}
-	pgUser := os.Getenv("POSTGRES_USER")
-	if pgUser == "" {
-		log.Fatal("POSTGRES_USER is not set")
-	}
-	pgDB := os.Getenv("POSTGRES_DB")
-	if pgDB == "" {
-		log.Fatal("POSTGRES_DB is not set")
-	}
-	pgHost := os.Getenv("POSTGRES_HOST")
-	if pgHost == "" {
-		log.Fatal("POSTGRES_HOST is not set")
-	}
-	pgPort := os.Getenv("POSTGRES_PORT")
-	if pgPort == "" {
-		log.Fatal("POSTGRES_PORT is not set")
-	}
-
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", pgHost, pgPort, pgUser, pgPassword, pgDB)
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.PostgresDB.Host, cfg.PostgresDB.Port, cfg.PostgresDB.User, cfg.PostgresDB.Password, cfg.PostgresDB.DB)
 	
 	taskRepo, err := postgres.NewTaskStorage(connStr)
 

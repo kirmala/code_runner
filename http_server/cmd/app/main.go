@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/kirmala/code_runner/http_server/cmd/app/config"
-	myenv "github.com/kirmala/code_runner/http_server/cmd/app/env"
 	"github.com/kirmala/code_runner/http_server/internal/metrics"
 	"github.com/kirmala/code_runner/http_server/internal/repository/postgres"
 	rabbitMQ "github.com/kirmala/code_runner/http_server/internal/repository/rabbit_mq"
@@ -16,7 +17,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/caarlos0/env"
 	"github.com/labstack/echo/v5"
 	echoSwagger "github.com/swaggo/echo-swagger/v2"
 
@@ -24,6 +24,7 @@ import (
 	"github.com/kirmala/code_runner/http_server/internal/api/httpx"
 	"github.com/kirmala/code_runner/http_server/internal/api/httpx/middleware"
 	pkgHttp "github.com/kirmala/code_runner/http_server/pkg/http"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 // @title github.com/kirmala/code_runner/http_server
@@ -36,16 +37,18 @@ func main() {
 	appFlags := config.ParseFlags()
 	var cfg config.AppConfig
 	config.MustLoad(appFlags.ConfigPath, &cfg)
+
+	h := slogctx.NewHandler(slog.NewJSONHandler(os.Stdout, nil), nil)
+	slog.SetDefault(slog.New(h))
+
+	defer func() {
+		slog.Info("shutdown complete")
+	}()
+	
 	addr := fmt.Sprintf("%s:%s", cfg.HTTPConfig.Host, cfg.HTTPConfig.Port)
 	rabbitMQAddr := fmt.Sprintf("amqp://guest:guest@%s:%s", cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
 
-	var envCfg myenv.Config
-	err := env.Parse(&envCfg)
-	if err != nil {
-		log.Fatalf("parsing env: %v", err)
-	}
-
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", envCfg.PostgresHost, envCfg.PostgresPort, envCfg.PostgresUser, envCfg.PostgresPassword, envCfg.PostgresDB)
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.PostgresDB.Host, cfg.PostgresDB.Port, cfg.PostgresDB.User, cfg.PostgresDB.Password, cfg.PostgresDB.DB)
 	if err := postgres.RunMigrations(connStr); err != nil {
 		log.Fatalf("running migrations: %v", err)
 	}
@@ -59,7 +62,7 @@ func main() {
 		log.Fatalf("creating user storage: %v", err)
 	}
 
-	redisCli, err := redis.NewClusterClient(envCfg.RedisAddresses, envCfg.RedisPassword)
+	redisCli, err := redis.NewClusterClient(cfg.RedisDB.Addresses, cfg.RedisDB.Password)
 	if err != nil {
 		log.Fatalf("creating redis client: %v", err)
 	}
