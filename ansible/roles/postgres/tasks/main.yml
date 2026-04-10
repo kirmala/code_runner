@@ -9,3 +9,12 @@
 
 - name: Setup backup and cloud sync logic
   ansible.builtin.include_tasks: backup.yml
+
+- name: Ensure the service is started and enabled on boot
+  ansible.builtin.systemd_service:
+    name: "{{ postgresql_service_name }}"
+    state: started
+    enabled: true
+
+- name: Setup postgres exporter
+  ansible.builtin.include_tasks: exporter.yml

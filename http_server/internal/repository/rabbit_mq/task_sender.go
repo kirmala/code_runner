@@ -1,10 +1,15 @@
 package rabbitMQ
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
+	"log/slog"
 
+	"google.golang.org/protobuf/proto"
+
+	"github.com/kirmala/code_runner/contracts/gen/pb"
 	"github.com/kirmala/code_runner/http_server/internal/domain"
+	"github.com/kirmala/code_runner/http_server/pkg/correlationid"
 	"github.com/streadway/amqp"
 )
 
@@ -44,10 +49,20 @@ func NewRabbitMQSender(ampqURL, queueName string) (*RabbitMQSender, error) {
 	}, nil
 }
 
-func (r *RabbitMQSender) Send(task domain.Task) error {
-	body, err := json.Marshal(task)
+func (r *RabbitMQSender) Send(ctx context.Context, task domain.Task) error {
+	msg := pb.TaskExecutionMessage{
+		TaskId: task.Id.String(),
+		Code: task.Code,
+		Translator: pb.TaskTranslator(task.Translator),
+	}
+	body, err := proto.Marshal(&msg)
 	if err != nil {
 		return fmt.Errorf("task mashal: %w", err)
+	}
+
+	correlationId, ok := correlationid.FromContext(ctx)
+	if !ok {
+		slog.WarnContext(ctx, "No correlationId in context")
 	}
 
 	err = r.channel.Publish(
@@ -56,13 +71,16 @@ func (r *RabbitMQSender) Send(task domain.Task) error {
 		false,
 		false,
 		amqp.Publishing{
-			ContentType: "application/json",
+			ContentType: "application/x-protobuf",
 			Body:        body,
+			CorrelationId: correlationId,
 		},
 	)
 	if err != nil {
 		return fmt.Errorf("task publishing: %w", err)
 	}
+
+	slog.InfoContext(ctx, "task sent successfully")
 
 	return nil
 }

@@ -1,0 +1,87 @@
+- name: Create dashboard directory
+  ansible.builtin.file:
+    path: "{{ grafana.dashboard_dir }}"
+    state: directory
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    mode: "0755"
+  become: true
+
+- name: Ensure Grafana dashboard provisioning directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    mode: "0755"
+  loop:
+    - "{{ grafana.provisioning_dir }}/dashboards"
+    - "{{ grafana.provisioning_dir }}/datasources"
+  become: true
+
+- name: Create dashboard directory for JSON files
+  ansible.builtin.file:
+    path: "{{ grafana.dashboard_dir }}"
+    state: directory
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    mode: "0755"
+  become: true
+
+- name: Deploy config for grafana
+  ansible.builtin.template:
+    src: custom.ini.j2
+    dest: "{{ grafana.dir }}/conf/custom.ini"
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    mode: "0640"
+  become: true
+  notify: restart grafana
+
+- name: Deploy dashboard provider configuration
+  ansible.builtin.template:
+    src: dashboard_provider.yml.j2
+    dest: "{{ grafana.provisioning_dir }}/dashboards/ansible.yml"
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    mode: "0640"
+  become: true
+  notify: restart grafana
+
+- name: Deploy dashboard datasources
+  ansible.builtin.template:
+    src: datasources.yml.j2
+    dest: "{{ grafana.provisioning_dir }}/datasources/prometheus.yml"
+    owner: "{{ grafana.user }}"
+    group: "{{ grafana.user }}"
+    mode: "0640"
+  become: true
+  notify: restart grafana
+
+- name: Deploy template dashboards
+  ansible.builtin.template:
+    src: "{{ item.template }}"
+    dest: "{{ grafana.dashboard_dir }}/{{ item.filename }}"
+    owner: grafana
+    group: grafana
+    mode: "0644"
+  loop: "{{ grafana.template_dashboards }}"
+  become: true
+
+- name: Download community dashboards from Grafana.com
+  ansible.builtin.uri:
+    url: "https://grafana.com/api/dashboards/{{ item.id }}/revisions/latest/download"
+    return_content: yes
+  register: community_dashboards
+  loop: "{{ grafana.community_dashboards }}"
+
+- name: Save community dashboards and fix datasource placeholder
+  ansible.builtin.copy:
+    # This filter finds the ${DS_...} string and replaces it with your real datasource name
+    content: "{{ item.content | regex_replace('\\$\\{DS_[^}]+\\}', grafana.prometheus_datasource_name) }}"
+    dest: "{{ grafana.dashboard_dir }}/community_{{ item.item.id }}.json"
+    owner: grafana
+    group: grafana
+    mode: "0644"
+  loop: "{{ community_dashboards.results }}"
+  become: true

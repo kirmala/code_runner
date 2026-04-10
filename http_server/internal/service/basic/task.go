@@ -1,6 +1,7 @@
 package basic
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -48,8 +49,8 @@ func (rs *Task) Put(task domain.Task) error {
 	return rs.taskRepo.Put(task)
 }
 
-func (rs *Task) Post(task domain.Task) error {
-	err := rs.taskSender.Send(task)
+func (rs *Task) Post(ctx context.Context, task domain.Task) error {
+	err := rs.taskSender.Send(ctx, task)
 	if err != nil {
 		return fmt.Errorf("sending task: %w", err)
 	}

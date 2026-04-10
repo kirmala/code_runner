@@ -1,0 +1,8 @@
+- name: Install grafana packages
+  ansible.builtin.include_tasks: install.yml
+
+- name: Create systemd unit for grafana 
+  ansible.builtin.include_tasks: systemd.yml
+
+- name: Deploy dashboards via file provisioning
+  ansible.builtin.include_tasks: file_provisioning.yml

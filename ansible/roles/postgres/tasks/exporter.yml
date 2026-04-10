@@ -1,0 +1,21 @@
+- name: Create monitoring user
+  community.postgresql.postgresql_user:
+    name: "{{ postgresql_exporter_user }}"
+    password: "{{ postgresql_exporter_password }}"
+    role_attr_flags: "LOGIN"
+  become_user: postgres
+
+- name: Grant pg_monitor privileges
+  community.postgresql.postgresql_membership:
+    group: pg_monitor
+    target_roles:
+      - "{{ postgresql_exporter_user }}"
+    state: present
+  become_user: postgres
+
+- name: Install and configure Postgres Exporter
+  include_role:
+    name: prometheus.prometheus.postgres_exporter
+  vars:
+    postgres_exporter_name: "postgresql://{{ postgresql_exporter_user }}:{{ postgresql_exporter_password }}@localhost:5432/postgres?sslmode=disable"
+    

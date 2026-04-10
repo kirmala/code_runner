@@ -1,0 +1,15 @@
+[Unit]
+Description=Grafana
+After=network.target
+
+[Service]
+User={{ grafana.user }}
+Group={{ grafana.user }}
+Type=simple
+WorkingDirectory={{ grafana.homepath }}
+ExecStart={{ grafana.homepath }}/bin/grafana server --config={{ grafana.config_path }} --homepath={{ grafana.homepath }}
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

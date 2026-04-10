@@ -32,7 +32,8 @@
     group: "{{ redis_cluster.user }}"
     mode: '0644'
   become: true
-
+  notify:
+    - restart redis_cluster
 
 - name: Copy config to the server
   ansible.builtin.template:
@@ -42,6 +43,8 @@
     group: "{{ redis_cluster.user }}"
     mode: '0644'
   become: true
+  notify:
+    - restart redis_cluster
 
 - name: Create systemd unit file
   ansible.builtin.template:

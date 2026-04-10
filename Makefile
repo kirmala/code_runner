@@ -22,7 +22,7 @@ dev-build:
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) build
 
 dev-up: network-create cluster-up
-	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) up -d
+	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) up --build -d
 
 dev-logs:
 	docker compose -f $(COMPOSE_BASE) -f $(COMPOSE_DEV) logs -f

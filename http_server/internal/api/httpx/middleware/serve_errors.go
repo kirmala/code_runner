@@ -3,7 +3,6 @@ package middleware
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/kirmala/code_runner/http_server/internal/api"
@@ -13,57 +12,49 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-
-func mapError(c *echo.Context, err error) {
+func mapError(err error) dto.Error {
 
 	if err == nil {
-		return
+		return dto.Error{}
 	}
 
 	var (
-		notFound repository.ErrNotFound
-		conflict repository.ErrConflict
-		badReq   api.ErrBadRequest
+		notFound        repository.ErrNotFound
+		conflict        repository.ErrConflict
+		badReq          api.ErrBadRequest
 		unauthenticated service.ErrUnauthenticated
 	)
 
 	switch {
 	case errors.As(err, &notFound):
-		msg := dto.Error{Error: notFound.Error()}
-		writeError(c, msg, http.StatusNotFound)
+		return dto.Error{Error: notFound.Error(), Code: http.StatusNotFound}
 	case errors.As(err, &conflict):
-		msg := dto.Error{Error: conflict.Error()}
-		writeError(c, msg, http.StatusConflict)
+		return dto.Error{Error: conflict.Error(), Code: http.StatusConflict}
 	case errors.As(err, &badReq):
-		msg := dto.Error{Error: badReq.Error()}
-		writeError(c, msg, http.StatusBadRequest)
+		return dto.Error{Error: badReq.Error(), Code: http.StatusBadRequest}
 	case errors.As(err, &unauthenticated):
-		msg := dto.Error{Error: "Unauthorized"}
-		writeError(c, msg, http.StatusUnauthorized)
+		return dto.Error{Error: "Unauthorized", Code: http.StatusUnauthorized}
 	default:
-		msg := dto.Error{Error: "Internal Server Error"}
-		writeError(c, msg, http.StatusInternalServerError)
-		log.Printf("Internal server error: %v", err)
+		return dto.Error{Error: "Internal Server Error", Code: http.StatusInternalServerError}
 	}
 }
 
-func writeError(c *echo.Context, msg dto.Error, errorStatus int) {
-	if errorStatus < 400 || errorStatus >= 600 {
-		panic(fmt.Sprintf("invalid error status: %d", errorStatus))
+func writeError(c *echo.Context, errDto dto.Error) error {
+	if errDto.Code < 400 || errDto.Code >= 600 {
+		panic(fmt.Sprintf("invalid error status: %d", errDto.Code))
 	}
 
-	err := c.JSON(errorStatus, msg)
-	if err != nil {
-		panic(fmt.Sprintf("failed to write error response: %v", err))
-	}
+	return c.JSON(errDto.Code, errDto)
 }
 
 func ServeErrors(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		err := next(c)
 		if err != nil {
-			mapError(c, err)
+			errDto := mapError(err)
+			return writeError(c, errDto)
 		}
-		return err
+
+		return nil
 	}
 }

@@ -1,0 +1,12 @@
+[paths]
+provisioning = {{ grafana.provisioning_dir }}
+
+[auth]
+managed_service_accounts_enabled = true
+
+[smtp]
+enabled = true
+host = smtp.gmail.com:587
+user = kmalahov703@gmail.com
+password = {{ grafana.smtp_password }}
+

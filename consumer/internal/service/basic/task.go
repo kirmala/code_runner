@@ -5,16 +5,25 @@ import (
 
 	"github.com/kirmala/code_runner/consumer/internal/domain"
 	"github.com/kirmala/code_runner/consumer/internal/repository"
+	"github.com/kirmala/code_runner/consumer/internal/service"
 )
 
 type Task struct {
-	repo repository.Task
+	repo   repository.Task
+	runner service.Runner
 }
 
-func NewTask(repo repository.Task) *Task {
-	return &Task{repo: repo}
+func NewTask(repo repository.Task, runner service.Runner) *Task {
+	return &Task{repo: repo, runner: runner}
 }
 
-func (t *Task) Put(ctx context.Context, task domain.Task) error {
-	return t.repo.Put(ctx, task)
+func (ts *Task) Process(ctx context.Context, task domain.Task) error {
+	processedTask, err := ts.runner.Run(context.Background(), task)
+	if err != nil {
+		task.Result = err.Error()
+		task.Status = domain.StatusFailed
+		_ = ts.repo.Put(context.Background(), task)
+		return err
+	}
+	return ts.repo.Put(context.Background(), processedTask)
 }

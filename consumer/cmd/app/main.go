@@ -1,69 +1,81 @@
 package main
 
 import (
-	"os"
-
+	"context"
+	"errors"
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/kirmala/code_runner/consumer/cmd/app/config"
 	"github.com/kirmala/code_runner/consumer/internal/api/rabbitmq"
 	"github.com/kirmala/code_runner/consumer/internal/repository/postgres"
 	"github.com/kirmala/code_runner/consumer/internal/service/basic"
 	"github.com/kirmala/code_runner/consumer/internal/service/docker"
+	slogctx "github.com/veqryn/slog-context"
 )
 
 // http://localhost:15672/api/healthchecks/node
 
 func main() {
+	h := slogctx.NewHandler(slog.NewJSONHandler(os.Stdout, nil), nil)
+	slog.SetDefault(slog.New(h).With(slog.String("service", "consumer")))
+
 	appFlags := config.ParseFlags()
 	var cfg config.AppConfig
-	config.MustLoad(appFlags.ConfigPath, &cfg)
-
-	pgPassword := os.Getenv("POSTGRES_PASSWORD")
-	if pgPassword == "" {
-		log.Fatal("POSTGRES_PASSWORD is not set")
-	}
-	pgUser := os.Getenv("POSTGRES_USER")
-	if pgUser == "" {
-		log.Fatal("POSTGRES_USER is not set")
-	}
-	pgDB := os.Getenv("POSTGRES_DB")
-	if pgDB == "" {
-		log.Fatal("POSTGRES_DB is not set")
-	}
-	pgHost := os.Getenv("POSTGRES_HOST")
-	if pgHost == "" {
-		log.Fatal("POSTGRES_HOST is not set")
-	}
-	pgPort := os.Getenv("POSTGRES_PORT")
-	if pgPort == "" {
-		log.Fatal("POSTGRES_PORT is not set")
-	}
-
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", pgHost, pgPort, pgUser, pgPassword, pgDB)
-	
-	taskRepo, err := postgres.NewTaskStorage(connStr)
-
+	err := config.Load(appFlags.ConfigPath, &cfg)
 	if err != nil {
-		log.Fatalf("connecting to postgres: %s", err)
+		slog.Error("config load failed", slog.Any("error", err))
+		return
 	}
 
-	taskService := basic.NewTask(taskRepo)
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.PostgresDB.Host, cfg.PostgresDB.Port, cfg.PostgresDB.User, cfg.PostgresDB.Password, cfg.PostgresDB.DB)
+
+	db, err := postgres.Connect(connStr)
+	if err != nil {
+		slog.Error("connect postgres failed", slog.Any("error", err))
+		return
+	}
+
+	taskRepo := postgres.NewTaskStorage(db)
 
 	imageName := cfg.ImageName
 	clientVersion := cfg.ClientVersion
 	runner, err := docker.NewRunner(imageName, clientVersion, cfg.ContainerResource)
 	if err != nil {
-		log.Fatalf("creating docker client: %s", err)
+		slog.Error("create docker client failed", slog.Any("error", err))
+		return
 	}
+
+	taskService := basic.NewTask(taskRepo, runner)
 
 	rabbitMQAddr := fmt.Sprintf("amqp://guest:guest@%s:%s", cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
 
-	TaskReceiver, err := rabbitmq.NewTaskReceiver(rabbitMQAddr, cfg.QueueName, runner, taskService)
-	if err != nil {
-		log.Fatalf("failed creating rabbitMQ: %v", err)
-	}
+	middlewares := []rabbitmq.Middleware{rabbitmq.LoggerMiddleware, rabbitmq.CorrelationIdMiddleware}
 
-	TaskReceiver.Receive()
+	TaskReceiver, err := rabbitmq.NewTaskReceiver(rabbitMQAddr, cfg.QueueName, runner, taskService, middlewares)
+	if err != nil {
+		slog.Error("create rabbitMQ failed", slog.Any("error", err))
+		return
+	}
+	defer func() {
+		slog.Info("closing ampq connection")
+		err := TaskReceiver.Close()
+		if err != nil {
+			slog.Error("close ampq connection failed", slog.Any("error", err))
+		}
+	}()
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
+	slog.Info("start receiving")
+	err = TaskReceiver.Receive(ctx)
+	if err != nil && !errors.Is(err, context.Canceled) {
+		slog.Error("task receiver closed with error", slog.Any("error", err))
+	} else {
+		slog.Info("task receiver stopped gracefully")
+	}
 }

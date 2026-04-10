@@ -1,0 +1,19 @@
+[Unit]
+Description=Prometheus
+After=network.target
+
+[Service]
+User={{ prometheus.user }}
+Group={{ prometheus.user }}
+Type=simple
+ExecStart=/usr/local/bin/prometheus \
+  --config.file={{ prometheus.dir }}/prometheus.yml \
+  --storage.tsdb.path={{ prometheus.data_dir }} \
+  --web.console.templates={{ prometheus.dir }}/consoles \
+  --web.console.libraries={{ prometheus.dir }}/console_libraries
+ExecReload=/bin/kill -HUP $MAINPID
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

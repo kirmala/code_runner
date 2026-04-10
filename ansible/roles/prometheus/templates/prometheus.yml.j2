@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: {{ prometheus.targets.self }}
+
+  - job_name: "node"
+    static_configs:
+      - targets: {{ prometheus.targets.node_exporter }}
+
+  - job_name: "app"
+    static_configs:
+      - targets: {{ prometheus.targets.code_runner }}
+
+  - job_name: "postgres-exporter"
+    static_configs:
+      - targets: {{ prometheus.targets.postgres_exporter }}
+
+  - job_name: "redis-exporter"
+    static_configs:
+      - targets: {{ prometheus.targets.redis_exporter }}

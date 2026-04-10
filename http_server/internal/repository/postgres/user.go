@@ -15,18 +15,8 @@ type UserStorage struct {
 	db *sql.DB
 }
 
-func NewUserStorage(connStr string) (*UserStorage, error) {
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		return nil, fmt.Errorf("connecting to db: %s", err)
-	}
-
-	err = db.Ping()
-	if err != nil {
-		return nil, fmt.Errorf("pinging db: %s", err)
-	}
-
-	return &UserStorage{db: db}, nil
+func NewUserStorage(db *sql.DB) (*UserStorage) {
+	return &UserStorage{db: db}
 }
 
 func (us *UserStorage) GetByLogin(login string) (*domain.User, error) {

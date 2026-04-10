@@ -1,0 +1,21 @@
+- name: Create systemd unit file
+  ansible.builtin.template:
+    src: "{{ grafana.service_name }}.service.j2"
+    dest: "/etc/systemd/system/{{ grafana.service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  register: systemd_file
+  notify:
+    - restart grafana
+  
+- name: Force immediate daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: systemd_file.changed
+
+- name: Ensure the service is started and enabled on boot
+  ansible.builtin.systemd_service:
+    name: "{{ grafana.service_name }}"
+    state: started
+    enabled: true

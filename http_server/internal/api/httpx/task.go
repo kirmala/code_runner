@@ -129,7 +129,7 @@ func (s *Task) postHandler(c *echo.Context) error {
 
 	newTask := domain.Task{Id: uuid.New(), Code: req.TaskCode, Translator: taskTranslator, Status: domain.StatusInProgress, Result: "progres..."}
 
-	err = s.service.Post(newTask)
+	err = s.service.Post(c.Request().Context(), newTask)
 	if err != nil {
 		return err
 	}

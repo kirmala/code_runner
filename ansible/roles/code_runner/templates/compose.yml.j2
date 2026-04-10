@@ -7,6 +7,7 @@ services:
     image: "{{ code_runner.images.http_server.name }}:{{ code_runner.images.http_server.tag }}"
     ports:
       - "{{ code_runner.external_port }}:8080"
+      - "{{ code_runner.http_server_metrics_port }}:2112"
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"

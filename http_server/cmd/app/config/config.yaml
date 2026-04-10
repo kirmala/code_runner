@@ -1,3 +1,17 @@
+postgres_db:
+  db: "code_runner"
+  user: "admin"
+  host: "postgres"
+  port: "5432"
+redis_db:
+  password: "lol"
+  addresses:
+    - redis-node-1:6379
+    - redis-node-2:6379
+    - redis-node-3:6379
+    - redis-node-4:6379
+    - redis-node-5:6379
+    - redis-node-6:6379
 http:
   host: "0.0.0.0"
   port: "8080"
@@ -5,3 +19,6 @@ rabbit_mq:
   host: "broker"
   port: "5672"
   queue_name: "goida"
+prometheus:
+  host: "0.0.0.0"
+  port: "2112"
