@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/kirmala/code_runner/consumer/cmd/app/config"
 	"github.com/kirmala/code_runner/consumer/internal/api/rabbitmq"
@@ -17,7 +21,8 @@ import (
 
 func main() {
 	h := slogctx.NewHandler(slog.NewJSONHandler(os.Stdout, nil), nil)
-	slog.SetDefault(slog.New(h))
+	slog.SetDefault(slog.New(h).With(slog.String("service", "consumer")))
+
 	appFlags := config.ParseFlags()
 	var cfg config.AppConfig
 	err := config.Load(appFlags.ConfigPath, &cfg)
@@ -36,8 +41,6 @@ func main() {
 
 	taskRepo := postgres.NewTaskStorage(db)
 
-	taskService := basic.NewTask(taskRepo)
-
 	imageName := cfg.ImageName
 	clientVersion := cfg.ClientVersion
 	runner, err := docker.NewRunner(imageName, clientVersion, cfg.ContainerResource)
@@ -46,12 +49,33 @@ func main() {
 		return
 	}
 
+	taskService := basic.NewTask(taskRepo, runner)
+
 	rabbitMQAddr := fmt.Sprintf("amqp://guest:guest@%s:%s", cfg.RabbitMQ.Host, cfg.RabbitMQ.Port)
 
-	TaskReceiver, err := rabbitmq.NewTaskReceiver(rabbitMQAddr, cfg.QueueName, runner, taskService)
+	middlewares := []rabbitmq.Middleware{rabbitmq.LoggerMiddleware, rabbitmq.CorrelationIdMiddleware}
+
+	TaskReceiver, err := rabbitmq.NewTaskReceiver(rabbitMQAddr, cfg.QueueName, runner, taskService, middlewares)
 	if err != nil {
 		slog.Error("create rabbitMQ failed", slog.Any("error", err))
+		return
 	}
+	defer func() {
+		slog.Info("closing ampq connection")
+		err := TaskReceiver.Close()
+		if err != nil {
+			slog.Error("close ampq connection failed", slog.Any("error", err))
+		}
+	}()
 
-	TaskReceiver.Receive()
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
+
+	slog.Info("start receiving")
+	err = TaskReceiver.Receive(ctx)
+	if err != nil && !errors.Is(err, context.Canceled) {
+		slog.Error("task receiver closed with error", slog.Any("error", err))
+	} else {
+		slog.Info("task receiver stopped gracefully")
+	}
 }

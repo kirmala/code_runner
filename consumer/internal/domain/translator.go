@@ -1,6 +1,8 @@
 package domain
 
-import "errors"
+import (
+	"fmt"
+)
 
 type Translator int
 
@@ -11,7 +13,13 @@ const (
 	GppTranslator
 )
 
-var ErrUnknownTranslator = errors.New("unknown translator")
+type ErrUnknownTranslator struct {
+	translator string
+}
+
+func (e ErrUnknownTranslator) Error() string {
+	return fmt.Sprintf("unknown translator: %s", e.translator)
+}
 
 var TranslatorName = map[Translator]string{
 	UnknownTranslator: "unknown",
@@ -22,14 +30,14 @@ var TranslatorName = map[Translator]string{
 
 func ParseTranslator(translator string) (Translator, error) {
 	switch translator {
-	case "python":
+	case "TASK_TRANSLATOR_PYTHON":
 		return PythonTranslator, nil
-	case "clang":
+	case "TASK_TRANSLATOR_CLANG":
 		return ClangTranslator, nil
-	case "g++":
+	case "TASK_TRANSLATOR_GPP":
 		return GppTranslator, nil
 	default:
-		return UnknownTranslator, ErrUnknownTranslator
+		return UnknownTranslator, ErrUnknownTranslator{translator: translator}
 	}
 }
 

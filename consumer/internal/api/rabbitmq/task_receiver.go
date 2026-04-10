@@ -2,13 +2,16 @@ package rabbitmq
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 
+	"github.com/google/uuid"
 	"github.com/kirmala/code_runner/consumer/internal/domain"
 	"github.com/kirmala/code_runner/consumer/internal/service"
+	"github.com/kirmala/code_runner/contracts/gen/pb"
 	"github.com/streadway/amqp"
+	"google.golang.org/protobuf/proto"
 )
 
 type TaskReceiver struct {
@@ -17,15 +20,13 @@ type TaskReceiver struct {
 	queueName   string
 	runner      service.Runner
 	taskService service.Task
+
+	// middlewares to be applied before running handler
+	// where 0 is the closest to handler middleware
+	middlewares []Middleware
 }
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
-	}
-}
-
-func NewTaskReceiver(ampqURL, queueName string, runner service.Runner, taskService service.Task) (*TaskReceiver, error) {
+func NewTaskReceiver(ampqURL, queueName string, runner service.Runner, taskService service.Task, middlewares []Middleware) (*TaskReceiver, error) {
 	conn, err := amqp.Dial(ampqURL)
 	if err != nil {
 		return nil, fmt.Errorf("connecting to rabbitMQ: %w", err)
@@ -54,59 +55,88 @@ func NewTaskReceiver(ampqURL, queueName string, runner service.Runner, taskServi
 		queueName:   queueName,
 		runner:      runner,
 		taskService: taskService,
+		middlewares: middlewares,
 	}, nil
 }
 
-func (r *TaskReceiver) Receive() {
+// Handler process rabbitmq message
+type Handler func(context.Context, amqp.Delivery) error
+
+// A Middleware represents middleware to wrap handler
+type Middleware func(Handler) Handler
+
+func (t *TaskReceiver) taskHandler(ctx context.Context, d amqp.Delivery) error {
+	slog.InfoContext(ctx, "start handling")
+	var taskDto pb.TaskExecutionMessage
+
+	err := proto.Unmarshal(d.Body, &taskDto)
+	if err != nil {
+		return err
+	}
+
+	translator, err := domain.ParseTranslator(taskDto.Translator.String())
+	if err != nil {
+		return err
+	}
+	id, err := uuid.Parse(taskDto.TaskId)
+	if err != nil {
+		return err
+	}
+
+	task := domain.Task{Id: id, Code: taskDto.Code, Translator: translator}
+
+	return t.taskService.Process(ctx, task)
+}
+
+func (t *TaskReceiver) applyMiddlewares(h Handler) Handler {
+	collapsed := h
+	for _, m := range t.middlewares {
+		collapsed = m(collapsed)
+	}
+	return collapsed
+}
+
+func (r *TaskReceiver) Receive(ctx context.Context) error {
 	msgs, err := r.channel.Consume(
 		r.queueName,
 		"",
-		true,
+		false,
 		false,
 		false,
 		false,
 		nil,
 	)
-	failOnError(err, "Failed to declare a queue")
+	if err != nil {
+		return err
+	}
 
-	forever := make(chan bool)
+	h := r.applyMiddlewares(r.taskHandler)
 
-	go func() {
-		for d := range msgs {
-			var task domain.Task
-			errorTask := task
-			err := json.Unmarshal([]byte(d.Body), &task)
-			if err != nil {
-				log.Printf("Error decoding JSON: %s", err)
-				errorTask.Result = err.Error()
-				errorTask.Status = domain.StatusFailed
+	for {
+		select {
+		case d, ok := <-msgs:
+			if !ok {
+				return errors.New("rabbitmq connection closed")
+			}
 
-				err = r.taskService.Put(context.Background(), errorTask)
+			go func(d amqp.Delivery) {
+				// Run your handler
+				err := h(ctx, d)
+
 				if err != nil {
-					log.Printf("adding processed task to database: %s", err)
+					slog.ErrorContext(ctx, "handler error", "error", err)
+					_ = d.Ack(false)
+					return
 				}
-				continue
-			}
-			processedTask, err := r.runner.Run(context.Background(), task)
-			if err != nil {
-				log.Printf("processing task: %s", err)
-				errorTask.Result = err.Error()
-				errorTask.Status = domain.StatusFailed
-				err = r.taskService.Put(context.Background(), errorTask)
-				if err != nil {
-					log.Printf("adding processed task to database: %s", err)
+
+				if err := d.Ack(false); err != nil {
+					slog.Error("failed to ack message", "error", err)
 				}
-				continue
-			}
-			err = r.taskService.Put(context.Background(), processedTask)
-			if err != nil {
-				log.Printf("adding processed task to database: %s", err)
-				continue
-			}
-			log.Printf("Success")
+			}(d)
+		case <-ctx.Done():
+			return ctx.Err()
 		}
-	}()
-	<-forever
+	}
 }
 
 func (r *TaskReceiver) Close() error {

@@ -34,7 +34,7 @@ import (
 // @BasePath /
 func main() {
 	h := slogctx.NewHandler(slog.NewJSONHandler(os.Stdout, nil), nil)
-	slog.SetDefault(slog.New(h))
+	slog.SetDefault(slog.New(h).With(slog.String("service", "api")))
 
 	appFlags := config.ParseFlags()
 	var cfg config.AppConfig

@@ -7,5 +7,5 @@ import (
 )
 
 type Task interface {
-	Put(ctx context.Context, task domain.Task) error
+	Process(ctx context.Context, task domain.Task) error
 }

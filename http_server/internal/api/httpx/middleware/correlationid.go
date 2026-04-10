@@ -4,13 +4,13 @@ import (
 	"log/slog"
 
 	"github.com/google/uuid"
+	"github.com/kirmala/code_runner/http_server/pkg/correlationid"
 	"github.com/labstack/echo/v5"
 	slogctx "github.com/veqryn/slog-context"
 )
 
 const (
 	correlationHeader = "X-Correlation-ID" // X-Correlation-ID is a common header used to pass a unique identifier for each request
-	correlationKey    = "correlation_id"   // correlationKey is the key used to store the correlation ID in the Echo context
 )
 
 // CorrelationID is an Echo middleware that generates a unique correlation ID for each incoming request.
@@ -25,7 +25,9 @@ func CorrelationID(next echo.HandlerFunc) echo.HandlerFunc {
 			correlationID = uuid.New().String()
 		}
 
-		ctx = slogctx.Prepend(ctx, slog.String(correlationKey, correlationID))
+		ctx = slogctx.Prepend(ctx, slog.String("correlation_id", correlationID))
+
+		ctx = correlationid.NewContext(ctx, correlationID)
 
 		r = r.WithContext(ctx)
 		c.SetRequest(r)

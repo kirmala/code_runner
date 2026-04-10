@@ -129,6 +129,7 @@ sequenceDiagram
 ```bash
 git clone https://github.com/kirmala/code_runner
 cd code_runner
+create file .env and copy contents of .env.example there
 make dev-up
 ```
 

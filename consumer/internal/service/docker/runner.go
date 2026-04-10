@@ -69,8 +69,6 @@ func (r *Runner) Run(ctx context.Context, task domain.Task) (domain.Task, error)
 		cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && g++ /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
 	case domain.ClangTranslator:
 		cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' > /tmp/code.cpp && clang /tmp/code.cpp -o /tmp/code && /tmp/code", task.Code)}
-	default:
-		return domain.Task{}, domain.ErrUnknownTranslator
 	}
 
 	resp, err := r.cli.ContainerCreate(
