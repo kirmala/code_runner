@@ -92,6 +92,10 @@ func main() {
 		return c.NoContent(http.StatusOK)
 	})
 
+	e.GET("/broken", func(c *echo.Context) error {
+		return c.NoContent(http.StatusInternalServerError)
+	})
+
 	reg := prometheus.NewRegistry()
 	metrics.Register(reg)
 
