@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/kirmala/code_runner/http_server/cmd/app/config"
-	"github.com/kirmala/code_runner/http_server/internal/domain"
 	"github.com/kirmala/code_runner/http_server/internal/metrics"
 	"github.com/kirmala/code_runner/http_server/internal/repository/postgres"
 	rabbitMQ "github.com/kirmala/code_runner/http_server/internal/repository/rabbit_mq"
