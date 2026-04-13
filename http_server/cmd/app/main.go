@@ -82,6 +82,11 @@ func main() {
 	apiGroup.Use(middleware.ServeErrors)
 	apiGroup.Use(middleware.Logger)
 	apiGroup.Use(middleware.Recover)
+
+	
+	apiGroup.GET("/broken", func(c *echo.Context) error {
+		return c.NoContent(http.StatusInternalServerError)
+	})
 	
 	taskHandlers.WithTaskHandlers(apiGroup)
 	userHandlers.WithUserHandlers(apiGroup)
@@ -90,10 +95,6 @@ func main() {
 
 	e.GET("/health", func(c *echo.Context) error {
 		return c.NoContent(http.StatusOK)
-	})
-
-	e.GET("/broken", func(c *echo.Context) error {
-		return c.NoContent(http.StatusInternalServerError)
 	})
 
 	reg := prometheus.NewRegistry()
