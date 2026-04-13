@@ -33,6 +33,7 @@ func Metrics(next echo.HandlerFunc) echo.HandlerFunc {
 			appName,
 			method,
 			path,
+			strconv.Itoa(statusGroup),
 		).Observe(time.Since(start).Seconds())
 
 		return err

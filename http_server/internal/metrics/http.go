@@ -19,7 +19,7 @@ var (
 			Help:    "HTTP request duration",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"service", "method", "path"},
+		[]string{"service", "method", "path", "status_group"},
 	)
 )
 
