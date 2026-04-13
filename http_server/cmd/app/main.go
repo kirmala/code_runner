@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 
 	"github.com/kirmala/code_runner/http_server/cmd/app/config"
+	"github.com/kirmala/code_runner/http_server/internal/domain"
 	"github.com/kirmala/code_runner/http_server/internal/metrics"
 	"github.com/kirmala/code_runner/http_server/internal/repository/postgres"
 	rabbitMQ "github.com/kirmala/code_runner/http_server/internal/repository/rabbit_mq"
@@ -83,9 +85,9 @@ func main() {
 	apiGroup.Use(middleware.Logger)
 	apiGroup.Use(middleware.Recover)
 
-	
+
 	apiGroup.GET("/broken", func(c *echo.Context) error {
-		return c.NoContent(http.StatusInternalServerError)
+		return errors.New("broken")
 	})
 	
 	taskHandlers.WithTaskHandlers(apiGroup)
