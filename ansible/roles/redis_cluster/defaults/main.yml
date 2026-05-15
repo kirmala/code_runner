@@ -23,10 +23,10 @@ redis_cluster:
   
   image: "redis:7.2-alpine"
   nodes:
-    - { name: "redis-node-1", vol: "redis_data_1" }
-    - { name: "redis-node-2", vol: "redis_data_2" }
-    - { name: "redis-node-3", vol: "redis_data_3" }
-    - { name: "redis-node-4", vol: "redis_data_4" }
-    - { name: "redis-node-5", vol: "redis_data_5" }
-    - { name: "redis-node-6", vol: "redis_data_6" }
+    - { name: "redis-node-1", vol: "redis_data_1", port: 6379, bus_port: 16379 }
+    - { name: "redis-node-2", vol: "redis_data_2", port: 6380, bus_port: 16380 }
+    - { name: "redis-node-3", vol: "redis_data_3", port: 6381, bus_port: 16381 }
+    - { name: "redis-node-4", vol: "redis_data_4", port: 6382, bus_port: 16382 }
+    - { name: "redis-node-5", vol: "redis_data_5", port: 6383, bus_port: 16383 }
+    - { name: "redis-node-6", vol: "redis_data_6", port: 6384, bus_port: 16384 }
     

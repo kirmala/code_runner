@@ -10,7 +10,13 @@ services:
     command: >
       sh -c "redis-server /usr/local/etc/redis/redis.conf 
       --requirepass $REDIS_PASSWORD 
-      --masterauth $REDIS_PASSWORD"
+      --masterauth $REDIS_PASSWORD
+      --cluster-announce-ip 192.168.56.200
+      --cluster-announce-port {{ node.port }}
+      --cluster-announce-bus-port {{ node.bus_port }}"
+    ports:
+      - "{{ node.port }}:6379"
+      - "{{ node.bus_port }}:16379" 
     environment:
       - REDIS_PASSWORD
     volumes:
