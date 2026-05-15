@@ -121,6 +121,8 @@ jobs:
     runs-on: self-hosted
     needs: integration_tests
     if: github.ref == 'refs/heads/main' && needs.integration_tests.result == 'success'
+    env:
+      KUBECONFIG: /etc/rancher/k3s/k3s.yaml
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
