@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.consumer.replicas }}
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      serviceAccountName: consumer
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z rabbitmq {{ .Values.rabbitmqConfig.port }}; do echo waiting for rabbitmq; sleep 2; done']
+      containers:
+        - name: consumer
+          image: {{ .Values.consumer.image }}
+          env:
+            - name: POSTGRES_DB
+              value: "{{ .Values.postgres.db }}"
+            - name: POSTGRES_USER
+              value: "{{ .Values.postgres.user }}"
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.postgres.password }}"
+            - name: POSTGRES_HOST
+              value: "{{ .Values.postgres.host }}"
+            - name: POSTGRES_PORT
+              value: "{{ .Values.postgres.port }}"
+            - name: RABBITMQ_HOST
+              value: "{{ .Values.rabbitmqConfig.host }}"
+            - name: RABBITMQ_PORT
+              value: "{{ .Values.rabbitmqConfig.port }}"
+            - name: RUNNER_TYPE
+              value: "kubernetes"
+            - name: K8S_NAMESPACE
+              value: "{{ .Values.namespace }}"

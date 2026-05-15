@@ -1,0 +1,29 @@
+namespace: dev
+
+httpServer:
+  image: kirill252/code_runner-http_server:latest
+  replicas: 2
+  port: 8080
+  metricsPort: 2112
+
+consumer:
+  image: kirill252/code_runner-consumer:latest
+  replicas: 1
+
+rabbitmq:
+  image: rabbitmq:3-management
+
+postgres:
+  host: "192.168.56.20"
+  port: "5432"
+  db: "code_runner"
+  user: "admin"
+  password: "kek"
+
+redis:
+  password: "lol"
+  addresses: "192.168.56.20:6379,192.168.56.20:6380,192.168.56.20:6381,192.168.56.20:6382,192.168.56.20:6383,192.168.56.20:6384"
+
+rabbitmqConfig:
+  host: "rabbitmq"
+  port: "5672"

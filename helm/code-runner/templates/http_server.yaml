@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: http-server
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.httpServer.replicas }}
+  selector:
+    matchLabels:
+      app: http-server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: http-server
+    spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z rabbitmq {{ .Values.rabbitmqConfig.port }}; do echo waiting for rabbitmq; sleep 2; done']
+      containers:
+        - name: http-server
+          image: {{ .Values.httpServer.image }}
+          ports:
+            - containerPort: {{ .Values.httpServer.port }}
+            - containerPort: {{ .Values.httpServer.metricsPort }}
+          env:
+            - name: POSTGRES_DB
+              value: "{{ .Values.postgres.db }}"
+            - name: POSTGRES_USER
+              value: "{{ .Values.postgres.user }}"
+            - name: POSTGRES_PASSWORD
+              value: "{{ .Values.postgres.password }}"
+            - name: POSTGRES_HOST
+              value: "{{ .Values.postgres.host }}"
+            - name: POSTGRES_PORT
+              value: "{{ .Values.postgres.port }}"
+            - name: REDIS_PASSWORD
+              value: "{{ .Values.redis.password }}"
+            - name: REDIS_ADDRESSES
+              value: "{{ .Values.redis.addresses }}"
+            - name: RABBITMQ_HOST
+              value: "{{ .Values.rabbitmqConfig.host }}"
+            - name: RABBITMQ_PORT
+              value: "{{ .Values.rabbitmqConfig.port }}"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.httpServer.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: http-server
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: http-server
+  ports:
+    - name: http
+      port: 80
+      targetPort: {{ .Values.httpServer.port }}
+    - name: metrics
+      port: {{ .Values.httpServer.metricsPort }}
+      targetPort: {{ .Values.httpServer.metricsPort }}
+  type: NodePort
