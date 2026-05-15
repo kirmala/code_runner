@@ -46,6 +46,7 @@ func main() {
 	var runner service.Runner
 
 	runnerType := os.Getenv("RUNNER_TYPE")
+	slog.Debug("runner type", slog.Any("type", runnerType))
 	if runnerType == "kubernetes" {
 		namespace := os.Getenv("K8S_NAMESPACE")
 		if namespace == "" {
