@@ -1,0 +1,5 @@
+namespace: qa
+httpServer:
+  replicas: 1   # qa не нужно много реплик
+consumer:
+  replicas: 1

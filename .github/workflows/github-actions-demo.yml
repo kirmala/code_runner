@@ -122,35 +122,29 @@ jobs:
     needs: integration_tests
     if: github.ref == 'refs/heads/main' && needs.integration_tests.result == 'success'
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Python and Install dependencies
-      run: |
-        python3 -m venv ~/runner-venv
-        source ~/runner-venv/bin/activate
-        pip install --upgrade pip
-        pip install ansible docker
-        ansible-galaxy collection install community.docker
+      - name: Create namespaces if not exist
+        run: |
+          kubectl create namespace dev --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace qa --dry-run=client -o yaml | kubectl apply -f -
+          kubectl create namespace prod --dry-run=client -o yaml | kubectl apply -f -
 
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh
-        chmod 700 ~/.ssh
+      - name: Deploy to dev
+        run: |
+          helm upgrade --install code-runner-dev ./helm/code-runner \
+            -f ./helm/code-runner/values-dev.yaml \
+            --wait --timeout 3m
 
-        printf "%s" "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
+      - name: Deploy to qa
+        run: |
+          helm upgrade --install code-runner-qa ./helm/code-runner \
+            -f ./helm/code-runner/values-qa.yaml \
+            --wait --timeout 3m
 
-        printf "%s" "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-
-    - name: Add vault
-      run: |
-        mkdir -p ~/secrets
-        echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > ~/secrets/ansible_vault_pass 
-
-    - name: Run ansible playbook
-      run: |
-        source ~/runner-venv/bin/activate
-        cd ansible
-        ansible-playbook site.yml --become
-
+      - name: Deploy to prod
+        run: |
+          helm upgrade --install code-runner-prod ./helm/code-runner \
+            -f ./helm/code-runner/values-prod.yaml \
+            --wait --timeout 3m

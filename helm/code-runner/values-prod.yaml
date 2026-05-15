@@ -1,0 +1,5 @@
+namespace: prod
+httpServer:
+  replicas: 3   # prod — больше реплик
+consumer:
+  replicas: 2

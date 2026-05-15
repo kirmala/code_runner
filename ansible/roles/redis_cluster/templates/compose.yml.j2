@@ -11,7 +11,7 @@ services:
       sh -c "redis-server /usr/local/etc/redis/redis.conf 
       --requirepass $REDIS_PASSWORD 
       --masterauth $REDIS_PASSWORD
-      --cluster-announce-ip 192.168.56.200
+      --cluster-announce-ip 192.168.56.20
       --cluster-announce-port {{ node.port }}
       --cluster-announce-bus-port {{ node.bus_port }}"
     ports:
