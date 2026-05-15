@@ -12,8 +12,10 @@ import (
 	"github.com/kirmala/code_runner/consumer/cmd/app/config"
 	"github.com/kirmala/code_runner/consumer/internal/api/rabbitmq"
 	"github.com/kirmala/code_runner/consumer/internal/repository/postgres"
+	"github.com/kirmala/code_runner/consumer/internal/service"
 	"github.com/kirmala/code_runner/consumer/internal/service/basic"
 	"github.com/kirmala/code_runner/consumer/internal/service/docker"
+	"github.com/kirmala/code_runner/consumer/internal/service/k8s"
 	slogctx "github.com/veqryn/slog-context"
 )
 
@@ -41,12 +43,25 @@ func main() {
 
 	taskRepo := postgres.NewTaskStorage(db)
 
-	imageName := cfg.ImageName
-	clientVersion := cfg.ClientVersion
-	runner, err := docker.NewRunner(imageName, clientVersion, cfg.ContainerResource)
-	if err != nil {
-		slog.Error("create docker client failed", slog.Any("error", err))
-		return
+	var runner service.Runner
+
+	runnerType := os.Getenv("RUNNER_TYPE")
+	if runnerType == "kubernetes" {
+		namespace := os.Getenv("K8S_NAMESPACE")
+		if namespace == "" {
+			namespace = "dev"
+		}
+		runner, err = k8s.NewRunner(namespace)
+		if err != nil {
+			slog.Error("create k8s runner failed", slog.Any("error", err))
+			return
+		}
+	} else {
+		runner, err = docker.NewRunner(cfg.ImageName, cfg.ClientVersion, cfg.ContainerResource)
+		if err != nil {
+			slog.Error("create docker client failed", slog.Any("error", err))
+			return
+		}
 	}
 
 	taskService := basic.NewTask(taskRepo, runner)

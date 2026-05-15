@@ -1,9 +1,9 @@
 package config
 
 type RabbitMQ struct {
-	Host      string `yaml:"host"`
-	Port      string `yaml:"port"`
-	QueueName string `yaml:"queue_name"`
+	Host      string `yaml:"host" env:"RABBITMQ_HOST"`
+	Port      string `yaml:"port" env:"RABBITMQ_PORT"`
+	QueueName string `yaml:"queue_name" env:"RABBITMQ_QUEUE_NAME"`
 }
 
 type PostgresDB struct {
