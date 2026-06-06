@@ -266,12 +266,19 @@ jobs:
               --output /out/trivy-consumer.sarif \
               /src
 
-      - name: Upload SARIF to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Upload SARIF — http_server
+        uses: github/codeql-action/upload-sarif@v4
         if: always()
         with:
-          sarif_file: '.'
-          category: trivy-sca
+          sarif_file: trivy-http_server.sarif
+          category: trivy-http_server
+
+      - name: Upload SARIF — consumer
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: trivy-consumer.sarif
+          category: trivy-consumer
 
       - name: Upload SCA artifacts
         uses: actions/upload-artifact@v4
