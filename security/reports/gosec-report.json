@@ -1,0 +1,516 @@
+{
+	"Golang errors": {
+		"/src/consumer/internal/api/rabbitmq/correlationid.go": [
+			{
+				"line": 8,
+				"column": 2,
+				"error": "could not import github.com/streadway/amqp (invalid package name: \"\")"
+			}
+		],
+		"/src/consumer/internal/api/rabbitmq/task_receiver.go": [
+			{
+				"line": 12,
+				"column": 2,
+				"error": "could not import github.com/kirmala/code_runner/contracts/gen/pb (invalid package name: \"\")"
+			}
+		],
+		"/src/consumer/internal/mapper/status.go": [
+			{
+				"line": 5,
+				"column": 2,
+				"error": "could not import github.com/kirmala/code_runner/contracts/gen/pb (invalid package name: \"\")"
+			}
+		],
+		"/src/consumer/internal/repository/postgres/task.go": [
+			{
+				"line": 10,
+				"column": 4,
+				"error": "could not import github.com/lib/pq (invalid package name: \"\")"
+			}
+		],
+		"/src/consumer/internal/service/docker/runner.go": [
+			{
+				"line": 15,
+				"column": 2,
+				"error": "could not import github.com/moby/moby/api/types/container (invalid package name: \"\")"
+			},
+			{
+				"line": 16,
+				"column": 2,
+				"error": "could not import github.com/moby/moby/client (invalid package name: \"\")"
+			}
+		],
+		"/src/consumer/internal/service/k8s/runner.go": [
+			{
+				"line": 10,
+				"column": 13,
+				"error": "could not import k8s.io/api/batch/v1 (invalid package name: \"\")"
+			},
+			{
+				"line": 11,
+				"column": 12,
+				"error": "could not import k8s.io/api/core/v1 (invalid package name: \"\")"
+			},
+			{
+				"line": 12,
+				"column": 5,
+				"error": "could not import k8s.io/apimachinery/pkg/api/resource (invalid package name: \"\")"
+			},
+			{
+				"line": 13,
+				"column": 12,
+				"error": "could not import k8s.io/apimachinery/pkg/apis/meta/v1 (invalid package name: \"\")"
+			},
+			{
+				"line": 14,
+				"column": 5,
+				"error": "could not import k8s.io/client-go/kubernetes (invalid package name: \"\")"
+			},
+			{
+				"line": 15,
+				"column": 5,
+				"error": "could not import k8s.io/client-go/rest (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/cmd/app/config/load_config.go": [
+			{
+				"line": 8,
+				"column": 2,
+				"error": "could not import github.com/ilyakaznacheev/cleanenv (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/cmd/app/main.go": [
+			{
+				"line": 11,
+				"column": 2,
+				"error": "other declaration of metrics"
+			},
+			{
+				"line": 17,
+				"column": 2,
+				"error": "\"github.com/prometheus/client_golang/prometheus\" imported as metrics and not used"
+			},
+			{
+				"line": 17,
+				"column": 2,
+				"error": "metrics redeclared in this block"
+			},
+			{
+				"line": 18,
+				"column": 2,
+				"error": "could not import github.com/prometheus/client_golang/prometheus/promhttp (invalid package name: \"\")"
+			},
+			{
+				"line": 21,
+				"column": 14,
+				"error": "could not import github.com/swaggo/echo-swagger/v2 (invalid package name: \"\")"
+			},
+			{
+				"line": 101,
+				"column": 9,
+				"error": "undefined: prometheus"
+			}
+		],
+		"/src/http_server/internal/api/httpx/middleware/auth.go": [
+			{
+				"line": 9,
+				"column": 2,
+				"error": "could not import github.com/labstack/echo/v5 (invalid package name: \"\")"
+			},
+			{
+				"line": 10,
+				"column": 10,
+				"error": "could not import github.com/veqryn/slog-context (invalid package name: \"\")"
+			},
+			{
+				"line": 30,
+				"column": 25,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 30,
+				"column": 43,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 31,
+				"column": 17,
+				"error": "undefined: echo"
+			}
+		],
+		"/src/http_server/internal/api/httpx/middleware/correlationid.go": [
+			{
+				"line": 17,
+				"column": 25,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 17,
+				"column": 43,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 18,
+				"column": 17,
+				"error": "undefined: echo"
+			}
+		],
+		"/src/http_server/internal/api/httpx/middleware/logger.go": [
+			{
+				"line": 12,
+				"column": 18,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 12,
+				"column": 36,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 13,
+				"column": 17,
+				"error": "undefined: echo"
+			}
+		],
+		"/src/http_server/internal/api/httpx/middleware/metrics.go": [
+			{
+				"line": 13,
+				"column": 19,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 13,
+				"column": 37,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 14,
+				"column": 17,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 19,
+				"column": 14,
+				"error": "undefined: echo"
+			}
+		],
+		"/src/http_server/internal/api/httpx/middleware/recover.go": [
+			{
+				"line": 17,
+				"column": 19,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 17,
+				"column": 37,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 18,
+				"column": 17,
+				"error": "undefined: echo"
+			}
+		],
+		"/src/http_server/internal/api/httpx/middleware/serve_errors.go": [
+			{
+				"line": 42,
+				"column": 20,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 50,
+				"column": 23,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 50,
+				"column": 41,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 51,
+				"column": 17,
+				"error": "undefined: echo"
+			}
+		],
+		"/src/http_server/internal/api/httpx/task.go": [
+			{
+				"line": 14,
+				"column": 2,
+				"error": "could not import github.com/labstack/echo/v5 (invalid package name: \"\")"
+			},
+			{
+				"line": 17,
+				"column": 37,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 52,
+				"column": 36,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 85,
+				"column": 36,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 118,
+				"column": 31,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 141,
+				"column": 36,
+				"error": "undefined: echo"
+			}
+		],
+		"/src/http_server/internal/api/httpx/user.go": [
+			{
+				"line": 48,
+				"column": 39,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 74,
+				"column": 36,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 88,
+				"column": 36,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 89,
+				"column": 27,
+				"error": "undefined: echo"
+			},
+			{
+				"line": 90,
+				"column": 24,
+				"error": "undefined: echo"
+			}
+		],
+		"/src/http_server/internal/domain/session.go": [
+			{
+				"line": 3,
+				"column": 8,
+				"error": "could not import github.com/google/uuid (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/internal/metrics/http.go": [
+			{
+				"line": 4,
+				"column": 2,
+				"error": "could not import github.com/prometheus/client_golang/prometheus (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/internal/repository/postgres/migrations.go": [
+			{
+				"line": 7,
+				"column": 2,
+				"error": "could not import github.com/pressly/goose/v3 (invalid package name: \"\")"
+			},
+			{
+				"line": 15,
+				"column": 2,
+				"error": "undefined: goose"
+			},
+			{
+				"line": 17,
+				"column": 12,
+				"error": "undefined: goose"
+			},
+			{
+				"line": 21,
+				"column": 9,
+				"error": "undefined: goose"
+			}
+		],
+		"/src/http_server/internal/repository/postgres/user.go": [
+			{
+				"line": 11,
+				"column": 2,
+				"error": "could not import github.com/lib/pq (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/internal/repository/rabbit_mq/task_sender.go": [
+			{
+				"line": 8,
+				"column": 2,
+				"error": "could not import google.golang.org/protobuf/proto (invalid package name: \"\")"
+			},
+			{
+				"line": 10,
+				"column": 2,
+				"error": "could not import github.com/kirmala/code_runner/contracts/gen/pb (invalid package name: \"\")"
+			},
+			{
+				"line": 13,
+				"column": 2,
+				"error": "could not import github.com/streadway/amqp (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/internal/repository/ram_storage/session.go": [
+			{
+				"line": 4,
+				"column": 2,
+				"error": "could not import github.com/google/uuid (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/internal/repository/redis/client.go": [
+			{
+				"line": 8,
+				"column": 2,
+				"error": "could not import github.com/redis/go-redis/v9 (invalid package name: \"\")"
+			},
+			{
+				"line": 11,
+				"column": 58,
+				"error": "undefined: redis"
+			},
+			{
+				"line": 12,
+				"column": 12,
+				"error": "undefined: redis"
+			},
+			{
+				"line": 12,
+				"column": 36,
+				"error": "undefined: redis"
+			}
+		],
+		"/src/http_server/internal/repository/redis/session.go": [
+			{
+				"line": 15,
+				"column": 7,
+				"error": "undefined: redis"
+			},
+			{
+				"line": 18,
+				"column": 29,
+				"error": "undefined: redis"
+			},
+			{
+				"line": 36,
+				"column": 13,
+				"error": "undefined: redis"
+			}
+		],
+		"/src/http_server/internal/service/basic/task.go": [
+			{
+				"line": 7,
+				"column": 2,
+				"error": "could not import github.com/google/uuid (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/internal/service/basic/user.go": [
+			{
+				"line": 11,
+				"column": 2,
+				"error": "could not import golang.org/x/crypto/bcrypt (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/internal/service/mocks/sessionRepo.go": [
+			{
+				"line": 4,
+				"column": 2,
+				"error": "could not import github.com/google/uuid (invalid package name: \"\")"
+			}
+		],
+		"/src/http_server/internal/service/session/auth.go": [
+			{
+				"line": 6,
+				"column": 2,
+				"error": "could not import github.com/google/uuid (invalid package name: \"\")"
+			}
+		]
+	},
+	"Issues": [
+		{
+			"severity": "MEDIUM",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "676",
+				"url": "https://cwe.mitre.org/data/definitions/676.html"
+			},
+			"rule_id": "G114",
+			"details": "Use of net/http serve function that has no support for setting timeouts",
+			"file": "/src/http_server/cmd/app/main.go",
+			"code": "105: \t\thttp.Handle(\"/metrics\", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))\n106: \t\thttp.ListenAndServe(\":2112\", nil)\n107: \t}()\n",
+			"line": "106",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "MEDIUM",
+			"confidence": "LOW",
+			"cwe": {
+				"id": "400",
+				"url": "https://cwe.mitre.org/data/definitions/400.html"
+			},
+			"rule_id": "G112",
+			"details": "Potential Slowloris Attack because ReadHeaderTimeout is not configured in the http.Server",
+			"file": "/src/http_server/pkg/http/http.go",
+			"code": "7: func CreateAndRunServer(h http.Handler, addr string) error {\n8: \thttpServer := \u0026http.Server{\n9: \t\tAddr:    addr,\n10: \t\tHandler: h,\n11: \t}\n12: \n",
+			"line": "8-11",
+			"column": "17",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": null,
+			"rule_id": "G706",
+			"details": "Log injection via taint analysis",
+			"file": "/src/consumer/cmd/app/main.go",
+			"code": "48: \trunnerType := os.Getenv(\"RUNNER_TYPE\")\n49: \tslog.Info(\"runner type\", slog.Any(\"type\", runnerType))\n50: \tif runnerType == \"kubernetes\" {\n",
+			"line": "49",
+			"column": "11",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/src/http_server/cmd/app/main.go",
+			"code": "105: \t\thttp.Handle(\"/metrics\", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))\n106: \t\thttp.ListenAndServe(\":2112\", nil)\n107: \t}()\n",
+			"line": "106",
+			"column": "3",
+			"nosec": false,
+			"suppressions": null
+		},
+		{
+			"severity": "LOW",
+			"confidence": "HIGH",
+			"cwe": {
+				"id": "703",
+				"url": "https://cwe.mitre.org/data/definitions/703.html"
+			},
+			"rule_id": "G104",
+			"details": "Errors unhandled",
+			"file": "/src/http_server/cmd/app/main.go",
+			"code": "41: \tvar cfg config.AppConfig\n42: \tconfig.Load(appFlags.ConfigPath, \u0026cfg)\n43: \t\n",
+			"line": "42",
+			"column": "2",
+			"nosec": false,
+			"suppressions": null
+		}
+	],
+	"Stats": {
+		"files": 72,
+		"lines": 2907,
+		"nosec": 0,
+		"found": 5
+	},
+	"GosecVersion": "dev"
+}

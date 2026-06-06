@@ -1,0 +1,52 @@
+rules:
+  - id: shell-injection-via-fmt-sprintf
+    pattern-either:
+      - pattern: |
+          []string{"sh", "-c", fmt.Sprintf(...)}
+      - pattern: |
+          []string{"bash", "-c", fmt.Sprintf(...)}
+    message: >
+      CWE-78: Potential shell injection. User-controlled input is interpolated
+      into a shell command via fmt.Sprintf. If the input contains shell
+      metacharacters (single quotes, semicolons, backticks, $(...)) an attacker
+      can execute arbitrary commands inside the container.
+      Fix: write the code to a temp file using os.WriteFile and pass the file
+      path as an argument to the interpreter — do not use "sh -c".
+    languages: [go]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-78: Improper Neutralization of Special Elements used in an OS Command"
+      owasp: "A03:2021 - Injection"
+      confidence: HIGH
+
+  - id: ignored-crypto-error
+    pattern: "$_, _ = bcrypt.GenerateFromPassword(...)"
+    message: >
+      CWE-755: The error from bcrypt.GenerateFromPassword is silently discarded.
+      On failure (e.g. password too long) the returned slice is nil and the
+      caller stores an empty hash, allowing the user to authenticate with any
+      password.
+      Fix: check the error and return it to the caller.
+    languages: [go]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-755: Improper Handling of Exceptional Conditions"
+      confidence: HIGH
+
+  - id: http-server-no-read-timeout
+    pattern: |
+      &http.Server{
+        Addr: $ADDR,
+        Handler: $H,
+      }
+    message: >
+      CWE-400: http.Server created without ReadHeaderTimeout or ReadTimeout.
+      Without these the server is vulnerable to a Slowloris DoS attack where an
+      attacker slowly sends HTTP headers to hold connections open indefinitely.
+      Fix: add ReadHeaderTimeout (5s) and ReadTimeout (30s).
+    languages: [go]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-400: Uncontrolled Resource Consumption"
+      owasp: "A05:2021 - Security Misconfiguration"
+      confidence: HIGH

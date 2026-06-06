@@ -1,0 +1,99 @@
+---
+env:
+  contexts:
+    - name: "code-runner-api"
+      urls:
+        - "http://localhost:8080"
+      includePaths:
+        - "http://localhost:8080/.*"
+      excludePaths:
+        - "http://localhost:8080/swagger/.*"
+        - "http://localhost:8080/metrics"
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  - type: openapi
+    parameters:
+      apiFile: "/zap/wrk/http_server/docs/swagger.yaml"
+      targetUrl: "http://localhost:8080"
+      context: "code-runner-api"
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 60
+
+  - type: activeScan
+    parameters:
+      context: "code-runner-api"
+      policy: "API-Scan-Policy"
+      maxRuleDurationInMins: 5
+      maxScanDurationInMins: 30
+
+  - type: report
+    parameters:
+      template: "traditional-html"
+      reportDir: "/zap/reports"
+      reportFile: "zap-report"
+      reportTitle: "Code Runner API Security Scan"
+      reportDescription: "DAST scan via OWASP ZAP Automation Framework"
+      displayReport: false
+
+# Active scan rules configuration:
+# Level: OFF=0, DEFAULT=1, MEDIUM=2, HIGH=3
+# Strength: OFF=0, DEFAULT=1, MEDIUM=2, HIGH=3, INSANE=4
+rules:
+  # 10010: Cookie No HttpOnly Flag
+  - id: 10010
+    threshold: MEDIUM
+  # 10011: Cookie Without Secure Flag
+  - id: 10011
+    threshold: MEDIUM
+  # 10015: Incomplete or No Cache-control Header Set
+  - id: 10015
+    threshold: LOW
+  # 10016: Web Browser XSS Protection Not Enabled
+  - id: 10016
+    threshold: MEDIUM
+  # 10017: Cross-Domain JavaScript Source File Inclusion
+  - id: 10017
+    threshold: MEDIUM
+  # 10020: X-Frame-Options Header Not Set
+  - id: 10020
+    threshold: MEDIUM
+  # 10021: X-Content-Type-Options Header Missing
+  - id: 10021
+    threshold: MEDIUM
+  # 10038: Content Security Policy (CSP) Header Not Set
+  - id: 10038
+    threshold: MEDIUM
+  # 10054: Cookie without SameSite Attribute
+  - id: 10054
+    threshold: MEDIUM
+  # 10096: Timestamp Disclosure
+  - id: 10096
+    threshold: LOW
+  # 10202: Absence of Anti-CSRF Tokens
+  - id: 10202
+    threshold: MEDIUM
+  # 40012: Cross Site Scripting (Reflected)
+  - id: 40012
+    threshold: MEDIUM
+    strength: HIGH
+  # 40014: Cross Site Scripting (Persistent)
+  - id: 40014
+    threshold: MEDIUM
+    strength: HIGH
+  # 40018: SQL Injection
+  - id: 40018
+    threshold: MEDIUM
+    strength: HIGH
+  # 40022: SQL Injection - MySQL
+  - id: 40022
+    threshold: MEDIUM
+    strength: HIGH
+  # 90022: Application Error Disclosure
+  - id: 90022
+    threshold: LOW

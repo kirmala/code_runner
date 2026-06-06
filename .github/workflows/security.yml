@@ -1,0 +1,229 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run every Monday at 08:00 UTC
+    - cron: '0 8 * * 1'
+
+permissions:
+  contents: read
+  security-events: write  # required for uploading SARIF to GitHub Security tab
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # 1. SAST — semgrep (custom rules) + gosec
+  # ─────────────────────────────────────────────────────────────────
+  sast:
+    name: SAST (semgrep + gosec)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      # ── semgrep ────────────────────────────────────────────────
+      - name: Install semgrep
+        run: pip install semgrep
+
+      - name: Run semgrep (custom rules)
+        run: |
+          semgrep \
+            --config security/semgrep-rules.yaml \
+            --metrics=off \
+            --json \
+            --output security/reports/semgrep-report.json \
+            http_server/ consumer/ || true
+
+      - name: Run semgrep (OWASP ruleset)
+        run: |
+          semgrep \
+            --config "p/owasp-top-ten" \
+            --lang go \
+            --metrics=off \
+            --json \
+            --output security/reports/semgrep-owasp-report.json \
+            http_server/ consumer/ || true
+
+      # ── gosec ──────────────────────────────────────────────────
+      - name: Install gosec
+        run: go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+      - name: Run gosec (http_server)
+        working-directory: http_server
+        run: |
+          $(go env GOPATH)/bin/gosec \
+            -conf ../security/gosec-config.json \
+            -fmt json \
+            -out ../security/reports/gosec-http_server.json \
+            ./... || true
+
+      - name: Run gosec (consumer)
+        working-directory: consumer
+        run: |
+          $(go env GOPATH)/bin/gosec \
+            -conf ../security/gosec-config.json \
+            -fmt json \
+            -out ../security/reports/gosec-consumer.json \
+            ./... || true
+
+      - name: Upload SAST reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sast-reports
+          path: security/reports/gosec-*.json
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────────
+  # 2. DAST — OWASP ZAP (OpenAPI baseline scan)
+  # ─────────────────────────────────────────────────────────────────
+  dast:
+    name: DAST (OWASP ZAP)
+    runs-on: ubuntu-latest
+    needs: sast
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create .env from template
+        run: envsubst < .env.example > .env
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          REDIS_PASSWORD:    ${{ secrets.REDIS_PASSWORD }}
+
+      - name: Start application stack
+        run: |
+          docker compose up -d
+          echo "Waiting for http_server health check..."
+          timeout 120 bash -c \
+            'until curl -sf http://localhost:8080/health; do sleep 3; done'
+
+      - name: ZAP — OpenAPI baseline scan
+        uses: zaproxy/action-api-scan@v0.9.0
+        with:
+          target: 'http://localhost:8080'
+          format: openapi
+          # swagger.yaml already exists in the repo
+          api_file_url: 'http://localhost:8080/swagger/doc.json'
+          rules_file_name: 'security/zap-rules.tsv'
+          fail_action: false       # don't fail the build, just report
+          cmd_options: '-J zap-report.json -r zap-report.html'
+
+      - name: Upload ZAP reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dast-zap-reports
+          path: |
+            zap-report.html
+            zap-report.json
+          retention-days: 30
+
+      - name: Stop application stack
+        if: always()
+        run: docker compose down -v
+
+  # ─────────────────────────────────────────────────────────────────
+  # 3. SCA — Trivy (dependency + Docker image scan)
+  # ─────────────────────────────────────────────────────────────────
+  sca:
+    name: SCA (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ── filesystem scan (go.mod / go.sum) ──────────────────────
+      - name: Trivy — scan http_server dependencies
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: fs
+          scan-ref: ./http_server
+          scanners: vuln
+          format: table
+          severity: CRITICAL,HIGH,MEDIUM
+          exit-code: '0'
+
+      - name: Trivy — scan consumer dependencies
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: fs
+          scan-ref: ./consumer
+          scanners: vuln
+          format: table
+          severity: CRITICAL,HIGH,MEDIUM
+          exit-code: '0'
+
+      # ── SARIF output for GitHub Security tab ───────────────────
+      - name: Trivy — SARIF report (http_server)
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: fs
+          scan-ref: ./http_server
+          scanners: vuln
+          format: sarif
+          output: trivy-http_server.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          exit-code: '0'
+
+      - name: Trivy — SARIF report (consumer)
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: fs
+          scan-ref: ./consumer
+          scanners: vuln
+          format: sarif
+          output: trivy-consumer.sarif
+          severity: CRITICAL,HIGH,MEDIUM
+          exit-code: '0'
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: '.'
+          category: trivy-sca
+
+      # ── Docker image scan ──────────────────────────────────────
+      - name: Build http_server image for scanning
+        run: docker build -t scan-http_server:ci -f http_server/Dockerfile http_server
+
+      - name: Build consumer image for scanning
+        run: docker build -t scan-consumer:ci -f consumer/Dockerfile consumer
+
+      - name: Trivy — scan http_server image
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: image
+          image-ref: scan-http_server:ci
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Trivy — scan consumer image
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: image
+          image-ref: scan-consumer:ci
+          format: table
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Upload SCA artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sca-reports
+          path: |
+            trivy-http_server.sarif
+            trivy-consumer.sarif
+          retention-days: 30
