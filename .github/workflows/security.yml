@@ -222,47 +222,49 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Trivy — scan http_server (table)
-        uses: aquasecurity/trivy-action@0.31.0
-        with:
-          scan-type: fs
-          scan-ref: ./http_server
-          scanners: vuln
-          format: table
-          severity: CRITICAL,HIGH,MEDIUM
-          exit-code: '0'
+      - name: Trivy — scan http_server dependencies
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/http_server:/src:ro \
+            aquasec/trivy:latest fs \
+              --scanners vuln \
+              --severity CRITICAL,HIGH,MEDIUM \
+              --format table \
+              /src
 
-      - name: Trivy — scan consumer (table)
-        uses: aquasecurity/trivy-action@0.31.0
-        with:
-          scan-type: fs
-          scan-ref: ./consumer
-          scanners: vuln
-          format: table
-          severity: CRITICAL,HIGH,MEDIUM
-          exit-code: '0'
+      - name: Trivy — scan consumer dependencies
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/consumer:/src:ro \
+            aquasec/trivy:latest fs \
+              --scanners vuln \
+              --severity CRITICAL,HIGH,MEDIUM \
+              --format table \
+              /src
 
-      - name: Trivy — SARIF for GitHub Security tab (http_server)
-        uses: aquasecurity/trivy-action@0.31.0
-        with:
-          scan-type: fs
-          scan-ref: ./http_server
-          scanners: vuln
-          format: sarif
-          output: trivy-http_server.sarif
-          severity: CRITICAL,HIGH,MEDIUM
-          exit-code: '0'
+      - name: Trivy — SARIF (http_server)
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/http_server:/src:ro \
+            -v ${{ github.workspace }}:/out:rw \
+            aquasec/trivy:latest fs \
+              --scanners vuln \
+              --severity CRITICAL,HIGH,MEDIUM \
+              --format sarif \
+              --output /out/trivy-http_server.sarif \
+              /src
 
-      - name: Trivy — SARIF for GitHub Security tab (consumer)
-        uses: aquasecurity/trivy-action@0.31.0
-        with:
-          scan-type: fs
-          scan-ref: ./consumer
-          scanners: vuln
-          format: sarif
-          output: trivy-consumer.sarif
-          severity: CRITICAL,HIGH,MEDIUM
-          exit-code: '0'
+      - name: Trivy — SARIF (consumer)
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/consumer:/src:ro \
+            -v ${{ github.workspace }}:/out:rw \
+            aquasec/trivy:latest fs \
+              --scanners vuln \
+              --severity CRITICAL,HIGH,MEDIUM \
+              --format sarif \
+              --output /out/trivy-consumer.sarif \
+              /src
 
       - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
