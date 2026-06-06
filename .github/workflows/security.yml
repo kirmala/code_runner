@@ -162,7 +162,7 @@ jobs:
 
       - name: ZAP — OpenAPI scan
         run: |
-          mkdir -p zap-reports
+          mkdir -p zap-reports && chmod 777 zap-reports
           docker run --rm \
             --network code_runner_network \
             -v ${{ github.workspace }}/zap-reports:/zap/wrk:rw \
