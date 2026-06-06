@@ -165,15 +165,13 @@ jobs:
           mkdir -p zap-reports
           docker run --rm \
             --network code_runner_network \
-            -v ${{ github.workspace }}/zap-reports:/zap/reports:rw \
-            -v ${{ github.workspace }}/http_server/docs:/zap/docs:ro \
+            -v ${{ github.workspace }}/zap-reports:/zap/wrk:rw \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-api-scan.py \
               -t "http://http_server:8080/swagger/doc.json" \
               -f openapi \
-              -r /zap/reports/zap-report.html \
-              -J /zap/reports/zap-report.json \
-              -z "-config rules.cookie.ignorelist=sessionid" \
+              -r zap-report.html \
+              -J zap-report.json \
               -I
         continue-on-error: true
 
